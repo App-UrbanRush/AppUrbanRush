@@ -1,7 +1,8 @@
-import { Injectable, Inject, BadRequestException, NotFoundException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
+import { User } from '../../domain/entities/user.model';
 
 @Injectable()
 export class UserService {
@@ -12,16 +13,30 @@ export class UserService {
   async create(dto: CreateUserDto): Promise<string> {
     const existe = await this._userRepository.findOneByEmail(dto.user_email);
     if (existe) throw new BadRequestException('El correo ya existe');
-    await this._userRepository.save(dto);
+
+    // Creamos la instancia del modelo de dominio
+    const newUser = new User(
+      null, // ID nulo porque es nuevo
+      dto.user_email,
+      dto.user_password
+    );
+
+    const savedUser = await this._userRepository.save(newUser);
+
+    // Si viene un rol en el DTO, lo asignamos a través del repositorio
+    if (dto.rol_id) {
+      await this._userRepository.updateUserRole(savedUser.id!, dto.rol_id);
+    }
+
     return 'Usuario creado correctamente';
   }
 
   async obtenerUsuarios() {
     const usuarios = await this._userRepository.findAll();
     return usuarios.map(u => ({
-      user_id: u.user_id,
-      user_email: u.user_email,
-      roles: u.userroles?.map(ur => ur.rol.rol_name)
+      user_id: u.id,
+      user_email: u.email,
+      roles: u.roles // Ya viene como string[] gracias al Mapper
     }));
   }
 
@@ -33,9 +48,9 @@ export class UserService {
     }
   
     return {
-      user_id: usuario.user_id,
-      user_email: usuario.user_email,
-      roles: usuario.userroles?.map(ur => ur.rol.rol_name) || []
+      user_id: usuario.id,
+      user_email: usuario.email,
+      roles: usuario.roles
     };
   }
 
@@ -43,7 +58,7 @@ export class UserService {
     const usuario = await this._userRepository.findOneById(id);
     if (!usuario) throw new NotFoundException('Usuario no encontrado');
 
-    // Lógica de seguridad (Solo si currentUser existe, para no romper pruebas)
+    // Lógica de seguridad
     if (currentUser) {
       const isOwner = id === currentUser.user_id;
       const isAdmin = currentUser.rolIds?.includes(1);
@@ -51,18 +66,14 @@ export class UserService {
       
       // Solo el admin puede cambiar roles
       if (dto.rol_id && isAdmin) {
-        const rol = await this._userRepository.findRolById(dto.rol_id);
-        const userRole = await this._userRepository.findUserRole(usuario);
-        if (userRole) {
-          userRole.rol = rol;
-          await this._userRepository.saveUserRole(userRole);
-        }
+        await this._userRepository.updateUserRole(id, dto.rol_id);
       }
     }
 
-    // Actualizamos los campos básicos
-    if (dto.user_email) usuario.user_email = dto.user_email;
-    if (dto.user_password) usuario.user_password = dto.user_password;
+    // Actualizamos los campos básicos en el objeto de dominio
+    // (Asegúrate de que en user.model.ts no sean 'readonly')
+    if (dto.user_email) usuario.email = dto.user_email;
+    if (dto.user_password) usuario.password = dto.user_password;
 
     await this._userRepository.save(usuario);
     return 'Usuario actualizado correctamente';
@@ -72,7 +83,8 @@ export class UserService {
     const usuario = await this._userRepository.findOneById(id);
     if (!usuario) throw new NotFoundException('El usuario que intentas eliminar no existe');
     
-    await this._userRepository.remove(usuario);
+    // El repositorio ahora recibe el ID según la nueva interfaz
+    await this._userRepository.remove(id);
     return 'Usuario eliminado correctamente';
   }
 }

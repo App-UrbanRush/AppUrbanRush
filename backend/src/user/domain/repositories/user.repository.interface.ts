@@ -1,13 +1,15 @@
-import { UserEntity } from '../../infrastructure/persistence/entities/user.entity';
+import { User } from '../entities/user.model';
 
 export interface IUserRepository {
-  save(user: Partial<UserEntity>): Promise<UserEntity>;
-  findOneByEmail(email: string): Promise<UserEntity | null>;
-  findOneById(id: number): Promise<UserEntity | null>;
-  findAll(): Promise<UserEntity[]>;
-  remove(user: UserEntity): Promise<void>;
-  // Auxiliares para Roles
+  save(user: User): Promise<User>;
+  findOneByEmail(email: string): Promise<User | null>;
+  findOneById(id: number): Promise<User | null>;
+  findAll(): Promise<User[]>;
+  remove(id: number): Promise<void>;
+  
+  // Auxiliares para Roles (Hablando en lenguaje de Dominio)
+  updateUserRole(userId: number, rolId: number): Promise<void>;
   findRolById(id: number): Promise<any>;
-  findUserRole(user: UserEntity): Promise<any>;
+  findUserRole(user: User): Promise<any>;
   saveUserRole(userRole: any): Promise<void>;
 }
