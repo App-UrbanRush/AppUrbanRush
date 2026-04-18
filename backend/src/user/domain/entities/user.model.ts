@@ -1,12 +1,9 @@
 export class User {
     constructor(
-      public id: number | null, 
-      public email: string,     
-      public password?: string,  
-      public roles: string[] = [],
+      public user_id: number | null, 
+      public user_email: string,     
+      public user_password?: string,  
+      public roles: number[] = [],
     ) {}
   
-    isAdmin(): boolean {
-      return this.roles.includes('admin');
-    }
-  }
+}

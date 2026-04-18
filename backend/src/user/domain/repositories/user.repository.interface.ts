@@ -12,4 +12,6 @@ export interface IUserRepository {
   findRolById(id: number): Promise<any>;
   findUserRole(user: User): Promise<any>;
   saveUserRole(userRole: any): Promise<void>;
+
+  savePeople(peopleData: any): Promise<any>;
 }

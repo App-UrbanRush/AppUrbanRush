@@ -7,6 +7,7 @@ import { UserRolesEntity } from 'src/user_rol/infrastructure/persistence/entity/
 import { UserEntity } from '../entities/user.entity';
 import { User } from '../../../domain/entities/user.model';
 import { UserMapper } from '../mappers/user.mapper';
+import { PeopleEntity } from 'src/people/infrastructure/persistence/entities/people.entity';
 
 @Injectable()
 export class TypeOrmUserRepository implements IUserRepository {
@@ -14,6 +15,7 @@ export class TypeOrmUserRepository implements IUserRepository {
     @InjectRepository(UserEntity) private readonly repo: Repository<UserEntity>,
     @InjectRepository(UserRolesEntity) private readonly urRepo: Repository<UserRolesEntity>,
     @InjectRepository(RolEntity) private readonly rolRepo: Repository<RolEntity>,
+    @InjectRepository(PeopleEntity) private readonly peopleRepo: Repository<PeopleEntity>, 
   ) {}
 
   async save(user: User): Promise<User> {
@@ -72,15 +74,21 @@ export class TypeOrmUserRepository implements IUserRepository {
   }
 
   async findUserRole(user: User) { 
-    if (!user.id) return null; 
+    if (!user.user_id) return null; 
 
     return this.urRepo.findOne({ 
-      where: { user: { user_id: user.id } }, 
+      where: { user: { user_id: user.user_id } }, 
       relations: ['rol'] 
     }); 
   }
 
-  async saveUserRole(ur: any) { 
-    await this.urRepo.save(ur); 
+  async saveUserRole(urData: any): Promise<void> { 
+    await this.urRepo.save(urData); 
   }
+
+  async savePeople(peopleData: any): Promise<any> {
+    return await this.peopleRepo.save(peopleData);
+  }
+
+  
 }

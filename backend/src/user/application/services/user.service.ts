@@ -25,7 +25,7 @@ export class UserService {
 
     // Si viene un rol en el DTO, lo asignamos a través del repositorio
     if (dto.rol_id) {
-      await this._userRepository.updateUserRole(savedUser.id!, dto.rol_id);
+      await this._userRepository.updateUserRole(savedUser.user_id!, dto.rol_id);
     }
 
     return 'Usuario creado correctamente';
@@ -34,8 +34,8 @@ export class UserService {
   async obtenerUsuarios() {
     const usuarios = await this._userRepository.findAll();
     return usuarios.map(u => ({
-      user_id: u.id,
-      user_email: u.email,
+      user_id: u.user_id,
+      user_email: u.user_email,
       roles: u.roles // Ya viene como string[] gracias al Mapper
     }));
   }
@@ -48,8 +48,8 @@ export class UserService {
     }
   
     return {
-      user_id: usuario.id,
-      user_email: usuario.email,
+      user_id: usuario.user_id,
+      user_email: usuario.user_email,
       roles: usuario.roles
     };
   }
@@ -72,8 +72,8 @@ export class UserService {
 
     // Actualizamos los campos básicos en el objeto de dominio
     // (Asegúrate de que en user.model.ts no sean 'readonly')
-    if (dto.user_email) usuario.email = dto.user_email;
-    if (dto.user_password) usuario.password = dto.user_password;
+    if (dto.user_email) usuario.user_email = dto.user_email;
+    if (dto.user_password) usuario.user_password = dto.user_password;
 
     await this._userRepository.save(usuario);
     return 'Usuario actualizado correctamente';
