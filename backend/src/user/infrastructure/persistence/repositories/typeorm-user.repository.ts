@@ -18,6 +18,50 @@ export class TypeOrmUserRepository implements IUserRepository {
     @InjectRepository(PeopleEntity) private readonly peopleRepo: Repository<PeopleEntity>, 
   ) {}
 
+  async create(user: User, personData: any): Promise<User> {
+    const queryRunner = this.repo.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Guardar la Entidad de Usuario
+      const userEntity = queryRunner.manager.create(UserEntity, {
+        user_email: user.user_email,
+        user_password: user.user_password,
+      });
+      const savedUser = await queryRunner.manager.save(userEntity);
+
+      // 2. Guardar la Persona asociada al usuario
+      const personEntity = queryRunner.manager.create(PeopleEntity, {
+        ...personData,
+        user_id: savedUser.user_id, 
+      });
+      await queryRunner.manager.save(personEntity);
+
+      // 3. Guardar los Roles - CORREGIDO PARA EVITAR TS2769
+      if (user.roles && user.roles.length > 0) {
+        for (const roleId of user.roles) {
+          const userRole = queryRunner.manager.create(UserRolesEntity, {
+            user: savedUser, // Pasamos la entidad completa
+            rol: { rol_id: roleId } as RolEntity,
+          } as any); // Usamos any para saltar la validación estricta de TypeORM aquí
+          await queryRunner.manager.save(userRole);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+
+      // CORREGIDO PARA EVITAR TS2322 (Agregamos el !)
+      return UserMapper.toDomain(savedUser)!; 
+
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async save(user: User): Promise<User> {
     const persistenceModel = UserMapper.toPersistence(user);
     const savedEntity = await this.repo.save(persistenceModel);
@@ -44,7 +88,6 @@ export class TypeOrmUserRepository implements IUserRepository {
     const entities = await this.repo.find({ 
       relations: ['userroles', 'userroles.rol'] 
     });
-    // Filtramos los nulls por seguridad
     return entities.map(entity => UserMapper.toDomain(entity)).filter(u => u !== null) as User[];
   }
 
@@ -89,6 +132,4 @@ export class TypeOrmUserRepository implements IUserRepository {
   async savePeople(peopleData: any): Promise<any> {
     return await this.peopleRepo.save(peopleData);
   }
-
-  
 }

@@ -7,11 +7,15 @@ export class UserEntity {
   @PrimaryGeneratedColumn()
   user_id: number;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', length: 255, unique: true })
   user_email: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   user_password: string;
+
+  // Agrega esto para que coincida con tu lógica de negocio
+  @Column({ type: 'boolean', default: true })
+  status: boolean;
 
   @OneToMany(() => UserRolesEntity, (ur) => ur.user)
   userroles: UserRolesEntity[];

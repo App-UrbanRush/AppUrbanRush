@@ -13,6 +13,8 @@ import { RegisterUseCase } from "./application/use-cases/register.use-case";
 import { RolesGuard } from "./infrastructure/guards/roles.guard";
 import { AuthController } from "./infrastructure/controllers/auth.controller";
 import { UserModule } from "src/user/user.module";
+import { RegisterCourierUseCase } from "./application/use-cases/register-courier.use-case";
+import { CourierModule } from "src/courier/courier.module";
 
 @Module({
     imports: [
@@ -27,15 +29,17 @@ import { UserModule } from "src/user/user.module";
             })
         }),
    
-        UserModule, 
+        UserModule,
+        CourierModule
     ],
     providers: [
         LoginUseCase,
         RegisterUseCase,
+        RegisterCourierUseCase,
         JwtStrategy,
         RolesGuard,
     ],
     controllers: [AuthController],
-    exports: [RolesGuard, JwtStrategy, PassportModule], // Exporta Passport para que los Guards funcionen en otros módulos
+    exports: [RolesGuard, JwtStrategy, PassportModule], 
 })
 export class AuthModule { }
