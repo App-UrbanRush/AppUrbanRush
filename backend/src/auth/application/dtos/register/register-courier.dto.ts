@@ -18,4 +18,9 @@ export class RegisterCourierDto extends CreateFullUserDto {
     @IsNotEmpty()
     @ApiProperty({ example: 'SOAT-456' })
     soat_number: string;
+
+    @ApiProperty({ example: '1020304050' })
+    @IsString()
+    @IsNotEmpty()
+    document_number: string;
 }

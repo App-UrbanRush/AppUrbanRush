@@ -36,6 +36,7 @@ export class RegisterCourierUseCase {
     const personData = {
       firstName: dto.firstName,
       firstLastName: dto.firstLastName,
+      document_number: dto.document_number,
       cellphone: dto.cellphone,
       address: dto.address,
       gender: dto.gender,

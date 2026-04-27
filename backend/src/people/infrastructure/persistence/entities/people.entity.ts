@@ -21,7 +21,10 @@ export class PeopleEntity {
   @Column({ type: 'varchar', length: 255 })
   gender: string;
 
-  // Relación OneToOne con el usuario
+  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  document_number: string;
+
+
   @OneToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
