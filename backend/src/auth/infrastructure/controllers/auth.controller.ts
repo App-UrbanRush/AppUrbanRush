@@ -1,9 +1,11 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { LoginDto } from 'src/auth/application/dtos/login.dto';
+import { LoginDto } from 'src/auth/application/dtos/login/login.dto';
 import { RegisterUseCase } from 'src/auth/application/use-cases/register.use-case';
 import { LoginUseCase } from 'src/auth/application/use-cases/login.use-case';
-import { CreateFullUserDto } from 'src/auth/application/dtos/create-full-user.dto';
+import { CreateFullUserDto } from 'src/auth/application/dtos/register/create-full-user.dto';
+import { RegisterCourierUseCase } from 'src/auth/application/use-cases/register-courier.use-case';
+import { RegisterCourierDto } from 'src/auth/application/dtos/register/register-courier.dto';
 
 
 @ApiTags('Auth')
@@ -13,6 +15,7 @@ export class AuthController {
     // Inyectamos los casos de uso por separado
     private readonly _loginUseCase: LoginUseCase,
     private readonly _registerUseCase: RegisterUseCase,
+    private readonly _registerCourierUseCase: RegisterCourierUseCase,
   ) {}
 
   @Post('login')
@@ -30,4 +33,16 @@ export class AuthController {
   async register(@Body() dto: CreateFullUserDto) {
     return this._registerUseCase.execute(dto);
   }
+
+
+ @Post('register-courier') 
+ @ApiOperation({ 
+   summary: 'Registro para Repartidores', 
+   description: 'Crea cuenta de usuario y perfil de repartidor con datos de vehículo' 
+ })
+ @ApiResponse({ status: 201, description: 'Repartidor registrado exitosamente.' })
+ @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
+ async registerCourier(@Body() dto: RegisterCourierDto) {
+   return this._registerCourierUseCase.execute(dto);
+ }
 }

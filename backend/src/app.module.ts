@@ -6,6 +6,7 @@ import { RolesModule } from './roles/roles.module';
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './config/constants';
 import { PeopleModule } from './people/people.module';
 import { AuthModule } from './auth/auth.module';
+import { CourierModule } from './courier/courier.module';
 
 @Module({
   imports: [
@@ -30,8 +31,8 @@ import { AuthModule } from './auth/auth.module';
     UserModule,
     RolesModule,
     PeopleModule,
-    AuthModule
-    
+    AuthModule,
+    CourierModule    
   ],
 })
 export class AppModule {}

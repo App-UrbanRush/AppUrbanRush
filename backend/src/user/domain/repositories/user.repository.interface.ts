@@ -14,4 +14,6 @@ export interface IUserRepository {
   saveUserRole(userRole: any): Promise<void>;
 
   savePeople(peopleData: any): Promise<any>;
+
+  create(user: User, personData: any): Promise<User>;
 }
