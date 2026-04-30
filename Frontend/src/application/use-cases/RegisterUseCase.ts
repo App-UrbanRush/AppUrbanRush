@@ -14,7 +14,6 @@ export class RegisterUseCase {
       ...credentials,
       rolIds: [2],
     });
-
     this.authRepository.saveToken(response.access_token || response.token || "");
 
     return response;
