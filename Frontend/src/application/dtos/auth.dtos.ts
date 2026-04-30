@@ -15,6 +15,7 @@ export const RegisterDTOSchema = z.object({
   cellphone: z.string().min(7, "Teléfono inválido"),
   address: z.string().min(5, "Dirección requerida"),
   gender: z.string().min(1, "Género requerido"),
+  rolIds: z.array(z.number()).optional(),
 });
 
 export type RegisterDTO = z.infer<typeof RegisterDTOSchema>;
