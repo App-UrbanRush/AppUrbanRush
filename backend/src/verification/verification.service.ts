@@ -192,9 +192,12 @@ Si la imagen no es una cédula colombiana, pon isValidDocument: false.`,
       throw new InternalServerErrorException('Error al procesar la verificación');
     }
   }
-  async updateVerificationStatus(userId: number): Promise<void> {
+  
+  async updateVerificationStatus(userId: number, documentNumber: string): Promise<void> {
     await this.userRepository.update(userId, {
       verification_status: VerificationStatus.VERIFIED,
+      document_number: documentNumber,
     });
   }
+
 }

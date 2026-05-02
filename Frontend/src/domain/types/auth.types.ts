@@ -12,6 +12,7 @@ export interface RegisterCredentials {
   address: string;
   gender: string;
   rolIds?: number[];
+  document_number?: string;
 }
 
 export interface AuthResponse {

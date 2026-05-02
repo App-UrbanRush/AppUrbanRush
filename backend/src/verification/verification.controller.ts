@@ -38,10 +38,10 @@ async verifyDocument(
   // Sin userId — no guarda nada en BD todavía
   return this.verificationService.verifyDocument(images, body, null);
 }
- @Post('confirm-verification')
-  @UseGuards(AuthGuard('jwt'))
-  async confirmVerification(@Request() req) {
-    await this.verificationService.updateVerificationStatus(req.user.user_id);
-    return { message: 'Verificación confirmada' };
-  }
+@Post('confirm-verification')
+@UseGuards(AuthGuard('jwt'))
+async confirmVerification(@Request() req, @Body() body: { documentNumber: string }) {
+  await this.verificationService.updateVerificationStatus(req.user.user_id, body.documentNumber);
+  return { message: 'Verificación confirmada' };
+}
 }

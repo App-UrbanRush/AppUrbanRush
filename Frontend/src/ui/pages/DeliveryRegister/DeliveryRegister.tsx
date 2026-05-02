@@ -116,10 +116,7 @@ const DeliveryRegister = () => {
       formData.append("firstLastName", form.firstLastName);
       formData.append("birthDate", form.birthDate);
 
-      const verifyRes = await api.post(
-        "/verification/verify-document",
-        formData,
-      );
+      const verifyRes = await api.post("/verification/verify-document", formData);
       const result: VerificationResult = verifyRes.data;
 
       if (!result.verified) {
@@ -139,15 +136,14 @@ const DeliveryRegister = () => {
         address: form.address,
         gender: form.gender,
         rolIds: [2],
+        document_number: form.cedula,
       });
 
       const token = localStorage.getItem("token");
       await api.post(
         "/verification/confirm-verification",
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { documentNumber: form.cedula },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       setVerificationResult(result);
@@ -173,6 +169,7 @@ const DeliveryRegister = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {/* ── PASO 1: FORMULARIO ─────────────────────────────── */}
           {step === "form" && (
             <>
               <div className="delivery-register-header">
@@ -304,6 +301,7 @@ const DeliveryRegister = () => {
             </>
           )}
 
+          {/* ── PASO 2: SUBIR FOTOS CC ─────────────────────────── */}
           {step === "verification" && (
             <>
               <div className="delivery-register-header">
@@ -313,9 +311,7 @@ const DeliveryRegister = () => {
 
               <div className="verification-section">
                 <div className="verification-info">
-                  <p>
-                    📋 <strong>¿Por qué necesitamos esto?</strong>
-                  </p>
+                  <p>📋 <strong>¿Por qué necesitamos esto?</strong></p>
                   <p>
                     Verificamos que los datos de tu cédula coincidan con la
                     información que registraste para garantizar la seguridad de
@@ -327,7 +323,7 @@ const DeliveryRegister = () => {
                   <p>✅ Buena iluminación</p>
                   <p>✅ Cédula completa visible</p>
                   <p>✅ Sin reflejos ni sombras</p>
-                  <p>✅ Puedes subir frente y reverso</p>
+                  <p>✅ Frente y reverso</p>
                 </div>
 
                 <label className="upload-area">
@@ -340,19 +336,23 @@ const DeliveryRegister = () => {
                   />
                   {imagePreviews.length === 0 ? (
                     <div className="upload-placeholder">
-                      <span style={{ fontSize: "2rem" }}>📷</span>
+                      <span>📷</span>
                       <p>Toca aquí para subir fotos de tu cédula</p>
                       <small>JPG, PNG o WEBP — máx. 5MB por imagen</small>
                     </div>
                   ) : (
                     <div className="image-previews">
                       {imagePreviews.map((src, i) => (
-                        <img
-                          key={i}
-                          src={src}
-                          alt={`CC ${i + 1}`}
-                          className="cc-preview"
-                        />
+                        <div key={i} className="cc-preview-wrapper">
+                          <img
+                            src={src}
+                            alt={`CC ${i + 1}`}
+                            className="cc-preview"
+                          />
+                          <div className="cc-preview-label">
+                            {i === 0 ? "FRENTE" : "REVERSO"}
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -369,85 +369,90 @@ const DeliveryRegister = () => {
             </>
           )}
 
+          {/* ── RESULTADO ──────────────────────────────────────── */}
           {step === "result" && verificationResult && (
             <div className="verification-result">
-              <div style={{ fontSize: "3rem", textAlign: "center" }}>
+              <motion.div
+                className="result-icon"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
                 {verificationResult.verified ? "✅" : "❌"}
-              </div>
-              <h2 style={{ textAlign: "center" }}>
+              </motion.div>
+
+              <h2 className={verificationResult.verified ? "success" : "failed"}>
                 {verificationResult.verified
                   ? "¡Identidad verificada!"
                   : "Verificación fallida"}
               </h2>
-              <p style={{ textAlign: "center", color: "#666" }}>
-                {verificationResult.message}
-              </p>
+
+              <p className="result-message">{verificationResult.message}</p>
 
               <div className="confidence-bar">
-                <div className="confidence-label">
-                  Confianza: {verificationResult.confidence}%
+                <div className="confidence-header">
+                  <span>Nivel de confianza</span>
+                  <span
+                    className={`confidence-percentage ${
+                      verificationResult.confidence >= 75 ? "high" : "low"
+                    }`}
+                  >
+                    {verificationResult.confidence}%
+                  </span>
                 </div>
                 <div className="confidence-track">
-                  <div
-                    className="confidence-fill"
-                    style={{
-                      width: `${verificationResult.confidence}%`,
-                      background:
-                        verificationResult.confidence >= 75
-                          ? "#22c55e"
-                          : "#ef4444",
-                    }}
+                  <motion.div
+                    className={`confidence-fill ${
+                      verificationResult.confidence >= 75 ? "high" : "low"
+                    }`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${verificationResult.confidence}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
                   />
                 </div>
               </div>
 
               {verificationResult.mismatches.length > 0 && (
                 <div className="mismatches">
-                  <p>
-                    <strong>Problemas encontrados:</strong>
-                  </p>
+                  <p>Problemas encontrados:</p>
                   {verificationResult.mismatches.map((m, i) => (
-                    <p key={i} style={{ color: "#ef4444" }}>
-                      • {m}
-                    </p>
+                    <div key={i} className="mismatch-item">
+                      <span>⚠️</span>
+                      <span>{m}</span>
+                    </div>
                   ))}
                 </div>
               )}
 
-              {verificationResult.verified ? (
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="delivery-register-btn"
-                >
-                  Ir al Panel De Control
-                </button>
-              ) : (
-                <div style={{ display: "flex", gap: "1rem" }}>
+              <div className="result-actions">
+                {verificationResult.verified ? (
                   <button
-                    onClick={() => {
-                      setImages([]);
-                      setImagePreviews([]);
-                      setStep("verification");
-                    }}
-                    className="delivery-register-btn"
+                    onClick={() => navigate("/dashboard")}
+                    className="btn-retry"
                   >
-                    Intentar de nuevo
+                    Ir al Dashboard →
                   </button>
-                  <button
-                    onClick={() => setStep("form")}
-                    style={{
-                      background: "transparent",
-                      color: "#888",
-                      border: "1px solid #ccc",
-                      borderRadius: "8px",
-                      padding: "0.75rem 1rem",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Volver al formulario
-                  </button>
-                </div>
-              )}
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setImages([]);
+                        setImagePreviews([]);
+                        setStep("verification");
+                      }}
+                      className="btn-retry"
+                    >
+                      Intentar de nuevo
+                    </button>
+                    <button
+                      onClick={() => setStep("form")}
+                      className="btn-secondary"
+                    >
+                      Volver al formulario
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           )}
 

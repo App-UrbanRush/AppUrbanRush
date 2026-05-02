@@ -94,7 +94,7 @@ const Login = () => {
             Continuar con Google
           </button>
 
-          <Link className="login-forgot" to="/register">Crear cuenta</Link>
+          <Link className="login-forgot" to="/register-select">Crear cuenta</Link>
 
           <a href="#" className="login-forgot">
             ¿Olvidaste tu contraseña?
