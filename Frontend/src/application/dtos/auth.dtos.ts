@@ -16,6 +16,7 @@ export const RegisterDTOSchema = z.object({
   address: z.string().min(5, "Dirección requerida"),
   gender: z.string().min(1, "Género requerido"),
   rolIds: z.array(z.number()).optional(),
+  document_number: z.string().optional(),
 });
 
 export type RegisterDTO = z.infer<typeof RegisterDTOSchema>;

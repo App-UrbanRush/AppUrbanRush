@@ -43,4 +43,9 @@ export class CreateFullUserDto {
   @IsArray({ message: 'rolId debe ser un arreglo de números' })
   @IsNumber({}, { each: true, message: 'Cada rol debe ser un número' })
   rolIds: number[];
+
+  @ApiPropertyOptional({ description: 'Número de documento del usuario' })
+  @IsOptional()
+  @IsString({ message: 'El documento debe ser una cadena de texto' })
+  document_number?: string;
 }
