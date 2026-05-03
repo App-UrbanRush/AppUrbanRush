@@ -2,11 +2,6 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { PeopleEntity } from "src/people/infrastructure/persistence/entities/people.entity";
-import { RolEntity } from "src/roles/infrastructure/persistence/entity/rol.entity";
-import { UserEntity } from "src/user/infrastructure/persistence/entities/user.entity";
-import { UserRolesEntity } from "src/user_rol/infrastructure/persistence/entity/user_rol.entity";
 import { JwtStrategy } from "./infrastructure/strategies/jwt.strategy";
 import { LoginUseCase } from "./application/use-cases/login.use-case";
 import { RegisterUseCase } from "./application/use-cases/register.use-case";
@@ -15,6 +10,8 @@ import { AuthController } from "./infrastructure/controllers/auth.controller";
 import { UserModule } from "src/user/user.module";
 import { RegisterCourierUseCase } from "./application/use-cases/register-courier.use-case";
 import { CourierModule } from "src/courier/courier.module";
+import { RegisterVendorUseCase } from './application/use-cases/register-vendor.use-case';
+import { VendorModule } from 'src/vendor/vendor.module';
 
 @Module({
     imports: [
@@ -30,7 +27,8 @@ import { CourierModule } from "src/courier/courier.module";
         }),
    
         UserModule,
-        CourierModule
+        CourierModule,
+        VendorModule,
     ],
     providers: [
         LoginUseCase,
@@ -38,6 +36,7 @@ import { CourierModule } from "src/courier/courier.module";
         RegisterCourierUseCase,
         JwtStrategy,
         RolesGuard,
+        RegisterVendorUseCase,
     ],
     controllers: [AuthController],
     exports: [RolesGuard, JwtStrategy, PassportModule], 

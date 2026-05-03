@@ -8,6 +8,7 @@ import { PeopleModule } from './people/people.module';
 import { AuthModule } from './auth/auth.module';
 import { CourierModule } from './courier/courier.module';
 import { VerificationModule } from './verification/verification.module';
+import { VendorModule } from './vendor/vendor.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { VerificationModule } from './verification/verification.module';
     AuthModule,
     CourierModule,
     VerificationModule,
+    VendorModule,
   ],
 })
 export class AppModule {}

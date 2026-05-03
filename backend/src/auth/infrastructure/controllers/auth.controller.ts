@@ -6,7 +6,8 @@ import { LoginUseCase } from 'src/auth/application/use-cases/login.use-case';
 import { CreateFullUserDto } from 'src/auth/application/dtos/register/create-full-user.dto';
 import { RegisterCourierUseCase } from 'src/auth/application/use-cases/register-courier.use-case';
 import { RegisterCourierDto } from 'src/auth/application/dtos/register/register-courier.dto';
-
+import { RegisterVendorUseCase } from 'src/auth/application/use-cases/register-vendor.use-case';
+import { RegisterVendorDto } from 'src/auth/application/dtos/register/register-vendor.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -16,6 +17,7 @@ export class AuthController {
     private readonly _loginUseCase: LoginUseCase,
     private readonly _registerUseCase: RegisterUseCase,
     private readonly _registerCourierUseCase: RegisterCourierUseCase,
+    private readonly _registerVendorUseCase: RegisterVendorUseCase,
   ) {}
 
   @Post('login')
@@ -45,4 +47,15 @@ export class AuthController {
  async registerCourier(@Body() dto: RegisterCourierDto) {
    return this._registerCourierUseCase.execute(dto);
  }
+
+ @Post('register-vendor')
+@ApiOperation({
+  summary: 'Registro para Vendedores/Restaurantes',
+  description: 'Crea cuenta de usuario y perfil de negocio'
+})
+@ApiResponse({ status: 201, description: 'Vendedor registrado exitosamente.' })
+@ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
+async registerVendor(@Body() dto: RegisterVendorDto) {
+  return this._registerVendorUseCase.execute(dto);
+}
 }
