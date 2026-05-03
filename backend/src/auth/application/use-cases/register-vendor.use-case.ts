@@ -57,11 +57,11 @@ export class RegisterVendorUseCase {
       address: dto.business_address,
       phone: dto.business_phone,
       description: dto.description ?? null,
-      status: 'PENDING',
+      status: 'APPROVED',
     });
 
     return {
-      message: 'Registro de vendedor exitoso. Tu cuenta está en revisión.',
+      message: 'Registro de vendedor exitoso.',
       user_id: savedUser.user_id,
     };
   }
