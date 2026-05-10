@@ -1,15 +1,24 @@
+/**
+ * UI LAYER - COMPONENTE
+ * Protege las rutas privadas
+ */
+
 import { Navigate } from "react-router-dom";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useAuth } from "../context/useAuth";
 
-interface Props {
+interface PrivateRouteProps {
   children: ReactNode;
 }
 
-const PrivateRoute = ({ children }: Props) => {
-  const { token } = useAuth();
+export const PrivateRoute = ({ children }: PrivateRouteProps) => {
+  const { isAuthenticated } = useAuth();
 
-  return token ? children : <Navigate to="/" />;
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 export default PrivateRoute;

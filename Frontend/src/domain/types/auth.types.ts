@@ -1,9 +1,26 @@
-export interface LoginCredentials {
-  user_email: string;
-  user_password: string;
+/**
+ * DOMAIN LAYER - Tipos puros de negocio
+ * No dependen de ninguna tecnología específica
+ */
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
 }
 
-export interface RegisterCredentials {
+export interface AuthResponse {
+  access_token: string;
+  user: User;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
   user_email: string;
   user_password: string;
   firstName: string;
@@ -11,18 +28,22 @@ export interface RegisterCredentials {
   cellphone: string;
   address: string;
   gender: string;
-  rolIds?: number[];
   document_number?: string;
+  rolIds?: number[];
 }
 
-export interface AuthResponse {
-  access_token: string;
-  token?: string;
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
-export interface User {
-  id?: number;
-  email: string;
-  firstName: string;
-  lastNames: string;
+export interface RegisterDeliveryRequest extends RegisterRequest {
+  vehicle_type: string;
+  vehicle_plate: string;
+  soat_number: string;
+  birthDate?: string;
 }
+

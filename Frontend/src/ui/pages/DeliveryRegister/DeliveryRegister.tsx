@@ -1,38 +1,30 @@
-import "../DeliveryRegister/DeliveryRegister.css";
-import axios from "axios";
+/**
+ * UI LAYER - PÁGINA DELIVERY REGISTER
+ * Usa correctamente la arquitectura hexagonal
+ * - Usa useAuth() para el registro y verificación
+ * - NO crea instancias de casos de uso
+ * - NO importa detalles de infraestructura (axios, APIs, etc)
+ */
+
+import "./DeliveryRegister.css";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { AuthRepositoryImpl } from "../../../infrastructure/repositories/AuthRepositoryImpl";
-import { RegisterUseCase } from "../../../application/use-cases/RegisterUseCase";
-import { api } from "../../../infrastructure/api/authApi";
-import type { RegisterCredentials } from "../../../domain/types/auth.types";
-
-interface DeliveryCredentials extends RegisterCredentials {
-  vehicleType: string;
-  licensePlate: string;
-  experience: string;
-  workSchedule: string;
-  hasInsurance: boolean;
-  availabilityZone: string;
-  cedula: string;
-  birthDate: string;
-}
+import { useAuth } from "../../context/useAuth";
+import type { RegisterDeliveryRequest } from "../../../domain/types/auth.types";
 
 type Step = "form" | "verification" | "result";
 
-interface VerificationResult {
-  verified: boolean;
-  confidence: number;
-  mismatches: string[];
-  message: string;
-}
-
 const DeliveryRegister = () => {
   const navigate = useNavigate();
+  const { registerDelivery, verifyDocument, isLoading, error: contextError } = useAuth();
 
   const [step, setStep] = useState<Step>("form");
-  const [form, setForm] = useState<DeliveryCredentials>({
+  const [apiError, setApiError] = useState<string>("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [documentImage, setDocumentImage] = useState<File | null>(null);
+
+  const [form, setForm] = useState<RegisterDeliveryRequest>({
     user_email: "",
     user_password: "",
     firstName: "",
@@ -40,26 +32,17 @@ const DeliveryRegister = () => {
     cellphone: "",
     address: "",
     gender: "",
-    vehicleType: "",
-    licensePlate: "",
-    experience: "",
-    workSchedule: "",
-    hasInsurance: false,
-    availabilityZone: "",
-    cedula: "",
+    document_number: "",
+    vehicle_type: "",
+    vehicle_plate: "",
+    soat_number: "",
     birthDate: "",
-    rolIds: [2],
   });
 
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [verificationResult, setVerificationResult] =
-    useState<VerificationResult | null>(null);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
     setForm({
@@ -71,13 +54,9 @@ const DeliveryRegister = () => {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length > 2) {
-      alert("Máximo 2 imágenes (frente y reverso)");
-      return;
+    if (e.target.files && e.target.files[0]) {
+      setDocumentImage(e.target.files[0]);
     }
-    setImages(files);
-    setImagePreviews(files.map((f) => URL.createObjectURL(f)));
   };
 
   const validateForm = () => {
@@ -88,79 +67,60 @@ const DeliveryRegister = () => {
     if (!form.firstLastName) newErrors.firstLastName = "Requerido";
     if (!form.cellphone) newErrors.cellphone = "Requerido";
     if (!form.address) newErrors.address = "Requerido";
-    if (!form.vehicleType) newErrors.vehicleType = "Requerido";
-    if (!form.licensePlate) newErrors.licensePlate = "Requerido";
-    if (!form.cedula) newErrors.cedula = "Requerido";
+    if (!form.gender) newErrors.gender = "Requerido";
+    if (!form.document_number) newErrors.document_number = "Requerido";
+    if (!form.vehicle_type) newErrors.vehicle_type = "Requerido";
+    if (!form.vehicle_plate) newErrors.vehicle_plate = "Requerido";
+    if (!form.soat_number) newErrors.soat_number = "Requerido";
     if (!form.birthDate) newErrors.birthDate = "Requerido";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
-    setStep("verification");
+    if (validateForm()) {
+      setStep("verification");
+      setApiError("");
+    }
   };
 
-  const handleVerification = async () => {
-    if (images.length === 0) {
-      alert("Sube al menos una foto de tu cédula");
+  const handleVerifyAndRegister = async () => {
+    if (!documentImage) {
+      setApiError("Debes subir una foto de tu cédula para continuar");
       return;
     }
+
     try {
-      setLoading(true);
-      const formData = new FormData();
-      images.forEach((img) => formData.append("images", img));
-      formData.append("cedula", form.cedula);
-      formData.append("firstName", form.firstName);
-      formData.append("firstLastName", form.firstLastName);
-      formData.append("birthDate", form.birthDate);
+      setApiError("");
+      setIsVerifying(true);
 
-      const verifyRes = await api.post("/verification/verify-document", formData);
-      const result: VerificationResult = verifyRes.data;
-
-      if (!result.verified) {
-        setVerificationResult(result);
-        setStep("result");
-        return;
-      }
-
-      const authRepository = new AuthRepositoryImpl();
-      const registerUseCase = new RegisterUseCase(authRepository);
-      await registerUseCase.execute({
-        user_email: form.user_email,
-        user_password: form.user_password,
+      const verificationResult = await verifyDocument(documentImage, {
+        cedula: form.document_number || "",
         firstName: form.firstName,
         firstLastName: form.firstLastName,
-        cellphone: form.cellphone,
-        address: form.address,
-        gender: form.gender,
-        rolIds: [2],
-        document_number: form.cedula,
+        birthDate: form.birthDate || "",
       });
 
-      const token = localStorage.getItem("token");
-      await api.post(
-        "/verification/confirm-verification",
-        { documentNumber: form.cedula },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      if (!verificationResult.verified) {
+        throw new Error(`Verificación fallida: ${verificationResult.mismatches.join(", ")}`);
+      }
 
-      setVerificationResult(result);
+      await registerDelivery(form);
       setStep("result");
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        alert(error.response?.data?.message || "Error en verificación");
-      }
+      // Axios error has response.data.message sometimes
+      const errorMsg = (error as { response?: { data?: { message?: string } }; message?: string }).response?.data?.message || (error as { message?: string }).message || "Error en el proceso";
+      setApiError(errorMsg);
     } finally {
-      setLoading(false);
+      setIsVerifying(false);
     }
   };
 
   return (
     <div className="delivery-register-container">
       <div className="delivery-register-left">
-        {/* LOGO PARA MÓVIL */}
         <img src="/Logo-png.png" alt="UrbanRush Logo" className="mobile-logo-form" />
 
         <motion.div
@@ -169,310 +129,250 @@ const DeliveryRegister = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* ── PASO 1: FORMULARIO ─────────────────────────────── */}
+          {/* PASO 1: FORMULARIO */}
           {step === "form" && (
             <>
               <div className="delivery-register-header">
                 <h2>Registro de Domiciliario</h2>
-                <p>Paso 1 de 2 — Información personal</p>
+                <p>Paso 1 de 2 — Información personal y vehículo</p>
               </div>
 
-              <form onSubmit={handleSubmit} className="delivery-register-form">
+              {(apiError || contextError) && (
+                <div style={{ color: "red", marginBottom: "15px" }}>
+                  {apiError || contextError}
+                </div>
+              )}
+
+              <form onSubmit={handleNextStep} className="delivery-register-form">
                 <div className="form-section">
                   <h3>Información Personal</h3>
+                  
                   <input
                     name="user_email"
                     type="email"
                     placeholder="Correo electrónico"
+                    value={form.user_email}
                     onChange={handleChange}
-                    required
                   />
-                  {errors.user_email && (
-                    <span className="error-message">{errors.user_email}</span>
-                  )}
+                  {errors.user_email && <span className="error-message">{errors.user_email}</span>}
+
                   <input
                     name="user_password"
                     type="password"
                     placeholder="Contraseña"
+                    value={form.user_password}
                     onChange={handleChange}
-                    required
                   />
-                  <div className="delivery-register-row">
-                    <input
-                      name="firstName"
-                      placeholder="Nombre"
-                      onChange={handleChange}
-                    />
-                    <input
-                      name="firstLastName"
-                      placeholder="Apellido"
-                      onChange={handleChange}
-                    />
+                  {errors.user_password && <span className="error-message">{errors.user_password}</span>}
+
+                  <div className="delivery-register-row" style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        name="firstName"
+                        placeholder="Nombre"
+                        value={form.firstName}
+                        onChange={handleChange}
+                      />
+                      {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        name="firstLastName"
+                        placeholder="Apellido"
+                        value={form.firstLastName}
+                        onChange={handleChange}
+                      />
+                      {errors.firstLastName && <span className="error-message">{errors.firstLastName}</span>}
+                    </div>
                   </div>
-                  <input
-                    name="cellphone"
-                    placeholder="Celular"
-                    onChange={handleChange}
-                  />
+
+                  <div className="delivery-register-row" style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        name="cellphone"
+                        placeholder="Celular"
+                        value={form.cellphone}
+                        onChange={handleChange}
+                      />
+                      {errors.cellphone && <span className="error-message">{errors.cellphone}</span>}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <select name="gender" value={form.gender} onChange={handleChange}>
+                        <option value="" disabled>Género</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                      {errors.gender && <span className="error-message">{errors.gender}</span>}
+                    </div>
+                  </div>
+
                   <input
                     name="address"
                     placeholder="Dirección"
+                    value={form.address}
                     onChange={handleChange}
                   />
-                  <select
-                    name="gender"
-                    onChange={handleChange}
-                    value={form.gender}
-                  >
-                    <option value="">Seleccionar género</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="femenino">Femenino</option>
-                    <option value="otro">Otro</option>
-                  </select>
+                  {errors.address && <span className="error-message">{errors.address}</span>}
 
-                  <input
-                    name="cedula"
-                    placeholder="Número de cédula"
-                    onChange={handleChange}
-                  />
-                  {errors.cedula && (
-                    <span className="error-message">{errors.cedula}</span>
-                  )}
-                  <label style={{ fontSize: "0.85rem", color: "#666" }}>
-                    Fecha de nacimiento
-                  </label>
-                  <input name="birthDate" type="date" onChange={handleChange} />
-                  {errors.birthDate && (
-                    <span className="error-message">{errors.birthDate}</span>
-                  )}
+                  <div className="delivery-register-row" style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        name="document_number"
+                        placeholder="Número de Cédula"
+                        value={form.document_number}
+                        onChange={handleChange}
+                      />
+                      {errors.document_number && <span className="error-message">{errors.document_number}</span>}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        name="birthDate"
+                        type="date"
+                        title="Fecha de Nacimiento"
+                        value={form.birthDate}
+                        onChange={handleChange}
+                      />
+                      {errors.birthDate && <span className="error-message">{errors.birthDate}</span>}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="form-section">
-                  <h3>Vehículo</h3>
+                  <h3>Información del Vehículo</h3>
+                  
                   <select
-                    name="vehicleType"
+                    name="vehicle_type"
+                    value={form.vehicle_type}
                     onChange={handleChange}
-                    value={form.vehicleType}
                   >
-                    <option value="">Tipo de vehículo</option>
-                    <option value="moto">Moto</option>
-                    <option value="bicicleta">Bicicleta</option>
-                    <option value="carro">Carro</option>
+                    <option value="" disabled>Selecciona tipo de vehículo</option>
+                    <option value="motorcycle">Motocicleta</option>
+                    <option value="bicycle">Bicicleta</option>
+                    <option value="car">Auto</option>
                   </select>
+                  {errors.vehicle_type && (
+                    <span className="error-message">{errors.vehicle_type}</span>
+                  )}
+
                   <input
-                    name="licensePlate"
-                    placeholder="Placa"
+                    name="vehicle_plate"
+                    placeholder="Placa del vehículo"
+                    value={form.vehicle_plate}
                     onChange={handleChange}
                   />
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      name="hasInsurance"
-                      checked={form.hasInsurance}
-                      onChange={handleChange}
-                    />
-                    <span>Tengo seguro del vehículo</span>
-                  </label>
-                </div>
+                  {errors.vehicle_plate && (
+                    <span className="error-message">{errors.vehicle_plate}</span>
+                  )}
 
-                <div className="form-section">
-                  <h3>Horario</h3>
-                  <select
-                    name="workSchedule"
+                  <input
+                    name="soat_number"
+                    placeholder="Número de SOAT"
+                    value={form.soat_number}
                     onChange={handleChange}
-                    value={form.workSchedule}
-                  >
-                    <option value="">Horario preferido</option>
-                    <option value="tiempo-completo">Tiempo completo</option>
-                    <option value="medio-tiempo">Medio tiempo</option>
-                    <option value="fines-semana">Fines de semana</option>
-                    <option value="flexible">Flexible</option>
-                  </select>
+                  />
+                  {errors.soat_number && (
+                    <span className="error-message">{errors.soat_number}</span>
+                  )}
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="delivery-register-btn"
-                >
-                  {loading ? "Registrando..." : "Continuar a verificación →"}
+                <button type="submit" className="delivery-register-btn">
+                  Siguiente
                 </button>
               </form>
+
+              <p className="login-link">
+                ¿Ya tienes cuenta? <Link to="/">Inicia sesión</Link>
+              </p>
             </>
           )}
 
-          {/* ── PASO 2: SUBIR FOTOS CC ─────────────────────────── */}
+          {/* PASO 2: VERIFICACIÓN */}
           {step === "verification" && (
             <>
               <div className="delivery-register-header">
                 <h2>Verificación de Identidad</h2>
-                <p>Paso 2 de 2 — Sube las fotos de tu cédula</p>
+                <p>Paso 2 de 2 — Sube tu cédula</p>
               </div>
 
-              <div className="verification-section">
-                <div className="verification-info">
-                  <p>📋 <strong>¿Por qué necesitamos esto?</strong></p>
-                  <p>
-                    Verificamos que los datos de tu cédula coincidan con la
-                    información que registraste para garantizar la seguridad de
-                    nuestra plataforma.
-                  </p>
+              {apiError && (
+                <div style={{ color: "red", marginBottom: "15px", padding: "10px", backgroundColor: "#ffebee", borderRadius: "5px" }}>
+                  {apiError}
                 </div>
+              )}
 
-                <div className="verification-tips">
-                  <p>✅ Buena iluminación</p>
-                  <p>✅ Cédula completa visible</p>
-                  <p>✅ Sin reflejos ni sombras</p>
-                  <p>✅ Frente y reverso</p>
-                </div>
+              <div className="verification-section" style={{ textAlign: "center", marginBottom: "20px" }}>
+                <p style={{ marginBottom: "15px", fontSize: "14px", color: "#666" }}>
+                  Para garantizar la seguridad de nuestra plataforma, validaremos tus datos contra tu cédula de ciudadanía.
+                </p>
 
-                <label className="upload-area">
+                <div className="file-upload-wrapper" style={{ marginBottom: "20px" }}>
+                  <label htmlFor="cedula-upload" style={{
+                    display: "inline-block",
+                    padding: "10px 20px",
+                    backgroundColor: "#f0f0f0",
+                    border: "2px dashed #ccc",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    width: "100%",
+                    boxSizing: "border-box"
+                  }}>
+                    {documentImage ? `📸 ${documentImage.name}` : "📸 Subir foto frontal de la Cédula"}
+                  </label>
                   <input
+                    id="cedula-upload"
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    multiple
+                    accept="image/*"
                     onChange={handleImageChange}
                     style={{ display: "none" }}
                   />
-                  {imagePreviews.length === 0 ? (
-                    <div className="upload-placeholder">
-                      <span>📷</span>
-                      <p>Toca aquí para subir fotos de tu cédula</p>
-                      <small>JPG, PNG o WEBP — máx. 5MB por imagen</small>
-                    </div>
-                  ) : (
-                    <div className="image-previews">
-                      {imagePreviews.map((src, i) => (
-                        <div key={i} className="cc-preview-wrapper">
-                          <img
-                            src={src}
-                            alt={`CC ${i + 1}`}
-                            className="cc-preview"
-                          />
-                          <div className="cc-preview-label">
-                            {i === 0 ? "FRENTE" : "REVERSO"}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </label>
+                </div>
+              </div>
 
-                <button
-                  onClick={handleVerification}
-                  disabled={loading || images.length === 0}
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button 
+                  onClick={() => setStep("form")} 
                   className="delivery-register-btn"
+                  style={{ backgroundColor: "#ccc", color: "#333" }}
+                  disabled={isVerifying || isLoading}
                 >
-                  {loading ? "Verificando con IA..." : "Verificar identidad"}
+                  Volver
+                </button>
+                <button 
+                  onClick={handleVerifyAndRegister} 
+                  className="delivery-register-btn"
+                  disabled={isVerifying || isLoading}
+                >
+                  {isVerifying ? "Verificando con IA..." : (isLoading ? "Registrando..." : "Confirmar y Registrar")}
                 </button>
               </div>
             </>
           )}
 
-          {/* ── RESULTADO ──────────────────────────────────────── */}
-          {step === "result" && verificationResult && (
-            <div className="verification-result">
-              <motion.div
-                className="result-icon"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          {/* RESULTADO */}
+          {step === "result" && (
+            <div style={{ textAlign: "center" }}>
+              <h2 style={{ color: "#4CAF50", marginBottom: "10px" }}>¡Registro exitoso!</h2>
+              <p style={{ fontSize: "16px", marginBottom: "20px" }}>
+                Tu identidad fue verificada correctamente y tu cuenta ha sido creada.
+                Actualmente se encuentra en revisión.
+              </p>
+              <button 
+                onClick={() => navigate("/")} 
+                className="delivery-register-btn"
               >
-                {verificationResult.verified ? "✅" : "❌"}
-              </motion.div>
-
-              <h2 className={verificationResult.verified ? "success" : "failed"}>
-                {verificationResult.verified
-                  ? "¡Identidad verificada!"
-                  : "Verificación fallida"}
-              </h2>
-
-              <p className="result-message">{verificationResult.message}</p>
-
-              <div className="confidence-bar">
-                <div className="confidence-header">
-                  <span>Nivel de confianza</span>
-                  <span
-                    className={`confidence-percentage ${
-                      verificationResult.confidence >= 75 ? "high" : "low"
-                    }`}
-                  >
-                    {verificationResult.confidence}%
-                  </span>
-                </div>
-                <div className="confidence-track">
-                  <motion.div
-                    className={`confidence-fill ${
-                      verificationResult.confidence >= 75 ? "high" : "low"
-                    }`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${verificationResult.confidence}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-
-              {verificationResult.mismatches.length > 0 && (
-                <div className="mismatches">
-                  <p>Problemas encontrados:</p>
-                  {verificationResult.mismatches.map((m, i) => (
-                    <div key={i} className="mismatch-item">
-                      <span>⚠️</span>
-                      <span>{m}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="result-actions">
-                {verificationResult.verified ? (
-                  <button
-                    onClick={() => navigate("/dashboard")}
-                    className="btn-retry"
-                  >
-                    Ir al Dashboard →
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setImages([]);
-                        setImagePreviews([]);
-                        setStep("verification");
-                      }}
-                      className="btn-retry"
-                    >
-                      Intentar de nuevo
-                    </button>
-                    <button
-                      onClick={() => setStep("form")}
-                      className="btn-secondary"
-                    >
-                      Volver al formulario
-                    </button>
-                  </>
-                )}
-              </div>
+                Ir al inicio de sesión
+              </button>
             </div>
           )}
-
-          <p
-            className="login-link"
-            style={{ textAlign: "center", marginTop: "1rem" }}
-          >
-            ¿Ya tienes cuenta? <Link to="/">Inicia sesión</Link>
-          </p>
         </motion.div>
       </div>
 
+      {/* RIGHT - IMAGE */}
       <div className="delivery-register-right">
-        <img src="/delivery.png" alt="delivery personnel" />
+        <img src="/delivery.png" alt="delivery" />
         <div className="delivery-register-overlay">
-          <img
-            src="/Logo-png.png"
-            alt="UrbanRush Logo"
-            className="delivery-register-logo-img"
-          />
+          <img src="/Logo-png.png" alt="UrbanRush Logo" className="register-logo-img" />
         </div>
       </div>
     </div>

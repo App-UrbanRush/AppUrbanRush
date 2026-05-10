@@ -1,31 +1,188 @@
-import { useState } from "react";
-import type { ReactNode } from "react";
-import { AuthContext } from "./AuthContext";
+import { useState, useCallback, useMemo,
+   type ReactNode } from "react";
+import { AuthContext, type AuthContextType } from "./AuthContext";
+import type { AuthState } from "../../domain/types/auth.types";
+import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
+import { RegisterUseCase } from "../../application/use-cases/RegisterUseCase";
+import { LogoutUseCase } from "../../application/use-cases/LogoutUseCase";
+import { AuthRepositoryImpl } from "../../infrastructure/repositories/AuthRepositoryImpl";
+import { authLocalStorage } from "../../infrastructure/persistence/authLocalStorage";
+import { RegisterDeliveryUseCase } from "../../application/use-cases/RegisterDeliveryUseCase";
+import { VerifyDocumentUseCase } from "../../application/use-cases/VerifyDocumentUseCase";
+import { VerificationRepositoryImpl } from "../../infrastructure/repositories/VerificationRepositoryImpl";
+import type { RegisterDeliveryRequest, RegisterRequest } from "../../domain/types/auth.types";
+import type { VerifyDocumentRequest } from "../../domain/types/verification.types";
 
-interface Props {
+interface AuthProviderProps {
   children: ReactNode;
 }
 
-const AuthProvider = ({ children }: Props) => {
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("token")
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  // INYECCIÓN DE DEPENDENCIAS
+const authRepository = useMemo(() => new AuthRepositoryImpl(), []);
+
+const loginUseCase = useMemo(() => new LoginUseCase(authRepository), [authRepository]);
+const registerUseCase = useMemo(() => new RegisterUseCase(authRepository), [authRepository]);
+const logoutUseCase = useMemo(() => new LogoutUseCase(authRepository), [authRepository]);
+const registerDeliveryUseCase = useMemo(
+  () => new RegisterDeliveryUseCase(authRepository),
+  [authRepository]
+);
+
+const verificationRepository = useMemo(() => new VerificationRepositoryImpl(), []);
+const verifyDocumentUseCase = useMemo(
+  () => new VerifyDocumentUseCase(verificationRepository),
+  [verificationRepository]
+);
+
+  // STATE
+const [state, setState] = useState<AuthState>({
+  user: authLocalStorage.getUser(),
+  token: authLocalStorage.getToken(),
+  isAuthenticated: !!authLocalStorage.getToken(),
+  isLoading: false,
+  error: null,
+});
+
+
+  // LOGIN
+  const login = useCallback(async (email: string, password: string) => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+    try {
+      const response = await loginUseCase.execute({ email, password });
+
+      setState((prev) => ({
+        ...prev,
+        token: response.access_token,
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      }));
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error en login";
+
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage,
+      }));
+
+      throw error;
+    }
+  }, [loginUseCase]);
+
+  // REGISTER
+  const register = useCallback(
+    async (data: RegisterRequest) => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        const response = await registerUseCase.execute(data);
+
+        setState((prev) => ({
+          ...prev,
+          token: response.access_token,
+          user: response.user,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        }));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Error en registro";
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+
+        throw error;
+      }
+    },
+    [registerUseCase]
   );
 
-  const login = (token: string) => {
-    localStorage.setItem("token", token);
-    setToken(token);
-  };
+  // ✅ REGISTER DELIVERY (ARREGLADO)
+  const registerDelivery = useCallback(
+    async (data: RegisterDeliveryRequest) => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-  };
+      try {
+        const response = await registerDeliveryUseCase.execute(data);
 
-  return (
-    <AuthContext.Provider value={{ token, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+        setState((prev) => ({
+          ...prev,
+          user: response.user,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        }));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Error al registrar delivery";
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+
+        throw error;
+      }
+    },
+    [registerDeliveryUseCase]
   );
+
+  // LOGOUT
+  const logout = useCallback(async () => {
+    setState((prev) => ({ ...prev, isLoading: true }));
+
+    try {
+      await logoutUseCase.execute();
+
+      setState({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error en logout";
+
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage,
+      }));
+    }
+  }, [logoutUseCase]);
+
+  // VERIFY DOCUMENT
+  const verifyDocument = useCallback(
+    async (image: File, data: VerifyDocumentRequest) => {
+      return verifyDocumentUseCase.execute(image, data);
+    },
+    [verifyDocumentUseCase]
+  );
+
+  const value: AuthContextType = {
+    ...state,
+    login,
+    register,
+    logout,
+    registerDelivery,
+    verifyDocument,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export default AuthProvider;

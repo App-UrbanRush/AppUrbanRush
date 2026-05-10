@@ -18,7 +18,7 @@
 .rselect-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(255, 106, 0, 0.295), rgba(255, 140, 0, 0.473));
+  background: linear-gradient(rgba(0, 255, 85, 0.377), rgba(255, 140, 0, 0.473));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -78,15 +78,15 @@
 
 /* USUARIO — naranja */
 .rselect-option--user {
-  background: #fff7f0;
-  border-color: #ffcca0;
+  background: #f0f5ff;
+  border-color: #6c8ed6;
 }
 .rselect-option--user:hover {
-  border-color: #ff6a00;
-  box-shadow: 0 4px 20px rgba(255, 106, 0, 0.2);
+  border-color: #0011ff;
+  box-shadow: 0 4px 20px rgba(4, 0, 255, 0.315);
 }
 .rselect-option--user .rselect-icon {
-  background: linear-gradient(135deg, #ff6a00, #ff8c00);
+  background: linear-gradient(135deg, #ffae00, #ffa600);
 }
 .rselect-option--user h3 { color: #ff6a00; }
 

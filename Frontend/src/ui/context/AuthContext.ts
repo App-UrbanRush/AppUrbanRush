@@ -1,11 +1,22 @@
-import { createContext } from "react";
+/**
+ * UI LAYER - CONTEXT
+ * Define la forma del contexto de autenticación
+ */
 
-export interface AuthContextType {
-  token: string | null;
-  login: (token: string) => void;
+import { createContext } from "react";
+import type { AuthState, RegisterDeliveryRequest, RegisterRequest } from "../../domain/types/auth.types";
+import type { VerifyDocumentRequest, VerificationResult } from "../../domain/types/verification.types";
+
+export interface AuthContextType extends AuthState {
+  login: (email: string, password: string) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
+  registerDelivery: (data: RegisterDeliveryRequest) => Promise<void>;
+  verifyDocument: (image: File, data: VerifyDocumentRequest) => Promise<VerificationResult>;
+
   logout: () => void;
+
+  isLoading: boolean;
+  error: string | null;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);

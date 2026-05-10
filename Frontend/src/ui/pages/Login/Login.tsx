@@ -1,45 +1,58 @@
-import "../Login/Login.css";
+/**
+ * UI LAYER - PÁGINA LOGIN
+ * Usa correctamente la arquitectura hexagonal:
+ * - NO crea instancias de casos de uso
+ * - NO importa detalles de implementación (axios, localStorage, etc)
+ * - Usa useAuth() hook que ya tiene todo inyectado
+ */
+
+import "./Login.css";
 import { useAuth } from "../../context/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { AuthRepositoryImpl } from "../../../infrastructure/repositories/AuthRepositoryImpl";
-import { LoginUseCase } from "../../../application/use-cases/LoginUseCase";
-import { LoginDTOSchema, type LoginDTO } from "../../../application/dtos/auth.dtos";
+
+// Validación con zod
+const loginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "Mínimo 6 caracteres"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const { login: saveToken } = useAuth();
+  // Los casos de uso ya vienen inyectados del AuthProvider
+  const { login, isLoading, error: contextError } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  const [apiError, setApiError] = useState<string>("");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginDTO>({
-    resolver: zodResolver(LoginDTOSchema),
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginDTO) => {
+  // onSubmit: llama al caso de uso inyectado
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      setLoading(true);
-      setError("");
+      setApiError("");
+      // Aquí login es el LoginUseCase inyectado en el AuthProvider
+      // Él se encarga de:
+      // 1. Llamar al repositorio
+      // 2. Guardar en localStorage
+      // 3. Actualizar el contexto
+      await login(data.email, data.password);
 
-      const authRepository = new AuthRepositoryImpl();
-      const loginUseCase = new LoginUseCase(authRepository);
-
-      const response = await loginUseCase.execute(data);
-      saveToken(response.access_token);
+      // El estado en el contexto ya está actualizado
       navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      setError("Credenciales incorrectas");
-    } finally {
-      setLoading(false);
+      const errorMsg = err instanceof Error ? err.message : "Credenciales incorrectas";
+      setApiError(errorMsg);
     }
   };
 
@@ -62,7 +75,11 @@ const Login = () => {
           <h2>¡Hola de nuevo!</h2>
           <p>Inicia sesión para continuar</p>
 
-          {error && <span style={{ display: "block", marginBottom: "15px" }}>{error}</span>}
+          {(apiError || contextError) && (
+            <span style={{ display: "block", marginBottom: "15px", color: "red" }}>
+              {apiError || contextError}
+            </span>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="login-input-group">
@@ -85,8 +102,8 @@ const Login = () => {
               {errors.password && <span>{errors.password.message}</span>}
             </div>
 
-            <button disabled={loading} className="login-btn-primary">
-              {loading ? "Cargando..." : "Iniciar Sesión"}
+            <button type="submit" disabled={isLoading} className="login-btn-primary">
+              {isLoading ? "Cargando..." : "Iniciar Sesión"}
             </button>
           </form>
 
@@ -94,7 +111,9 @@ const Login = () => {
             Continuar con Google
           </button>
 
-          <Link className="login-forgot" to="/register-select">Crear cuenta</Link>
+          <Link className="login-forgot" to="/register-select">
+            Crear cuenta
+          </Link>
 
           <a href="#" className="login-forgot">
             ¿Olvidaste tu contraseña?
