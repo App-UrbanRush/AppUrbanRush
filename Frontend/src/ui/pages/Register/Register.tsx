@@ -1,69 +1,59 @@
-import "../Register/Register.css";
-import axios from "axios";
+import "./Register.css";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { AuthRepositoryImpl } from "../../../infrastructure/repositories/AuthRepositoryImpl";
-import { RegisterUseCase } from "../../../application/use-cases/RegisterUseCase";
-import type { RegisterCredentials } from "../../../domain/types/auth.types";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import type { RegisterRequest } from "../../../domain/types/auth.types";
+
+// Validación con zod adaptada al nuevo DTO
+const registerSchema = z.object({
+  user_email: z.string().email("Email inválido"),
+  user_password: z.string().min(6, "Mínimo 6 caracteres"),
+  firstName: z.string().min(2, "Nombre requerido"),
+  firstLastName: z.string().min(2, "Apellido requerido"),
+  cellphone: z.string().min(7, "Celular requerido"),
+  address: z.string().min(5, "Dirección requerida"),
+  gender: z.string().min(1, "Género requerido"),
+  document_number: z.string().optional(),
+});
+
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 const Register = () => {
-  const { login: saveToken } = useAuth();
+  const { register: registerUser, isLoading, error: contextError } = useAuth();
   const navigate = useNavigate();
+  const [apiError, setApiError] = useState<string>("");
 
-  const [form, setForm] = useState<RegisterCredentials>({
-    user_email: "",
-    user_password: "",
-    firstName: "",
-    firstLastName: "",
-    cellphone: "",
-    address: "",
-    gender: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      setLoading(true);
+      setApiError("");
+      
+      const payload: RegisterRequest = {
+        ...data,
+      };
 
-      const authRepository = new AuthRepositoryImpl();
-      const registerUseCase = new RegisterUseCase(authRepository);
+      await registerUser(payload);
 
-      const res = await registerUseCase.execute(form);
-
-      saveToken(res.access_token);
       navigate("/dashboard");
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const message =
-          error.response?.data?.message || "Error en registro";
-
-        console.error("Axios error:", message);
-        alert(message);
-      } else {
-        console.error("Error desconocido:", error);
-        alert("Error inesperado");
-      }
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Error en registro";
+      setApiError(errorMsg);
     }
   };
 
   return (
     <div className="register-container">
-
-      {/* LEFT → FORM */}
       <div className="register-left">
         <motion.div
           className="register-card"
@@ -73,56 +63,77 @@ const Register = () => {
         >
           <h2>Crear cuenta</h2>
 
-          <form onSubmit={handleSubmit}>
+          {(apiError || contextError) && (
+            <div style={{ color: "red", marginBottom: "15px" }}>
+              {apiError || contextError}
+            </div>
+          )}
 
-            <input
-              name="user_email"
-              placeholder="Correo"
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              name="user_password"
-              type="password"
-              placeholder="Contraseña"
-              onChange={handleChange}
-              required
-            />
-
-            <div className="register-row">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="input-group">
               <input
-                name="firstName"
-                placeholder="Nombre"
-                onChange={handleChange}
+                {...register("user_email")}
+                type="email"
+                placeholder="Correo electrónico"
               />
-              <input
-                name="firstLastName"
-                placeholder="Apellido"
-                onChange={handleChange}
-              />
+              {errors.user_email && <span className="error">{errors.user_email.message}</span>}
             </div>
 
-            <input
-              name="cellphone"
-              placeholder="Celular"
-              onChange={handleChange}
-            />
+            <div className="input-group">
+              <input
+                {...register("user_password")}
+                type="password"
+                placeholder="Contraseña"
+              />
+              {errors.user_password && <span className="error">{errors.user_password.message}</span>}
+            </div>
 
-            <input
-              name="address"
-              placeholder="Dirección"
-              onChange={handleChange}
-            />
+            <div className="register-row">
+              <div className="input-group" style={{ flex: 1, marginRight: '10px' }}>
+                <input
+                  {...register("firstName")}
+                  placeholder="Nombre"
+                />
+                {errors.firstName && <span className="error">{errors.firstName.message}</span>}
+              </div>
+              <div className="input-group" style={{ flex: 1 }}>
+                <input
+                  {...register("firstLastName")}
+                  placeholder="Apellido"
+                />
+                {errors.firstLastName && <span className="error">{errors.firstLastName.message}</span>}
+              </div>
+            </div>
 
-            <input
-              name="gender"
-              placeholder="Género"
-              onChange={handleChange}
-            />
+            <div className="register-row">
+              <div className="register-input-group" style={{ flex: 1, marginRight: '10px' }}>
+                <input
+                  {...register("cellphone")}
+                  placeholder="Celular"
+                />
+                {errors.cellphone && <span className="error">{errors.cellphone.message}</span>}
+              </div>
+              <div className="register-input-group" style={{ flex: 1 }}>
+                <select {...register("gender")} defaultValue="">
+                  <option value="" disabled>Seleccione Género</option>
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
+                {errors.gender && <span className="error">{errors.gender.message}</span>}
+              </div>
+            </div>
 
-            <button disabled={loading}>
-              {loading ? "Creando..." : "Registrarse"}
+            <div className="input-group">
+              <input
+                {...register("address")}
+                placeholder="Dirección"
+              />
+              {errors.address && <span className="error">{errors.address.message}</span>}
+            </div>
+
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? "Creando..." : "Registrarse"}
             </button>
           </form>
 
@@ -132,7 +143,6 @@ const Register = () => {
         </motion.div>
       </div>
 
-      {/* RIGHT → IMAGE */}
       <div className="register-right">
         <img src="/delivery2.png" alt="delivery" />
 
@@ -140,7 +150,6 @@ const Register = () => {
           <img src="/Logo-png.png" alt="UrbanRush Logo" className="register-logo-img" />
         </div>
       </div>
-
     </div>
   );
 };

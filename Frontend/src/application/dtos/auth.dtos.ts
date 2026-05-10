@@ -1,22 +1,32 @@
-import { z } from "zod";
+/**
+ * APPLICATION LAYER - DTOs (Data Transfer Objects)
+ * Se usan para transferir datos entre las capas
+ */
 
-export const LoginDTOSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
-});
+export class LoginDto {
+  constructor(
+    public email: string,
+    public password: string
+  ) {}
+}
 
-export type LoginDTO = z.infer<typeof LoginDTOSchema>;
+export class RegisterDto {
+  constructor(
+    public email: string,
+    public password: string,
+    public name: string,
+    public role: string
+  ) {}
+}
 
-export const RegisterDTOSchema = z.object({
-  user_email: z.string().email("Email inválido"),
-  user_password: z.string().min(6, "Mínimo 6 caracteres"),
-  firstName: z.string().min(2, "Nombre requerido"),
-  firstLastName: z.string().min(2, "Apellido requerido"),
-  cellphone: z.string().min(7, "Teléfono inválido"),
-  address: z.string().min(5, "Dirección requerida"),
-  gender: z.string().min(1, "Género requerido"),
-  rolIds: z.array(z.number()).optional(),
-  document_number: z.string().optional(),
-});
-
-export type RegisterDTO = z.infer<typeof RegisterDTOSchema>;
+export class AuthResponseDto {
+  constructor(
+    public access_token: string,
+    public user: {
+      id: string;
+      email: string;
+      name: string;
+      role: string;
+    }
+  ) {}
+}

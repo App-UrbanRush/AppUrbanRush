@@ -1,22 +1,15 @@
-import type { IAuthRepository } from "../../domain/interfaces/AuthRepository";
-import type { LoginDTO } from "../dtos/auth.dtos";
-import type { AuthResponse } from "../../domain/types/auth.types";
+import type { IAuthRepository } from "../../domain/interfaces/IAuthRepository";
+import type { AuthResponse, LoginRequest } from "../../domain/types/auth.types";
 
 export class LoginUseCase {
-  authRepository: IAuthRepository;
+  private authRepository: IAuthRepository;
 
   constructor(authRepository: IAuthRepository) {
     this.authRepository = authRepository;
   }
 
-  async execute(credentials: LoginDTO): Promise<AuthResponse> {
-    const response = await this.authRepository.login({
-      user_email: credentials.email,
-      user_password: credentials.password,
-    });
-
-    this.authRepository.saveToken(response.access_token);
-
+  async execute(credentials: LoginRequest): Promise<AuthResponse> {
+    const response = await this.authRepository.login(credentials);
     return response;
   }
 }
