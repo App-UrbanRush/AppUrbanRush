@@ -474,6 +474,87 @@
   color: #555;
 }
 
+/* ERROR MESSAGE */
+.error-text {
+  color: red;
+  margin-bottom: 15px;
+}
+
+.error-box {
+  color: red;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 5px;
+}
+
+/* ROW LAYOUT */
+.delivery-register-row {
+  display: flex;
+  gap: 10px;
+}
+
+.delivery-register-row > * {
+  flex: 1;
+}
+
+/* VERIFICATION */
+.verification-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.verification-info-text {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+.file-upload-wrapper {
+  margin-bottom: 20px;
+}
+
+.file-upload-label {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.file-upload-input {
+  display: none;
+}
+
+/* BUTTONS */
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-secondary-style {
+  background-color: #ccc;
+  color: #333;
+}
+
+/* RESULT */
+.result-section {
+  text-align: center;
+}
+
+.result-title {
+  color: #4CAF50;
+  margin-bottom: 10px;
+}
+
+.result-message-style {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
 /* ===== 📱 RESPONSIVE ===== */
 @media (max-width: 900px) {
   .delivery-register-container {

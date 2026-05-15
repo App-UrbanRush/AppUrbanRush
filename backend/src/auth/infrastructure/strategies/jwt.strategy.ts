@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -6,17 +6,31 @@ import { IUserRepository } from 'src/user/domain/repositories/user.repository.in
 import { JWT_SECRET } from 'src/config/constants';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy) implements OnModuleInit {
   constructor(
-    @Inject('IUserRepository') // Usamos el puerto del dominio de User
+    @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
     private readonly configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>(JWT_SECRET)!,
+      secretOrKeyProvider: (_request, _rawJwtToken, done) => {
+        const secret = configService.get<string>(JWT_SECRET);
+        if (!secret) {
+          done(new Error('JWT_SECRET is not configured'), null);
+          return;
+        }
+        done(null, secret);
+      },
     });
+  }
+
+  onModuleInit() {
+    const secret = this.configService.get<string>(JWT_SECRET);
+    if (!secret) {
+      throw new Error('JWT_SECRET environment variable is required but not configured');
+    }
   }
 
   async validate(payload: any) {

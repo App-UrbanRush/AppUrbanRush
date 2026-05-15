@@ -14,6 +14,7 @@ export interface IUserRepository {
   saveUserRole(userRole: any): Promise<void>;
 
   savePeople(peopleData: any): Promise<any>;
+  findPeopleByDocumentNumber(documentNumber: string): Promise<any>;
 
   create(user: User, personData: any): Promise<User>;
 }

@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
+import { Mail, Lock, LogIn } from "lucide-react";
 
 // Validación con zod
 const loginSchema = z.object({
@@ -83,26 +84,33 @@ const Login = () => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="login-input-group">
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                {...register("email")}
-                type="email"
-                placeholder="Email"
-              />
+              <div className="login-input-wrapper">
+                <Mail className="login-input-icon" size={18} />
+                <motion.input
+                  whileFocus={{ scale: 1.02 }}
+                  {...register("email")}
+                  type="email"
+                  placeholder="     Email"
+                />
+              </div>
               {errors.email && <span>{errors.email.message}</span>}
             </div>
 
             <div className="login-input-group">
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                {...register("password")}
-                type="password"
-                placeholder="Contraseña"
-              />
+              <div className="login-input-wrapper">
+                <Lock className="login-input-icon" size={18} />
+                <motion.input
+                  whileFocus={{ scale: 1.02 }}
+                  {...register("password")}
+                  type="password"
+                  placeholder="     Contraseña"
+                />
+              </div>
               {errors.password && <span>{errors.password.message}</span>}
             </div>
 
             <button type="submit" disabled={isLoading} className="login-btn-primary">
+              <LogIn size={18} />
               {isLoading ? "Cargando..." : "Iniciar Sesión"}
             </button>
           </form>

@@ -4,6 +4,7 @@ export class User {
       public user_email: string,     
       public user_password?: string,  
       public roles: number[] = [],
+      public document_number?: string | null,
     ) {}
   
 }

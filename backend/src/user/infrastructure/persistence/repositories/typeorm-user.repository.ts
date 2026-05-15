@@ -28,6 +28,7 @@ export class TypeOrmUserRepository implements IUserRepository {
       const userEntity = queryRunner.manager.create(UserEntity, {
         user_email: user.user_email,
         user_password: user.user_password,
+        document_number: personData.document_number ?? null,
       });
       const savedUser = await queryRunner.manager.save(userEntity);
 
@@ -51,8 +52,9 @@ export class TypeOrmUserRepository implements IUserRepository {
 
       await queryRunner.commitTransaction();
 
-      // CORREGIDO PARA EVITAR TS2322 (Agregamos el !)
-      return UserMapper.toDomain(savedUser)!; 
+      const domainUser = UserMapper.toDomain(savedUser);
+      if (!domainUser) throw new Error('Failed to map saved user to domain');
+      return domainUser; 
 
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -131,5 +133,9 @@ export class TypeOrmUserRepository implements IUserRepository {
 
   async savePeople(peopleData: any): Promise<any> {
     return await this.peopleRepo.save(peopleData);
+  }
+
+  async findPeopleByDocumentNumber(documentNumber: string): Promise<any> {
+    return await this.peopleRepo.findOne({ where: { document_number: documentNumber } });
   }
 }

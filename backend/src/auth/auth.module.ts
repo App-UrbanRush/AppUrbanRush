@@ -12,6 +12,7 @@ import { RegisterCourierUseCase } from "./application/use-cases/register-courier
 import { CourierModule } from "src/courier/courier.module";
 import { RegisterVendorUseCase } from './application/use-cases/register-vendor.use-case';
 import { VendorModule } from 'src/vendor/vendor.module';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
     imports: [
@@ -29,6 +30,7 @@ import { VendorModule } from 'src/vendor/vendor.module';
         UserModule,
         CourierModule,
         VendorModule,
+        EmailModule,
     ],
     providers: [
         LoginUseCase,

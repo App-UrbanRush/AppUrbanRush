@@ -40,7 +40,7 @@ export class VerificationService {
     private readonly userRepository: Repository<UserEntity>,
   ) {
     const apiKey = this.configService.get<string>('GROQ_API_KEY') || process.env.GROQ_API_KEY || '';
-    this.logger.log(`GROQ API Key loaded: length=${apiKey.length}, startsWith=${apiKey.substring(0, 4)}`);
+    this.logger.log(`GROQ API Key configured: ${!!apiKey}`);
     this.groq = new Groq({
       apiKey: apiKey,
     });

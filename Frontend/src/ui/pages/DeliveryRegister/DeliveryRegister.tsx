@@ -138,7 +138,7 @@ const DeliveryRegister = () => {
               </div>
 
               {(apiError || contextError) && (
-                <div style={{ color: "red", marginBottom: "15px" }}>
+                <div className="error-text">
                   {apiError || contextError}
                 </div>
               )}
@@ -165,8 +165,8 @@ const DeliveryRegister = () => {
                   />
                   {errors.user_password && <span className="error-message">{errors.user_password}</span>}
 
-                  <div className="delivery-register-row" style={{ display: 'flex', gap: '10px' }}>
-                    <div style={{ flex: 1 }}>
+                  <div className="delivery-register-row">
+                    <div>
                       <input
                         name="firstName"
                         placeholder="Nombre"
@@ -175,7 +175,7 @@ const DeliveryRegister = () => {
                       />
                       {errors.firstName && <span className="error-message">{errors.firstName}</span>}
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div>
                       <input
                         name="firstLastName"
                         placeholder="Apellido"
@@ -186,8 +186,8 @@ const DeliveryRegister = () => {
                     </div>
                   </div>
 
-                  <div className="delivery-register-row" style={{ display: 'flex', gap: '10px' }}>
-                    <div style={{ flex: 1 }}>
+                  <div className="delivery-register-row">
+                    <div>
                       <input
                         name="cellphone"
                         placeholder="Celular"
@@ -196,7 +196,7 @@ const DeliveryRegister = () => {
                       />
                       {errors.cellphone && <span className="error-message">{errors.cellphone}</span>}
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div>
                       <select name="gender" value={form.gender} onChange={handleChange}>
                         <option value="" disabled>Género</option>
                         <option value="M">Masculino</option>
@@ -215,8 +215,8 @@ const DeliveryRegister = () => {
                   />
                   {errors.address && <span className="error-message">{errors.address}</span>}
 
-                  <div className="delivery-register-row" style={{ display: 'flex', gap: '10px' }}>
-                    <div style={{ flex: 1 }}>
+                  <div className="delivery-register-row">
+                    <div>
                       <input
                         name="document_number"
                         placeholder="Número de Cédula"
@@ -225,7 +225,7 @@ const DeliveryRegister = () => {
                       />
                       {errors.document_number && <span className="error-message">{errors.document_number}</span>}
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div>
                       <input
                         name="birthDate"
                         type="date"
@@ -296,27 +296,18 @@ const DeliveryRegister = () => {
               </div>
 
               {apiError && (
-                <div style={{ color: "red", marginBottom: "15px", padding: "10px", backgroundColor: "#ffebee", borderRadius: "5px" }}>
+                <div className="error-box">
                   {apiError}
                 </div>
               )}
 
-              <div className="verification-section" style={{ textAlign: "center", marginBottom: "20px" }}>
-                <p style={{ marginBottom: "15px", fontSize: "14px", color: "#666" }}>
+              <div className="verification-section">
+                <p className="verification-info-text">
                   Para garantizar la seguridad de nuestra plataforma, validaremos tus datos contra tu cédula de ciudadanía.
                 </p>
 
-                <div className="file-upload-wrapper" style={{ marginBottom: "20px" }}>
-                  <label htmlFor="cedula-upload" style={{
-                    display: "inline-block",
-                    padding: "10px 20px",
-                    backgroundColor: "#f0f0f0",
-                    border: "2px dashed #ccc",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    width: "100%",
-                    boxSizing: "border-box"
-                  }}>
+                <div className="file-upload-wrapper">
+                  <label htmlFor="cedula-upload" className="file-upload-label">
                     {documentImage ? `📸 ${documentImage.name}` : "📸 Subir foto frontal de la Cédula"}
                   </label>
                   <input
@@ -324,16 +315,15 @@ const DeliveryRegister = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
-                    style={{ display: "none" }}
+                    className="file-upload-input"
                   />
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "10px" }}>
+              <div className="button-group">
                 <button 
                   onClick={() => setStep("form")} 
-                  className="delivery-register-btn"
-                  style={{ backgroundColor: "#ccc", color: "#333" }}
+                  className="delivery-register-btn btn-secondary-style"
                   disabled={isVerifying || isLoading}
                 >
                   Volver
@@ -351,12 +341,10 @@ const DeliveryRegister = () => {
 
           {/* RESULTADO */}
           {step === "result" && (
-            <div style={{ textAlign: "center" }}>
-              <h2 style={{ color: "#4CAF50", marginBottom: "10px" }}>¡Registro exitoso!</h2>
-              <p style={{ fontSize: "16px", marginBottom: "20px" }}>
-                Tu identidad fue verificada correctamente y tu cuenta ha sido creada.
-                Actualmente se encuentra en revisión.
-              </p>
+            <div className="result-section">
+              <h2 className="result-title">¡Registro exitoso!</h2>
+              <p className="result-message-style">
+                Tu identidad fue verificada correctamente. Cuenta creada exitosamente.</p>
               <button 
                 onClick={() => navigate("/")} 
                 className="delivery-register-btn"
