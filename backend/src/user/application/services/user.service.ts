@@ -3,6 +3,7 @@ import { IUserRepository } from '../../domain/repositories/user.repository.inter
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { User } from '../../domain/entities/user.model';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -15,10 +16,12 @@ export class UserService {
     if (existe) throw new BadRequestException('El correo ya existe');
 
     // Creamos la instancia del modelo de dominio
+    const hashedPassword = await bcrypt.hash(dto.user_password, 10);
+
     const newUser = new User(
-      null, // ID nulo porque es nuevo
+      null,
       dto.user_email,
-      dto.user_password
+      hashedPassword
     );
 
     const savedUser = await this._userRepository.save(newUser);
@@ -73,7 +76,7 @@ export class UserService {
     // Actualizamos los campos básicos en el objeto de dominio
     // (Asegúrate de que en user.model.ts no sean 'readonly')
     if (dto.user_email) usuario.user_email = dto.user_email;
-    if (dto.user_password) usuario.user_password = dto.user_password;
+    if (dto.user_password) usuario.user_password = await bcrypt.hash(dto.user_password, 10);
 
     await this._userRepository.save(usuario);
     return 'Usuario actualizado correctamente';

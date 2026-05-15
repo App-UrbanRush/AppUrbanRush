@@ -55,13 +55,13 @@ export class RegisterCourierUseCase {
       vehicle_type: dto.vehicle_type,
       vehicle_plate: dto.vehicle_plate,
       soat_number: dto.soat_number,
-      status: 'PENDING' // Por defecto entra a revisión
+      status: 'VERIFIED'
     };
 
     await this.courierRepository.save(courierData);
 
     return {
-      message: 'Registro de repartidor exitoso. Tu cuenta está en revisión.',
+      message: 'Registro de repartidor exitoso.',
       user_id: savedUser.user_id,
     };
   }

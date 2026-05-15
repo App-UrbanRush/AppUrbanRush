@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { CourierModule } from './courier/courier.module';
 import { VerificationModule } from './verification/verification.module';
 import { VendorModule } from './vendor/vendor.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { VendorModule } from './vendor/vendor.module';
     CourierModule,
     VerificationModule,
     VendorModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

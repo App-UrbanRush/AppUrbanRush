@@ -117,7 +117,7 @@ const [state, setState] = useState<AuthState>({
         setState((prev) => ({
           ...prev,
           user: response.user,
-          isAuthenticated: true,
+          isAuthenticated: false,
           isLoading: false,
           error: null,
         }));

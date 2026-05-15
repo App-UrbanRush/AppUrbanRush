@@ -9,13 +9,13 @@ export class CourierEntity {
   @Column({ type: 'varchar' })
   vehicle_type: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   vehicle_plate: string | null;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   soat_number: string | null;
 
-  @Column({ type: 'varchar', default: 'PENDING' })
+  @Column({ type: 'varchar', default: 'VERIFIED' })
   status: string;
 
   @OneToOne(() => UserEntity)

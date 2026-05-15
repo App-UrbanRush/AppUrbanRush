@@ -13,7 +13,7 @@ export interface AuthContextType extends AuthState {
   registerDelivery: (data: RegisterDeliveryRequest) => Promise<void>;
   verifyDocument: (image: File, data: VerifyDocumentRequest) => Promise<VerificationResult>;
 
-  logout: () => void;
+  logout: () => Promise<void>;
 
   isLoading: boolean;
   error: string | null;

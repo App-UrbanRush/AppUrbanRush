@@ -25,7 +25,7 @@ export class UserEntity {
   @Column({
     type: 'enum',
     enum: VerificationStatus,
-    default: VerificationStatus.PENDING,
+    default: VerificationStatus.VERIFIED,
     nullable: true,
   })
   verification_status: VerificationStatus;

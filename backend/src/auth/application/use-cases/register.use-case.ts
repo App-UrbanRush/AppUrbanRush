@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { IUserRepository } from '../../../user/domain/repositories/user.repository.interface';
 import { CreateFullUserDto } from '../dtos/register/create-full-user.dto';
 import { User } from '../../../user/domain/entities/user.model';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class RegisterUseCase {
@@ -11,6 +12,7 @@ export class RegisterUseCase {
     @Inject('IUserRepository') 
     private readonly _userRepository: IUserRepository,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   async execute(userData: CreateFullUserDto): Promise<{ message: string; token: string }> {
@@ -26,7 +28,9 @@ export class RegisterUseCase {
     const userDomain = new User(
       null,
       userData.user_email,
-      hashedPassword
+      hashedPassword,
+      [],
+      userData.document_number,
     );
 
     // Guardar usuario (retorna el usuario con su nuevo ID)
@@ -54,6 +58,9 @@ export class RegisterUseCase {
       user_email: newUser.user_email,
       rolIds: [rol.rol_id]
     };
+
+    // Enviar email de bienvenida
+    await this.emailService.sendWelcomeEmail(userData.user_email, userData.firstName);
 
     return {
       message: 'Usuario registrado exitosamente',

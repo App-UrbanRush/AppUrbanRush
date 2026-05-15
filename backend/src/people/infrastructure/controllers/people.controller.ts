@@ -1,13 +1,14 @@
-import { Body, Controller, Get, Param, Put, Req } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, Param, Put, Req, UseGuards } from "@nestjs/common";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { AuthGuard } from "@nestjs/passport";
 import { UpdatePeopleDto } from "src/people/application/dtos/update-people.dto";
 import { PeopleService } from "src/people/application/services/people.service";
-import { User } from "src/user/domain/entities/user.model";
-
 
 
 @ApiTags('people')
+@ApiBearerAuth()
 @Controller('people')
+@UseGuards(AuthGuard('jwt'))
 export class PeopleController {
   constructor(private readonly _peopleService: PeopleService) {}
 

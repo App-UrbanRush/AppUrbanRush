@@ -1,5 +1,6 @@
 import { People } from 'src/people/domain/entities/people.model';
 import { PeopleEntity } from '../entities/people.entity';
+import { UserEntity } from 'src/user/infrastructure/persistence/entities/user.entity';
 
 
 export class PeopleMapper {
@@ -24,7 +25,9 @@ export class PeopleMapper {
     entity.cellphone = domain.cellphone;
     entity.address = domain.address;
     entity.gender = domain.gender;
-    // La relación se maneja usualmente por ID en la entidad
+    if (domain.userId) {
+      entity.user = { user_id: domain.userId } as UserEntity;
+    }
     return entity;
   }
 }

@@ -132,6 +132,14 @@ const Register = () => {
               {errors.address && <span className="error">{errors.address.message}</span>}
             </div>
 
+            <div className="input-group">
+              <input
+                {...register("document_number")}
+                placeholder="Número de documento"
+              />
+              {errors.document_number && <span className="error">{errors.document_number.message}</span>}
+            </div>
+
             <button type="submit" disabled={isLoading}>
               {isLoading ? "Creando..." : "Registrarse"}
             </button>

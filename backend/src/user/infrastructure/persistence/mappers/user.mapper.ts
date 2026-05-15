@@ -14,7 +14,8 @@ export class UserMapper {
       entity.user_id,
       entity.user_email,
       entity.user_password,
-      rolIds as any // Lo pasamos al array de roles del dominio
+      rolIds as any,
+      entity.document_number,
     );
   }
 
@@ -30,6 +31,10 @@ export class UserMapper {
     
     if (domain.user_password) {
         entity.user_password = domain.user_password;
+    }
+
+    if (domain.document_number) {
+        entity.document_number = domain.document_number;
     }
     
     return entity;
