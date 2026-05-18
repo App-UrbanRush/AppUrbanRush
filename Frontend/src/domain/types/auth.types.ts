@@ -28,7 +28,6 @@ export interface RegisterRequest {
   cellphone: string;
   address: string;
   gender: string;
-  document_number?: string;
   rolIds?: number[];
 }
 
@@ -40,7 +39,15 @@ export interface AuthState {
   error: string | null;
 }
 
-export interface RegisterDeliveryRequest extends RegisterRequest {
+export interface RegisterDeliveryRequest {
+  user_email: string;
+  user_password: string;
+  firstName: string;
+  firstLastName: string;
+  cellphone: string;
+  address: string;
+  gender: string;
+  document_number: string;
   vehicle_type: string;
   vehicle_plate: string;
   soat_number: string;

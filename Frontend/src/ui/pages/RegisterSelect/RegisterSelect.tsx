@@ -11,9 +11,11 @@ const RegisterSelect = () => {
       {/* LEFT → IMAGEN */}
       <div className="rselect-left">
         <img src="/delivery2.png" alt="delivery" />
-        <div className="rselect-overlay">
-          <img src="/Logo-png.png" alt="UrbanRush Logo" className="rselect-logo-img" />
-        </div>
+      </div>
+
+      {/* OVERLAY CON LOGO */}
+      <div className="rselect-overlay">
+        <img src="/Logo-png.png" alt="UrbanRush Logo" className="rselect-logo-img" />
       </div>
 
       {/* RIGHT → SELECCIÓN */}
@@ -59,11 +61,26 @@ const RegisterSelect = () => {
               <span className="rselect-arrow">→</span>
             </motion.div>
 
+            {/* OPCIÓN NEGOCIO/RESTAURANTE */}
+            <motion.div
+              className="rselect-option rselect-option--vendor"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate("/register-vendor")}
+            >
+              <div className="rselect-icon">🏪</div>
+              <div className="rselect-info">
+                <h3>Negocio / Restaurante</h3>
+                <p>Registra tu negocio y vende en UrbanRush</p>
+              </div>
+              <span className="rselect-arrow">→</span>
+            </motion.div>
+
           </div>
 
           <p className="rselect-login-link">
             ¿Ya tienes cuenta?{" "}
-            <span onClick={() => navigate("/")}>Inicia sesión</span>
+            <button type="button" className="rselect-login-link-btn" onClick={() => navigate("/")}>Inicia sesión</button>
           </p>
         </motion.div>
       </div>

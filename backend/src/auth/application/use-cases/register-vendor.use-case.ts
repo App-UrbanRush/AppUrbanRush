@@ -15,16 +15,13 @@ export class RegisterVendorUseCase {
   ) {}
 
   async execute(dto: RegisterVendorDto) {
-    // 1. Validar si el correo ya existe
     const existingUser = await this.userRepository.findOneByEmail(dto.user_email);
     if (existingUser) {
       throw new BadRequestException('El correo electrónico ya está registrado');
     }
 
-    // 2. Encriptar contraseña
     const hashedPassword = await bcrypt.hash(dto.user_password, 10);
 
-    // 3. Crear usuario con rol Empresa (ID: 4)
     const newUser = new User(
       null,
       dto.user_email,
@@ -32,24 +29,21 @@ export class RegisterVendorUseCase {
       [4],
     );
 
-    // 4. Datos de la persona
     const personData = {
       firstName: dto.firstName,
       firstLastName: dto.firstLastName,
       document_number: dto.document_number,
       cellphone: dto.cellphone,
-      address: dto.address,
+      address: dto.business_address,
       gender: dto.gender,
     };
 
-    // 5. Guardar usuario y persona
     const savedUser = await this.userRepository.create(newUser, personData);
 
     if (!savedUser.user_id) {
       throw new Error('Error al recuperar el ID del usuario creado');
     }
 
-    // 6. Guardar datos del negocio en tabla vendors
     await this.vendorRepository.save({
       user_id: savedUser.user_id,
       business_name: dto.business_name,
@@ -57,7 +51,7 @@ export class RegisterVendorUseCase {
       address: dto.business_address,
       phone: dto.business_phone,
       description: dto.description ?? null,
-      status: 'APPROVED',
+      status: 'VERIFIED',
     });
 
     return {

@@ -27,6 +27,28 @@
   margin-bottom: 20px;
 }
 
+.back-btn {
+  background: linear-gradient(135deg, #ff7a00, #e96d00);
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 18px;
+  border-radius: 25px;
+  transition: all 0.3s;
+  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 122, 0, 0.5);
+}
+
 /* INPUTS */
 .register-card input {
   width: 100%;
@@ -48,7 +70,7 @@
 }
 
 /* BOTÓN */
-.register-card button {
+.register-card button:not(.back-btn) {
   width: 100%;
   padding: 12px;
   background: #ff7a00;
@@ -59,7 +81,7 @@
   transition: 0.3s;
 }
 
-.register-card button:hover {
+.register-card button:not(.back-btn):hover {
   background: #e96d00;
 }
 
@@ -153,4 +175,83 @@
     background: rgba(255, 255, 255, 0.9);
     padding: 20px;
   }
+}
+
+.register-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: registerFadeIn 0.3s ease;
+}
+
+@keyframes registerFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.register-success-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 35px;
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: registerSlideUp 0.4s ease;
+}
+
+@keyframes registerSlideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.register-success-icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #ff7a00, #ff8c00);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 36px;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 8px 25px rgba(255, 122, 0, 0.4);
+}
+
+.register-success-modal h3 {
+  font-size: 22px;
+  color: #1a1a2e;
+  margin: 0 0 10px;
+}
+
+.register-success-modal p {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 25px;
+  line-height: 1.5;
+}
+
+.register-success-btn {
+  width: 100%;
+  padding: 14px;
+  background: #ff7a00;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.register-success-btn:hover {
+  background: #e96d00;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 122, 0, 0.4);
 }
