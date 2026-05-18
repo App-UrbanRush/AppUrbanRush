@@ -23,6 +23,7 @@ const DeliveryRegister = () => {
   const [apiError, setApiError] = useState<string>("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [documentImage, setDocumentImage] = useState<File | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [form, setForm] = useState<RegisterDeliveryRequest>({
     user_email: "",
@@ -108,7 +109,7 @@ const DeliveryRegister = () => {
       }
 
       await registerDelivery(form);
-      setStep("result");
+      setShowSuccess(true);
     } catch (error: unknown) {
       // Axios error has response.data.message sometimes
       const errorMsg = (error as { response?: { data?: { message?: string } }; message?: string }).response?.data?.message || (error as { message?: string }).message || "Error en el proceso";
@@ -118,8 +119,25 @@ const DeliveryRegister = () => {
     }
   };
 
+  const handleSuccessConfirm = () => {
+    setShowSuccess(false);
+    navigate("/dashboard");
+  };
+
   return (
     <div className="delivery-register-container">
+      {showSuccess && (
+        <div className="delivery-success-overlay">
+          <div className="delivery-success-modal">
+            <div className="delivery-success-icon">✓</div>
+            <h3>¡Registro exitoso!</h3>
+            <p>Tu identidad fue verificada correctamente. Cuenta creada exitosamente.</p>
+            <button className="delivery-success-btn" onClick={handleSuccessConfirm}>
+              Ir al Panel de Control
+            </button>
+          </div>
+        </div>
+      )}
       <div className="delivery-register-left">
         <img src="/Logo-png.png" alt="UrbanRush Logo" className="mobile-logo-form" />
 
@@ -132,6 +150,10 @@ const DeliveryRegister = () => {
           {/* PASO 1: FORMULARIO */}
           {step === "form" && (
             <>
+              <button className="delivery-back-btn" onClick={() => navigate("/register-select")}>
+                ← Volver
+              </button>
+
               <div className="delivery-register-header">
                 <h2>Registro de Domiciliario</h2>
                 <p>Paso 1 de 2 — Información personal y vehículo</p>
@@ -337,21 +359,6 @@ const DeliveryRegister = () => {
                 </button>
               </div>
             </>
-          )}
-
-          {/* RESULTADO */}
-          {step === "result" && (
-            <div className="result-section">
-              <h2 className="result-title">¡Registro exitoso!</h2>
-              <p className="result-message-style">
-                Tu identidad fue verificada correctamente. Cuenta creada exitosamente.</p>
-              <button 
-                onClick={() => navigate("/")} 
-                className="delivery-register-btn"
-              >
-                Ir al inicio de sesión
-              </button>
-            </div>
           )}
         </motion.div>
       </div>

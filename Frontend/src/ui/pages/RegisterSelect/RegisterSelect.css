@@ -15,18 +15,23 @@
   object-fit: cover;
   object-position: center;
 }
+/* OVERLAY CON LOGO */
 .rselect-overlay {
   position: absolute;
   inset: 0;
+  width: 50%;
   background: linear-gradient(rgba(0, 255, 85, 0.377), rgba(255, 140, 0, 0.473));
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  z-index: 1;
 }
 .rselect-logo-img {
   width: 460px;
   height: 460px;
   object-fit: contain;
+  margin-bottom: 20px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
@@ -78,12 +83,12 @@
 
 /* USUARIO — naranja */
 .rselect-option--user {
-  background: #f0f5ff;
-  border-color: #6c8ed6;
+  background: #fff5eb;
+  border-color: #fbbf24;
 }
 .rselect-option--user:hover {
-  border-color: #0011ff;
-  box-shadow: 0 4px 20px rgba(4, 0, 255, 0.315);
+  border-color: #ff7a00;
+  box-shadow: 0 4px 20px rgba(255, 122, 0, 0.2);
 }
 .rselect-option--user .rselect-icon {
   background: linear-gradient(135deg, #ffae00, #ffa600);
@@ -103,6 +108,20 @@
   background: linear-gradient(135deg, #8b5cf6, #6d28d9);
 }
 .rselect-option--delivery h3 { color: #7c3aed; }
+
+/* NEGOCIO/VENDOR — azul corporativo */
+.rselect-option--vendor {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+.rselect-option--vendor:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+}
+.rselect-option--vendor .rselect-icon {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+.rselect-option--vendor h3 { color: #1d4ed8; }
 
 /* ICONO */
 .rselect-icon {
@@ -138,16 +157,24 @@
 
 /* LINK */
 .rselect-login-link {
-  font-size: 13px;
+  font-size: 14px;
   color: #888;
+  margin-top: 5px;
 }
-.rselect-login-link span {
+.rselect-login-link-btn {
+  background: none;
+  border: none;
   color: #ff6a00;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: all 0.2s;
 }
-.rselect-login-link span:hover {
+.rselect-login-link-btn:hover {
   text-decoration: underline;
+  color: #e96d00;
 }
 
 /* RESPONSIVE */
@@ -163,6 +190,21 @@
     z-index: 0;
   }
   .rselect-left img { filter: brightness(0.7); }
+  .rselect-overlay {
+    z-index: 10;
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 20px;
+    height: 220px;
+    background: linear-gradient(rgba(0, 255, 85, 0.377), rgba(255, 140, 0, 0.2));
+  }
+  .rselect-logo-img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    margin-bottom: 0;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
   .rselect-right {
     position: relative;
     z-index: 2;
@@ -174,8 +216,15 @@
     backdrop-filter: blur(20px);
     background: rgba(255, 255, 255, 0.95);
     padding: 30px 25px;
+    margin-top: 240px;
   }
-  .rselect-logo-img { width: 180px; height: 180px; }
+  .rselect-logo-img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
 }
 
 @media (max-width: 480px) {

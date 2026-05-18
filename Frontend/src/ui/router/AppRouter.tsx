@@ -4,6 +4,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Register from "../pages/Register/Register";
 import DeliveryRegister from "../pages/DeliveryRegister/DeliveryRegister";
 import RegisterSelect from "../pages/RegisterSelect/RegisterSelect";
+import VendorRegister from "../pages/VendorRegister/VendorRegister";
 import PrivateRoute from "../components/PrivateRoute";
 
 const AppRouter = () => {
@@ -14,6 +15,7 @@ const AppRouter = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/register-delivery" element={<DeliveryRegister />} />
         <Route path="/register-select" element={<RegisterSelect />} />
+        <Route path="/register-vendor" element={<VendorRegister />} />
         <Route
           path="/dashboard"
           element={

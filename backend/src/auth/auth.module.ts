@@ -16,7 +16,6 @@ import { EmailModule } from 'src/email/email.module';
 
 @Module({
     imports: [
-        // ConfigModule.forRoot() suele ir solo en el AppModule, aquí no es necesario
         PassportModule,
         JwtModule.registerAsync({
             imports: [ConfigModule],
@@ -41,6 +40,6 @@ import { EmailModule } from 'src/email/email.module';
         RegisterVendorUseCase,
     ],
     controllers: [AuthController],
-    exports: [RolesGuard, JwtStrategy, PassportModule], 
+    exports: [RolesGuard, JwtStrategy, PassportModule, JwtModule], 
 })
 export class AuthModule { }

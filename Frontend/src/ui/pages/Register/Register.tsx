@@ -17,7 +17,6 @@ const registerSchema = z.object({
   cellphone: z.string().min(7, "Celular requerido"),
   address: z.string().min(5, "Dirección requerida"),
   gender: z.string().min(1, "Género requerido"),
-  document_number: z.string().optional(),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -26,6 +25,7 @@ const Register = () => {
   const { register: registerUser, isLoading, error: contextError } = useAuth();
   const navigate = useNavigate();
   const [apiError, setApiError] = useState<string>("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const {
     register,
@@ -44,16 +44,33 @@ const Register = () => {
       };
 
       await registerUser(payload);
-
-      navigate("/dashboard");
+      setShowSuccess(true);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "Error en registro";
       setApiError(errorMsg);
     }
   };
 
+  const handleSuccessConfirm = () => {
+    setShowSuccess(false);
+    navigate("/dashboard");
+  };
+
   return (
     <div className="register-container">
+      {showSuccess && (
+        <div className="register-success-overlay">
+          <div className="register-success-modal">
+            <div className="register-success-icon">✓</div>
+            <h3>¡Registro exitoso!</h3>
+            <p>Tu cuenta ha sido creada correctamente.</p>
+            <button className="register-success-btn" onClick={handleSuccessConfirm}>
+              Ir al panel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="register-left">
         <motion.div
           className="register-card"
@@ -61,6 +78,10 @@ const Register = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
+          <button className="back-btn" onClick={() => navigate("/register-select")}>
+            ← Volver
+          </button>
+
           <h2>Crear cuenta</h2>
 
           {(apiError || contextError) && (
@@ -130,14 +151,6 @@ const Register = () => {
                 placeholder="Dirección"
               />
               {errors.address && <span className="error">{errors.address.message}</span>}
-            </div>
-
-            <div className="input-group">
-              <input
-                {...register("document_number")}
-                placeholder="Número de documento"
-              />
-              {errors.document_number && <span className="error">{errors.document_number.message}</span>}
             </div>
 
             <button type="submit" disabled={isLoading}>
