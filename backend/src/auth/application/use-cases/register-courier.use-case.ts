@@ -24,6 +24,13 @@ export class RegisterCourierUseCase {
       throw new BadRequestException('El correo electrónico ya está registrado');
     }
 
+    if (dto.document_number) {
+      const existingDocument = await this.userRepository.findOneByDocumentNumber(dto.document_number);
+      if (existingDocument) {
+        throw new BadRequestException('El número de documento ya está registrado');
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(dto.user_password, 10);
 
     const newUser = new User(
@@ -40,6 +47,8 @@ export class RegisterCourierUseCase {
       cellphone: dto.cellphone,
       address: dto.address,
       gender: dto.gender,
+      expedition_date: dto.expedition_date,
+      expedition_place: dto.expedition_place,
     };
 
     const savedUser = await this.userRepository.create(newUser, personData);

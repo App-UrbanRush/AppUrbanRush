@@ -4,6 +4,8 @@ export interface RegisterVendorRequest {
   firstName: string;
   firstLastName: string;
   document_number: string;
+  expedition_date?: string;
+  expedition_place?: string;
   cellphone: string;
   gender: string;
   business_name: string;

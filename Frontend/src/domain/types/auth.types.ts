@@ -51,6 +51,7 @@ export interface RegisterDeliveryRequest {
   vehicle_type: string;
   vehicle_plate: string;
   soat_number: string;
-  birthDate?: string;
+  expedition_date?: string;
+  expedition_place?: string;
 }
 

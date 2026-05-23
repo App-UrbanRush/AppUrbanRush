@@ -28,11 +28,12 @@ async verifyDocument(
     cedula: string;
     firstName: string;
     firstLastName: string;
-    birthDate: string;
+    expeditionDate: string;
+    expeditionPlace: string;
   },
 ) {
-  if (!images || images.length === 0) {
-    throw new BadRequestException('Debes subir al menos una foto de tu cédula');
+  if (!images || images.length < 2) {
+    throw new BadRequestException('Debes subir las dos caras de tu cédula (frontal y reverso)');
   }
 
   // Sin userId — no guarda nada en BD todavía

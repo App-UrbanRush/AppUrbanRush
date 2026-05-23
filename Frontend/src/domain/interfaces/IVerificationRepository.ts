@@ -7,5 +7,5 @@
 import type { VerifyDocumentRequest, VerificationResult } from "../types/verification.types";
 
 export interface IVerificationRepository {
-  verifyDocument(image: File, data: VerifyDocumentRequest): Promise<VerificationResult>;
+  verifyDocument(images: File[], data: VerifyDocumentRequest): Promise<VerificationResult>;
 }

@@ -22,10 +22,12 @@ const DeliveryRegister = () => {
   const [step, setStep] = useState<Step>("form");
   const [apiError, setApiError] = useState<string>("");
   const [isVerifying, setIsVerifying] = useState(false);
-  const [documentImage, setDocumentImage] = useState<File | null>(null);
+  const [documentImages, setDocumentImages] = useState<File[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<string>("");
+  const [isVerified, setIsVerified] = useState(false);
 
-  const [form, setForm] = useState<RegisterDeliveryRequest>({
+  const [form, setForm] = useState<RegisterDeliveryRequest & { city?: string }>({
     user_email: "",
     user_password: "",
     firstName: "",
@@ -37,7 +39,9 @@ const DeliveryRegister = () => {
     vehicle_type: "",
     vehicle_plate: "",
     soat_number: "",
-    birthDate: "",
+    expedition_date: "",
+    expedition_place: "",
+    city: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -55,8 +59,11 @@ const DeliveryRegister = () => {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setDocumentImage(e.target.files[0]);
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setDocumentImages(files);
+      setVerificationMessage("");
+      setIsVerified(false);
     }
   };
 
@@ -73,7 +80,8 @@ const DeliveryRegister = () => {
     if (!form.vehicle_type) newErrors.vehicle_type = "Requerido";
     if (!form.vehicle_plate) newErrors.vehicle_plate = "Requerido";
     if (!form.soat_number) newErrors.soat_number = "Requerido";
-    if (!form.birthDate) newErrors.birthDate = "Requerido";
+    if (!form.expedition_date) newErrors.expedition_date = "Requerido";
+    if (!form.city) newErrors.city = "Requerido";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -88,32 +96,47 @@ const DeliveryRegister = () => {
   };
 
   const handleVerifyAndRegister = async () => {
-    if (!documentImage) {
-      setApiError("Debes subir una foto de tu cédula para continuar");
+    if (documentImages.length === 0) {
+      setApiError("Debes subir las fotos de tu cédula (frontal y reverso) para continuar");
+      return;
+    }
+
+    if (documentImages.length < 2) {
+      setApiError("Debes subir las dos caras de tu cédula (frontal y reverso)");
       return;
     }
 
     try {
       setApiError("");
+      setVerificationMessage("");
       setIsVerifying(true);
 
-      const verificationResult = await verifyDocument(documentImage, {
+      const verificationResult = await verifyDocument(documentImages, {
         cedula: form.document_number || "",
         firstName: form.firstName,
         firstLastName: form.firstLastName,
-        birthDate: form.birthDate || "",
+        expeditionDate: form.expedition_date || "",
+        expeditionPlace: form.city || "",
       });
 
-      if (!verificationResult.verified) {
-        throw new Error(`Verificación fallida: ${verificationResult.mismatches.join(", ")}`);
+      if (verificationResult.verified) {
+        setIsVerified(true);
+        setVerificationMessage("✅ Documento verificado correctamente");
+        const { city: cityField, ...rest } = form;
+        const registerData = {
+          ...rest,
+          expedition_place: cityField || "",
+        };
+        await registerDelivery(registerData);
+        setShowSuccess(true);
+      } else {
+        setIsVerified(false);
+        setVerificationMessage(`❌ ${verificationResult.message}`);
       }
-
-      await registerDelivery(form);
-      setShowSuccess(true);
     } catch (error: unknown) {
-      // Axios error has response.data.message sometimes
       const errorMsg = (error as { response?: { data?: { message?: string } }; message?: string }).response?.data?.message || (error as { message?: string }).message || "Error en el proceso";
-      setApiError(errorMsg);
+      setIsVerified(false);
+      setVerificationMessage(`❌ ${errorMsg}`);
     } finally {
       setIsVerifying(false);
     }
@@ -249,15 +272,22 @@ const DeliveryRegister = () => {
                     </div>
                     <div>
                       <input
-                        name="birthDate"
+                        name="expedition_date"
                         type="date"
-                        title="Fecha de Nacimiento"
-                        value={form.birthDate}
+                        placeholder="Fecha de Expedición"
+                        value={form.expedition_date}
                         onChange={handleChange}
                       />
-                      {errors.birthDate && <span className="error-message">{errors.birthDate}</span>}
+                      {errors.expedition_date && <span className="error-message">{errors.expedition_date}</span>}
                     </div>
                   </div>
+                  <input
+                    name="city"
+                    placeholder="Ciudad de expedición"
+                    value={form.city}
+                    onChange={handleChange}
+                  />
+          {errors.city && <span className="error-message">{errors.city}</span>}
                 </div>
 
                 <div className="form-section">
@@ -325,24 +355,39 @@ const DeliveryRegister = () => {
 
               <div className="verification-section">
                 <p className="verification-info-text">
-                  Para garantizar la seguridad de nuestra plataforma, validaremos tus datos contra tu cédula de ciudadanía.
+                  Para garantizar la seguridad de nuestra plataforma, validaremos tus datos contra tu cédula de ciudadanía. Sube las dos caras del documento.
                 </p>
 
                 <div className="file-upload-wrapper">
                   <label htmlFor="cedula-upload" className="file-upload-label">
-                    {documentImage ? `📸 ${documentImage.name}` : "📸 Subir foto frontal de la Cédula"}
+                    {documentImages.length > 0 
+                      ? `📸 ${documentImages.map(f => f.name).join(", ")}` 
+                      : "📸 Subir las dos caras de la Cédula"}
                   </label>
                   <input
                     id="cedula-upload"
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleImageChange}
                     className="file-upload-input"
                   />
                 </div>
-              </div>
+                
+        {documentImages.length > 0 && documentImages.length < 2 && (
+          <p className="error-message" style={{ marginTop: "8px" }}>
+            Debes subir las dos caras del documento
+          </p>
+        )}
 
-              <div className="button-group">
+        {verificationMessage && (
+          <div className={`doc-result ${isVerified ? 'verified' : 'rejected'}`}>
+            {verificationMessage}
+          </div>
+        )}
+      </div>
+
+      <div className="button-group">
                 <button 
                   onClick={() => setStep("form")} 
                   className="delivery-register-btn btn-secondary-style"

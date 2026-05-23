@@ -12,7 +12,8 @@ interface DocumentFormData {
   cedula: string;
   firstName: string;
   firstLastName: string;
-  birthDate: string;
+  expeditionDate: string;
+  expeditionPlace: string;
 }
 
 export interface VerificationResult {
@@ -23,7 +24,8 @@ export interface VerificationResult {
     cedula?: string;
     firstName?: string;
     firstLastName?: string;
-    birthDate?: string;
+    expeditionDate?: string;
+    expeditionPlace?: string;
   };
   mismatches: string[];
   message: string;
@@ -52,13 +54,18 @@ export class VerificationService {
     userId: number | null,
   ): Promise<VerificationResult> {
     try {
-      // 1. Convertir primera imagen a base64
-      const image = images[0];
-      const base64Image = image.buffer.toString('base64');
-      const mimeType = image.mimetype;
+      // 1. Convertir primera imagen a base64 (frontal)
+      const frontImage = images[0];
+      const frontBase64 = frontImage.buffer.toString('base64');
+      const frontMimeType = frontImage.mimetype;
 
-      // 2. Llamar a Groq con visión
-      const response = await this.groq.chat.completions.create({
+      // 2. Convertir segunda imagen a base64 (reverso)
+      const backImage = images[1];
+      const backBase64 = backImage.buffer.toString('base64');
+      const backMimeType = backImage.mimetype;
+
+      // 3. Llamar a Groq con visión para la imagen frontal (datos principales)
+      const frontResponse = await this.groq.chat.completions.create({
         model: 'meta-llama/llama-4-scout-17b-16e-instruct',
         messages: [
           {
@@ -67,26 +74,25 @@ export class VerificationService {
               {
                 type: 'image_url',
                 image_url: {
-                  url: `data:${mimeType};base64,${base64Image}`,
+                  url: `data:${frontMimeType};base64,${frontBase64}`,
                 },
               },
               {
                 type: 'text',
                 text: `Eres un sistema de verificación de identidad para Colombia.
-Analiza esta cédula de ciudadanía colombiana y extrae los datos.
+Analiza esta imagen que es la cara FRONTAL de la cédula de ciudadanía colombiana y extrae los datos.
 
 RESPONDE ÚNICAMENTE con este JSON (sin texto adicional, sin markdown, sin backticks):
 {
   "cedula": "número de cédula sin puntos ni espacios",
   "firstName": "primer nombre en mayúsculas",
   "firstLastName": "primer apellido en mayúsculas",
-  "birthDate": "fecha de nacimiento en formato YYYY-MM-DD",
   "isValidDocument": true,
   "documentType": "tipo de documento detectado"
 }
 
 Si no puedes leer algún campo claramente, usa null para ese campo.
-Si la imagen no es una cédula colombiana, pon isValidDocument: false.`,
+Si la imagen no es la cara frontal de una cédula colombiana, pon isValidDocument: false.`,
               },
             ],
           },
@@ -95,68 +101,147 @@ Si la imagen no es una cédula colombiana, pon isValidDocument: false.`,
         temperature: 0.1,
       });
 
-      const rawText = response.choices[0]?.message?.content ?? '';
+      // 4. Llamar a Groq para la imagen posterior (lugar de nacimiento)
+      const backResponse = await this.groq.chat.completions.create({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${backMimeType};base64,${backBase64}`,
+                },
+              },
+              {
+                type: 'text',
+                text: `Eres un sistema de verificación de identidad para Colombia.
+Analiza esta imagen que es la cara POSTERIOR de la cédula de ciudadanía colombiana y extrae la fecha y lugar de expedicion.
 
-      // 3. Parsear respuesta
-      let extracted: any;
+RESPONDE ÚNICAMENTE con este JSON (sin texto adicional, sin markdown, sin backticks):
+{
+  "expeditionDate": "fecha de expedicion en formato YYYY-MM-DD",
+  "expeditionPlace": "lugar de expedicion (ciudad, departamento)",
+  "isValidDocument": true
+}
+
+Si no puedes leer la fecha o lugar de expedicion claramente, usa null.
+Si la imagen no es la cara posterior de una cédula colombiana, pon isValidDocument: false.`,
+              },
+            ],
+          },
+        ],
+        max_tokens: 512,
+        temperature: 0.1,
+      });
+
+      const frontRawText = frontResponse.choices[0]?.message?.content ?? '';
+      const backRawText = backResponse.choices[0]?.message?.content ?? '';
+
+      // 3. Parsear respuesta frontal
+      let frontExtracted: any;
       try {
-        const clean = rawText.replace(/```json|```/g, '').trim();
-        extracted = JSON.parse(clean);
+        const cleanFront = frontRawText.replace(/```json|```/g, '').trim();
+        frontExtracted = JSON.parse(cleanFront);
       } catch {
-        this.logger.error('Error parseando respuesta de Groq:', rawText);
-        throw new InternalServerErrorException('Error procesando la imagen del documento');
+        this.logger.error('Error parseando respuesta de Groq (frontal):', frontRawText);
+        throw new InternalServerErrorException('Error procesando la imagen frontal del documento');
       }
 
-      if (!extracted.isValidDocument) {
+      // 3b. Parsear respuesta posterior
+      let backExtracted: any;
+      try {
+        const cleanBack = backRawText.replace(/```json|```/g, '').trim();
+        backExtracted = JSON.parse(cleanBack);
+      } catch {
+        this.logger.error('Error parseando respuesta de Groq (posterior):', backRawText);
+        throw new InternalServerErrorException('Error procesando la imagen posterior del documento');
+      }
+
+      // Verificar que ambas caras sean válidas
+      if (!frontExtracted.isValidDocument) {
         return {
           verified: false,
           status: VerificationStatus.REJECTED,
           confidence: 0,
           extractedData: {},
-          mismatches: ['La imagen no corresponde a una cédula de ciudadanía colombiana'],
-          message: 'Documento inválido. Por favor sube una foto clara de tu cédula colombiana.',
+          mismatches: ['La imagen frontal no corresponde a una cédula de ciudadanía colombiana'],
+          message: 'Documento inválido. Por favor sube una foto clara de la cara frontal de tu cédula.',
+        };
+      }
+
+      if (!backExtracted.isValidDocument) {
+        return {
+          verified: false,
+          status: VerificationStatus.REJECTED,
+          confidence: 0,
+          extractedData: {},
+          mismatches: ['La imagen posterior no corresponde a una cédula de ciudadanía colombiana'],
+          message: 'Documento inválido. Por favor sube una foto clara de la cara posterior de tu cédula.',
         };
       }
 
       // 4. Comparar datos con el formulario
       const mismatches: string[] = [];
       let matchScore = 0;
-      const totalFields = 4;
+      const totalFields = 5;
 
       const cleanNum = (s: string) => s?.replace(/[.\s\-]/g, '') ?? '';
       const normalize = (s: string) =>
         s?.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim() ?? '';
 
       // Comparar cédula
-      if (extracted.cedula && cleanNum(extracted.cedula) === cleanNum(formData.cedula)) {
+      if (frontExtracted.cedula && cleanNum(frontExtracted.cedula) === cleanNum(formData.cedula)) {
         matchScore++;
-      } else if (extracted.cedula) {
+      } else if (frontExtracted.cedula) {
         mismatches.push('Número de cédula no coincide');
       }
 
       // Comparar nombre
-      if (extracted.firstName && normalize(extracted.firstName).includes(normalize(formData.firstName))) {
+      if (frontExtracted.firstName && normalize(frontExtracted.firstName).includes(normalize(formData.firstName))) {
         matchScore++;
-      } else if (extracted.firstName) {
+      } else if (frontExtracted.firstName) {
         mismatches.push('Nombre no coincide');
       }
 
       // Comparar apellido
-      if (extracted.firstLastName && normalize(extracted.firstLastName).includes(normalize(formData.firstLastName))) {
+      if (frontExtracted.firstLastName && normalize(frontExtracted.firstLastName).includes(normalize(formData.firstLastName))) {
         matchScore++;
-      } else if (extracted.firstLastName) {
+      } else if (frontExtracted.firstLastName) {
         mismatches.push('Apellido no coincide');
       }
 
-      // Comparar fecha de nacimiento
-      if (extracted.birthDate && extracted.birthDate === formData.birthDate) {
+      // Comparar fecha de expedicion
+      if (backExtracted.expeditionDate && backExtracted.expeditionDate === formData.expeditionDate) {
         matchScore++;
-      } else if (extracted.birthDate) {
-        mismatches.push('Fecha de nacimiento no coincide');
+      } else if (backExtracted.expeditionDate) {
+        mismatches.push('Fecha de expedicion no coincide');
+      }
+
+      // Comparar lugar de expedicion (solo ciudad)
+      const normalizePlace = (s: string) => s?.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[.\-_]/g, ' ').replace(/\s+/g, ' ').trim() ?? '';
+      
+      const docPlace = normalizePlace(backExtracted.expeditionPlace || '');
+
+      let placeMatch = false;
+      if (backExtracted.expeditionPlace) {
+        const cityUser = normalizePlace(formData.expeditionPlace.split(',')[0] || '');
+        if (cityUser && docPlace.includes(cityUser)) {
+          placeMatch = true;
+        }
+      }
+
+      if (backExtracted.expeditionPlace && placeMatch) {
+        matchScore++;
+      } else if (backExtracted.expeditionPlace) {
+        mismatches.push('Lugar de expedicion no coincide');
+      } else {
+        mismatches.push('No se pudo leer el lugar de expedicion en el documento');
       }
 
       const confidence = Math.round((matchScore / totalFields) * 100);
-      const verified = confidence >= 75 && mismatches.length <= 1;
+      const verified = confidence === 100 && mismatches.length === 0;
       const status = verified ? VerificationStatus.VERIFIED : VerificationStatus.REJECTED;
 
       // 5. Guardar en base de datos si hay userId
@@ -173,10 +258,11 @@ Si la imagen no es una cédula colombiana, pon isValidDocument: false.`,
         status,
         confidence,
         extractedData: {
-          cedula: extracted.cedula,
-          firstName: extracted.firstName,
-          firstLastName: extracted.firstLastName,
-          birthDate: extracted.birthDate,
+          cedula: frontExtracted.cedula,
+          firstName: frontExtracted.firstName,
+          firstLastName: frontExtracted.firstLastName,
+          expeditionDate: backExtracted.expeditionDate,
+          expeditionPlace: backExtracted.expeditionPlace,
         },
         mismatches,
         message: verified
