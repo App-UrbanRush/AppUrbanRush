@@ -15,6 +15,8 @@ const schema = z.object({
   firstName: z.string().min(2, "Nombre requerido"),
   firstLastName: z.string().min(2, "Apellido requerido"),
   document_number: z.string().min(5, "Documento requerido"),
+  expedition_date: z.string().min(1, "Fecha de expedición requerida"),
+  city: z.string().min(1, "Ciudad de expedición requerida"),
   cellphone: z.string().min(7, "Celular requerido"),
   gender: z.string().min(1, "Género requerido"),
   business_name: z.string().min(2, "Nombre del negocio requerido"),
@@ -34,7 +36,8 @@ type FormData = z.infer<typeof schema>;
 const stepTitles: Record<number, string> = {
   1: "Datos de la cuenta",
   2: "Datos del propietario",
-  3: "Datos del negocio",
+  3: "Verificación de documento",
+  4: "Datos del negocio",
 };
 
 const VendorRegister = () => {
@@ -43,8 +46,7 @@ const VendorRegister = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-  const [docImage, setDocImage] = useState<File | null>(null);
-  const [docPreview, setDocPreview] = useState<string>("");
+  const [docImages, setDocImages] = useState<File[]>([]);
   const [verifying, setVerifying] = useState(false);
   const [docVerified, setDocVerified] = useState(false);
   const [docMessage, setDocMessage] = useState("");
@@ -68,39 +70,41 @@ const VendorRegister = () => {
   };
 
   const handleDocImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
-        setApiError("Solo se permiten imágenes JPG, PNG o WEBP");
-        return;
+    const files = e.target.files;
+    if (files) {
+      const newImages: File[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+          setApiError("Solo se permiten imágenes JPG, PNG o WEBP");
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          setApiError("La imagen no debe superar los 5MB");
+          return;
+        }
+        newImages.push(file);
       }
-      if (file.size > 5 * 1024 * 1024) {
-        setApiError("La imagen no debe superar los 5MB");
-        return;
-      }
-      setDocImage(file);
-      setDocPreview(URL.createObjectURL(file));
+      setDocImages(newImages);
       setApiError("");
       setDocVerified(false);
       setDocMessage("");
     }
   };
 
-  const removeDocImage = () => {
-    setDocImage(null);
-    setDocPreview("");
-    setDocVerified(false);
-    setDocMessage("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   const verifyDocument = async () => {
     const values = getValues();
-    const ok = await trigger(["firstName", "firstLastName", "document_number"]);
+    const ok = await trigger(["firstName", "firstLastName", "document_number", "expedition_date", "city"]);
     if (!ok) return;
 
-    if (!docImage) {
-      setApiError("Debes subir una foto de tu cédula");
+    if (docImages.length === 0) {
+      setApiError("Debes subir las dos caras de tu cédula");
+      return;
+    }
+
+    if (docImages.length < 2) {
+      setApiError("Debes subir las dos caras del documento");
       return;
     }
 
@@ -108,11 +112,13 @@ const VendorRegister = () => {
     setApiError("");
     setDocMessage("");
     try {
-      const result = await verifyDocumentApi(docImage, {
+      const expeditionPlace = values.city || "";
+      const result = await verifyDocumentApi(docImages, {
         cedula: values.document_number,
         firstName: values.firstName,
         firstLastName: values.firstLastName,
-        birthDate: "",
+        expeditionDate: values.expedition_date,
+        expeditionPlace: expeditionPlace,
       });
 
       if (result.verified) {
@@ -130,7 +136,8 @@ const VendorRegister = () => {
   };
 
   const nextStep2 = async () => {
-    setStep(3);
+    const ok = await trigger(["firstName", "firstLastName", "document_number", "expedition_date", "city", "cellphone", "gender"]);
+    if (ok) setStep(3);
   };
 
   const onSubmit = async (data: FormData) => {
@@ -143,6 +150,8 @@ const VendorRegister = () => {
         firstName: data.firstName,
         firstLastName: data.firstLastName,
         document_number: data.document_number,
+        expedition_date: data.expedition_date,
+        expedition_place: data.city,
         cellphone: data.cellphone,
         gender: data.gender,
         business_name: data.business_name,
@@ -209,6 +218,8 @@ const VendorRegister = () => {
             <div className={`step ${step >= 2 ? "active" : ""}`}>2</div>
             <div className="step-line"></div>
             <div className={`step ${step >= 3 ? "active" : ""}`}>3</div>
+            <div className="step-line"></div>
+            <div className={`step ${step >= 4 ? "active" : ""}`}>4</div>
           </div>
 
           <p className="step-title">{stepTitle}</p>
@@ -252,10 +263,22 @@ const VendorRegister = () => {
                   </div>
                 </div>
 
-                <div className="input-group">
-                  <input {...register("document_number")} placeholder="Número de documento" />
-                  {errors.document_number && <span className="error">{errors.document_number.message}</span>}
+                <div className="register-row">
+                  <div className="input-group" style={{ flex: 1, marginRight: "10px" }}>
+                    <input {...register("document_number")} placeholder="Número de documento" />
+                    {errors.document_number && <span className="error">{errors.document_number.message}</span>}
+                  </div>
+                  <div className="input-group" style={{ flex: 1 }}>
+                    <input {...register("expedition_date")} type="date" placeholder="Fecha de Expedición" />
+                    {errors.expedition_date && <span className="error">{errors.expedition_date.message}</span>}
+                  </div>
                 </div>
+
+                <div className="input-group">
+                  <input {...register("city")} placeholder="Ciudad de expedición" />
+                  {errors.city && <span className="error">{errors.city.message}</span>}
+                </div>
+                
 
                 <div className="register-row">
                   <div className="input-group" style={{ flex: 1, marginRight: "10px" }}>
@@ -273,24 +296,28 @@ const VendorRegister = () => {
                   </div>
                 </div>
 
+                <button type="button" className="next-btn" onClick={nextStep2}>
+                  Siguiente →
+                </button>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div key="step3">
                 <div className="input-group doc-upload-section">
-                  <label className="doc-label">📷 Foto de tu cédula</label>
+                  <label className="doc-label">📷 Foto de tu cédula (ambas caras)</label>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
+                    multiple
                     onChange={handleDocImageChange}
                     className="doc-input"
                   />
-                  {docPreview && (
-                    <div className="doc-preview-container">
-                      <img src={docPreview} alt="Cédula" className="doc-preview" />
-                      <button type="button" className="remove-doc-btn" onClick={removeDocImage}>
-                        ✕
-                      </button>
-                    </div>
+                  {docImages.length > 0 && docImages.length < 2 && (
+                    <span className="error">Debes subir las dos caras del documento</span>
                   )}
-                  {docImage && (
+                  {docImages.length >= 2 && !docVerified && (
                     <button
                       type="button"
                       className="verify-doc-btn"
@@ -308,14 +335,14 @@ const VendorRegister = () => {
                   <span className="doc-hint">Sube una foto clara de tu cédula (JPG, PNG o WEBP, máx. 5MB)</span>
                 </div>
 
-                <button type="button" className="next-btn" onClick={nextStep2}>
-                  Siguiente →
+                <button type="button" className="next-btn" onClick={() => docVerified && setStep(4)} disabled={!docVerified}>
+                  {docVerified ? "Siguiente →" : "Verifica tu documento para continuar"}
                 </button>
               </div>
             )}
 
-            {step === 3 && (
-              <div key="step3">
+{step === 4 && (
+              <div key="step4">
                 <div className="input-group">
                   <input {...register("business_name")} placeholder="Nombre del negocio" />
                   {errors.business_name && <span className="error">{errors.business_name.message}</span>}

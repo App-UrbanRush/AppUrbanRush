@@ -9,9 +9,9 @@ import type { VerifyDocumentRequest, VerificationResult } from "../../domain/typ
 import { verifyDocumentApi } from "../api/verificationApi";
 
 export class VerificationRepositoryImpl implements IVerificationRepository {
-  async verifyDocument(image: File, data: VerifyDocumentRequest): Promise<VerificationResult> {
+  async verifyDocument(images: File[], data: VerifyDocumentRequest): Promise<VerificationResult> {
     try {
-      const result = await verifyDocumentApi(image, data);
+      const result = await verifyDocumentApi(images, data);
       return result;
     } catch (error) {
       throw new Error("Error en verificación de documento: " + (error instanceof Error ? error.message : "Unknown error"));

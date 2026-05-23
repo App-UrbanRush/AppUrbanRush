@@ -24,6 +24,11 @@ export class PeopleEntity {
   @Column({ type: 'varchar', length: 20, nullable: true })
   document_number: string;
 
+  @Column({ type: 'date', nullable: true })
+  expedition_date: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  expedition_place: string;
 
   @OneToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

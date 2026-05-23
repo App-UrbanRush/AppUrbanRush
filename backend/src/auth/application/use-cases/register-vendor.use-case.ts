@@ -20,6 +20,13 @@ export class RegisterVendorUseCase {
       throw new BadRequestException('El correo electrónico ya está registrado');
     }
 
+    if (dto.document_number) {
+      const existingDocument = await this.userRepository.findOneByDocumentNumber(dto.document_number);
+      if (existingDocument) {
+        throw new BadRequestException('El número de documento ya está registrado');
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(dto.user_password, 10);
 
     const newUser = new User(
@@ -33,6 +40,8 @@ export class RegisterVendorUseCase {
       firstName: dto.firstName,
       firstLastName: dto.firstLastName,
       document_number: dto.document_number,
+      expedition_date: dto.expedition_date,
+      expedition_place: dto.expedition_place,
       cellphone: dto.cellphone,
       address: dto.business_address,
       gender: dto.gender,

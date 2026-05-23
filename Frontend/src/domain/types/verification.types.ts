@@ -7,7 +7,8 @@ export interface VerifyDocumentRequest {
   cedula: string;
   firstName: string;
   firstLastName: string;
-  birthDate: string;
+  expeditionDate: string;
+  expeditionPlace: string;
 }
 
 export interface VerificationResult {

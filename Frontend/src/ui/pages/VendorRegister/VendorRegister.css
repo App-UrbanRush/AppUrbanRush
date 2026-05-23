@@ -235,6 +235,32 @@
     background: rgba(255, 255, 255, 0.9);
     padding: 20px;
   }
+
+  .step-indicator {
+    gap: 5px;
+  }
+
+  .step-line {
+    width: 20px !important;
+  }
+
+  .register-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .input-group {
+    width: 100%;
+  }
+
+  .doc-preview {
+    width: 130px;
+    height: 80px;
+  }
+
+  .doc-previews-container {
+    gap: 10px;
+  }
 }
 
 .doc-upload-section {
@@ -267,6 +293,31 @@
   margin-top: 12px;
   position: relative;
   display: inline-block;
+}
+
+.doc-previews-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.doc-preview-item {
+  position: relative;
+  display: inline-block;
+}
+
+.doc-preview-label {
+  display: block;
+  text-align: center;
+  background: #ff7a00;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 0 0 8px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: -4px;
 }
 
 .doc-preview {

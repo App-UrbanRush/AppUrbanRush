@@ -5,9 +5,12 @@ import "./RegisterSelect.css";
 const RegisterSelect = () => {
   const navigate = useNavigate();
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+  };
+
   return (
     <div className="rselect-container">
-
       {/* LEFT → IMAGEN */}
       <div className="rselect-left">
         <img src="/delivery2.png" alt="delivery" />
@@ -30,13 +33,13 @@ const RegisterSelect = () => {
           <p>¿Cómo quieres registrarte?</p>
 
           <div className="rselect-options">
-
             {/* OPCIÓN USUARIO NORMAL */}
             <motion.div
               className="rselect-option rselect-option--user"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate("/register")}
+              onClick={() => handleNavigate("/register")}
+              style={{ cursor: "pointer" }}
             >
               <div className="rselect-icon">🧑</div>
               <div className="rselect-info">
@@ -51,7 +54,8 @@ const RegisterSelect = () => {
               className="rselect-option rselect-option--delivery"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate("/register-delivery")}
+              onClick={() => handleNavigate("/register-delivery")}
+              style={{ cursor: "pointer" }}
             >
               <div className="rselect-icon">🛵</div>
               <div className="rselect-info">
@@ -66,7 +70,8 @@ const RegisterSelect = () => {
               className="rselect-option rselect-option--vendor"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate("/register-vendor")}
+              onClick={() => handleNavigate("/register-vendor")}
+              style={{ cursor: "pointer" }}
             >
               <div className="rselect-icon">🏪</div>
               <div className="rselect-info">
@@ -75,16 +80,20 @@ const RegisterSelect = () => {
               </div>
               <span className="rselect-arrow">→</span>
             </motion.div>
-
           </div>
 
           <p className="rselect-login-link">
             ¿Ya tienes cuenta?{" "}
-            <button type="button" className="rselect-login-link-btn" onClick={() => navigate("/")}>Inicia sesión</button>
+            <button
+              type="button"
+              className="rselect-login-link-btn"
+              onClick={() => handleNavigate("/")}
+            >
+              Inicia sesión
+            </button>
           </p>
         </motion.div>
       </div>
-
     </div>
   );
 };

@@ -14,7 +14,7 @@ export class VerifyDocumentUseCase {
     this.verificationRepository = verificationRepository;
   }
 
-  async execute(image: File, data: VerifyDocumentRequest): Promise<VerificationResult> {
-    return this.verificationRepository.verifyDocument(image, data);
+  async execute(images: File[], data: VerifyDocumentRequest): Promise<VerificationResult> {
+    return this.verificationRepository.verifyDocument(images, data);
   }
 }

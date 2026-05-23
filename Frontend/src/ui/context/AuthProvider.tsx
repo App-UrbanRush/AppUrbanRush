@@ -168,8 +168,8 @@ const [state, setState] = useState<AuthState>({
 
   // VERIFY DOCUMENT
   const verifyDocument = useCallback(
-    async (image: File, data: VerifyDocumentRequest) => {
-      return verifyDocumentUseCase.execute(image, data);
+    async (images: File[], data: VerifyDocumentRequest) => {
+      return verifyDocumentUseCase.execute(images, data);
     },
     [verifyDocumentUseCase]
   );

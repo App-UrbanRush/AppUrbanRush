@@ -71,9 +71,17 @@ export class TypeOrmUserRepository implements IUserRepository {
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    const entity = await this.repo.findOne({ 
+    const entity = await this.repo.findOne({
       where: { user_email: email },
-      relations: ['userroles', 'userroles.rol'] 
+      relations: ['userroles', 'userroles.rol']
+    });
+    return UserMapper.toDomain(entity);
+  }
+
+  async findOneByDocumentNumber(documentNumber: string): Promise<User | null> {
+    const entity = await this.repo.findOne({
+      where: { document_number: documentNumber },
+      relations: ['userroles', 'userroles.rol']
     });
     return UserMapper.toDomain(entity);
   }
@@ -133,9 +141,5 @@ export class TypeOrmUserRepository implements IUserRepository {
 
   async savePeople(peopleData: any): Promise<any> {
     return await this.peopleRepo.save(peopleData);
-  }
-
-  async findPeopleByDocumentNumber(documentNumber: string): Promise<any> {
-    return await this.peopleRepo.findOne({ where: { document_number: documentNumber } });
   }
 }

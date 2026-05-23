@@ -11,7 +11,7 @@ export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   registerDelivery: (data: RegisterDeliveryRequest) => Promise<void>;
-  verifyDocument: (image: File, data: VerifyDocumentRequest) => Promise<VerificationResult>;
+  verifyDocument: (images: File[], data: VerifyDocumentRequest) => Promise<VerificationResult>;
 
   logout: () => Promise<void>;
 

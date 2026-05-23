@@ -19,8 +19,7 @@ export class AuthRepositoryImpl implements IAuthRepository {
   }
 
   async registerDelivery(data: RegisterDeliveryRequest): Promise<AuthResponse> {
-    const { birthDate, ...apiData } = data;
-    const response = await registerDeliveryApi(apiData as any);
+    const response = await registerDeliveryApi(data as any);
     // Backend returns { message, user_id }
     return {
       access_token: "", // No token provided for delivery register since it goes to review

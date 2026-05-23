@@ -50,17 +50,22 @@
 }
 
 /* INPUTS */
-.register-card input {
+.register-card input,
+.register-card select {
   width: 100%;
   padding: 12px;
   margin-bottom: 12px;
   border-radius: 8px;
   border: 1px solid #ddd;
   outline: none;
+  background: #fff;
+  font-size: 14px;
 }
 
-.register-card input:focus {
+.register-card input:focus,
+.register-card select:focus {
   border-color: #ff7a00;
+  box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.2);
 }
 
 /* FILA */
@@ -174,6 +179,16 @@
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.9);
     padding: 20px;
+  }
+
+  .register-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .input-group input,
+  .input-group select {
+    width: 100%;
   }
 }
 

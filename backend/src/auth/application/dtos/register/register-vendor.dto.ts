@@ -28,6 +28,16 @@ export class RegisterVendorDto {
   @ApiPropertyOptional({ description: 'Número de documento' })
   document_number?: string;
 
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ description: 'Fecha de expedición del documento' })
+  expedition_date?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ description: 'Lugar de expedición del documento' })
+  expedition_place?: string;
+
   @IsNotEmpty({ message: 'El celular es obligatorio' })
   @IsString()
   @ApiProperty({ description: 'Celular del propietario' })
