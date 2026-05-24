@@ -73,7 +73,11 @@ export class RegisterCourierUseCase {
       rolIds: [3]
     };
 
-    await this.emailService.sendWelcomeEmail(dto.user_email, dto.firstName);
+    try {
+      await this.emailService.sendWelcomeEmail(dto.user_email, dto.firstName);
+    } catch (emailError) {
+      console.warn('Email de bienvenida no enviado:', emailError.message);
+    }
 
     return {
       message: 'Registro de repartidor exitoso.',

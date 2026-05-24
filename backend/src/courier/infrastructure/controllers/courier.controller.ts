@@ -15,6 +15,7 @@ export class CourierController {
   ) {}
 
   @Get(':userId/profile')
+  @Roles(1, 3)
   @ApiOperation({ summary: 'Obtener información técnica del repartidor' })
   async getProfile(@Param('userId') userId: number) {
     return this.getCourierProfileUseCase.execute(userId);
