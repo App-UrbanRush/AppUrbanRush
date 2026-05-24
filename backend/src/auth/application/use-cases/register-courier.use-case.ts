@@ -62,7 +62,7 @@ export class RegisterCourierUseCase {
       vehicle_type: dto.vehicle_type,
       vehicle_plate: dto.vehicle_plate,
       soat_number: dto.soat_number,
-      status: 'VERIFIED'
+      status: 'PENDING'
     };
 
     await this.courierRepository.save(courierData);
@@ -73,7 +73,11 @@ export class RegisterCourierUseCase {
       rolIds: [3]
     };
 
-    await this.emailService.sendWelcomeEmail(dto.user_email, dto.firstName);
+    try {
+      await this.emailService.sendWelcomeEmail(dto.user_email, dto.firstName);
+    } catch (emailError) {
+      console.warn('Email de bienvenida no enviado:', emailError.message);
+    }
 
     return {
       message: 'Registro de repartidor exitoso.',

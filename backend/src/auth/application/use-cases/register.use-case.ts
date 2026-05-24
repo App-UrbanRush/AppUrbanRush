@@ -60,8 +60,13 @@ export class RegisterUseCase {
     };
 
     // Enviar email de bienvenida
-    await this.emailService.sendWelcomeEmail(userData.user_email, userData.firstName);
-
+    try {
+      await this.emailService.sendWelcomeEmail(userData.user_email, userData.firstName);
+    } catch (emailError) {
+      // El registro fue exitoso, solo logueamos el fallo del email
+      console.warn('Email de bienvenida no enviado:', emailError.message);
+    }
+    
     return {
       message: 'Usuario registrado exitosamente',
       token: this.jwtService.sign(payload)
