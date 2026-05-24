@@ -28,7 +28,6 @@ export class TypeOrmUserRepository implements IUserRepository {
       const userEntity = queryRunner.manager.create(UserEntity, {
         user_email: user.user_email,
         user_password: user.user_password,
-        document_number: personData.document_number ?? null,
       });
       const savedUser = await queryRunner.manager.save(userEntity);
 
@@ -79,11 +78,13 @@ export class TypeOrmUserRepository implements IUserRepository {
   }
 
   async findOneByDocumentNumber(documentNumber: string): Promise<User | null> {
-    const entity = await this.repo.findOne({
+    const person = await this.peopleRepo.findOne({
       where: { document_number: documentNumber },
-      relations: ['userroles', 'userroles.rol']
+      relations: ['user', 'user.userroles', 'user.userroles.rol']
     });
-    return UserMapper.toDomain(entity);
+  
+    if (!person?.user) return null;
+    return UserMapper.toDomain(person.user);
   }
 
   async findOneById(id: number): Promise<User | null> {
