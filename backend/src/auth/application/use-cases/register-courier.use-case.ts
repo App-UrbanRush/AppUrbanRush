@@ -62,7 +62,7 @@ export class RegisterCourierUseCase {
       vehicle_type: dto.vehicle_type,
       vehicle_plate: dto.vehicle_plate,
       soat_number: dto.soat_number,
-      status: 'VERIFIED'
+      status: 'PENDING'
     };
 
     await this.courierRepository.save(courierData);

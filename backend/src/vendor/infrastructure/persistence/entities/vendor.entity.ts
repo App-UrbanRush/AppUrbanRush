@@ -21,7 +21,7 @@ export class VendorEntity {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ type: 'varchar', default: 'APPROVED' })
+  @Column({ type: 'varchar', default: 'PENDING' })
   status: string;
 
   @OneToOne(() => UserEntity)

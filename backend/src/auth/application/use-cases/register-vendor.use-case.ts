@@ -60,7 +60,7 @@ export class RegisterVendorUseCase {
       address: dto.business_address,
       phone: dto.business_phone,
       description: dto.description ?? null,
-      status: 'VERIFIED',
+      status: 'PENDING',
     });
 
     return {
