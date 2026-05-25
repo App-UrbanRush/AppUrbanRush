@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity, VerificationStatus } from '../user/infrastructure/persistence/entities/user.entity';
 import Groq from 'groq-sdk';
+import { PeopleEntity } from 'src/people/infrastructure/persistence/entities/people.entity';
 
 interface DocumentFormData {
   cedula: string;
@@ -40,6 +41,8 @@ export class VerificationService {
     private readonly configService: ConfigService,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(PeopleEntity)           
+    private readonly peopleRepo: Repository<PeopleEntity>,  
   ) {
     const apiKey = this.configService.get<string>('GROQ_API_KEY') || process.env.GROQ_API_KEY || '';
     this.logger.log(`GROQ API Key configured: ${!!apiKey}`);
@@ -249,9 +252,14 @@ Si la imagen no es la cara posterior de una cédula colombiana, pon isValidDocum
       if (userId && verified) {
         await this.userRepository.update(userId, {
           verification_status: status,
-          document_number: formData.cedula,
         });
+      
+        await this.peopleRepo.update(
+          { user: { user_id: userId } },
+          { document_number: formData.cedula },
+        );
       }
+      
 
       return {
         verified,
@@ -284,8 +292,12 @@ Si la imagen no es la cara posterior de una cédula colombiana, pon isValidDocum
   async updateVerificationStatus(userId: number, documentNumber: string): Promise<void> {
     await this.userRepository.update(userId, {
       verification_status: VerificationStatus.VERIFIED,
-      document_number: documentNumber,
-    });
-  }
 
+    });
+  
+    await this.peopleRepo.update(
+      { user: { user_id: userId } },
+      { document_number: documentNumber },
+    );
+  }
 }

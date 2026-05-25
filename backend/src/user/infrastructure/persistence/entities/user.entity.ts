@@ -21,7 +21,7 @@ export class UserEntity {
   @Column({ type: 'boolean', default: true })
   status: boolean;
 
-  // ── NUEVAS COLUMNAS ──────────────────────────────────────────
+
   @Column({
     type: 'enum',
     enum: VerificationStatus,
@@ -30,9 +30,6 @@ export class UserEntity {
   })
   verification_status: VerificationStatus;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
-  document_number: string;
-  // ─────────────────────────────────────────────────────────────
 
   @OneToMany(() => UserRolesEntity, (ur) => ur.user)
   userroles: UserRolesEntity[];
