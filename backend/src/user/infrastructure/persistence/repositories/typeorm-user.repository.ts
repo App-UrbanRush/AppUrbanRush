@@ -38,13 +38,13 @@ export class TypeOrmUserRepository implements IUserRepository {
       });
       await queryRunner.manager.save(personEntity);
 
-      // 3. Guardar los Roles - CORREGIDO PARA EVITAR TS2769
+      // 3. Guardar los Roles
       if (user.roles && user.roles.length > 0) {
         for (const roleId of user.roles) {
           const userRole = queryRunner.manager.create(UserRolesEntity, {
-            user: savedUser, // Pasamos la entidad completa
+            user: savedUser, 
             rol: { rol_id: roleId } as RolEntity,
-          } as any); // Usamos any para saltar la validación estricta de TypeORM aquí
+          } as any); 
           await queryRunner.manager.save(userRole);
         }
       }
@@ -72,7 +72,7 @@ export class TypeOrmUserRepository implements IUserRepository {
   async findOneByEmail(email: string): Promise<User | null> {
     const entity = await this.repo.findOne({
       where: { user_email: email },
-      relations: ['userroles', 'userroles.rol']
+      relations: ['userroles', 'userroles.rol'] 
     });
     return UserMapper.toDomain(entity);
   }
@@ -142,5 +142,59 @@ export class TypeOrmUserRepository implements IUserRepository {
 
   async savePeople(peopleData: any): Promise<any> {
     return await this.peopleRepo.save(peopleData);
+  }
+
+  // =========================================================================
+  // EXTRAER NOMBRE REAL DE LA PLATAFORMA DESDE LA TABLA DE PERSONAS
+  // =========================================================================
+
+  async getPersonFirstNameByUserId(userId: number): Promise<string | null> {
+    const person = await this.peopleRepo.findOne({
+      where: { user: { user_id: userId } }
+    });
+    
+    // CORREGIDO: Cambiado de person.first_name a person.firstName
+    if (!person || !person.firstName) {
+      return null;
+    }
+    
+    return person.firstName;
+  }
+
+  // =========================================================================
+  // MÉTODOS REQUERIDOS POR LA INTERFAZ PARA RECUPERACIÓN DE CONTRASEÑA
+  // =========================================================================
+
+  async saveResetCode(user_id: number, code: string, expiresAt: Date): Promise<void> {
+    await this.repo.update(user_id, {
+      resetPasswordCode: code,
+      resetPasswordExpiresAt: expiresAt,
+    });
+  }
+
+  async validateResetCode(user_email: string, code: string): Promise<boolean> {
+    const user = await this.repo.findOne({
+      where: { user_email, resetPasswordCode: code },
+    });
+
+    if (!user || !user.resetPasswordExpiresAt) {
+      return false;
+    }
+
+    const now = new Date();
+    return user.resetPasswordExpiresAt > now; 
+  }
+
+  async updatePassword(user_id: number, passwordHashed: string): Promise<void> {
+    await this.repo.update(user_id, {
+      user_password: passwordHashed,
+    });
+  }
+
+  async clearResetCode(user_id: number): Promise<void> {
+    await this.repo.update(user_id, {
+      resetPasswordCode: null,
+      resetPasswordExpiresAt: null,
+    });
   }
 }

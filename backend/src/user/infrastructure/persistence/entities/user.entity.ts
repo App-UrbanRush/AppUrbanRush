@@ -1,5 +1,6 @@
+import { PeopleEntity } from 'src/people/infrastructure/persistence/entities/people.entity';
 import { UserRolesEntity } from 'src/user_rol/infrastructure/persistence/entity/user_rol.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm';
 
 export enum VerificationStatus {
   PENDING = 'pending',
@@ -21,6 +22,12 @@ export class UserEntity {
   @Column({ type: 'boolean', default: true })
   status: boolean;
 
+  @Column({ name: 'reset_password_code', type: 'varchar', length: 6, nullable: true })
+  resetPasswordCode: string | null;
+
+  @Column({ name: 'reset_password_expires_at', type: 'timestamp', nullable: true })
+  resetPasswordExpiresAt: Date | null;
+
 
   @Column({
     type: 'enum',
@@ -33,4 +40,6 @@ export class UserEntity {
 
   @OneToMany(() => UserRolesEntity, (ur) => ur.user)
   userroles: UserRolesEntity[];
+  @OneToOne(() => PeopleEntity, (person) => person.user)
+  person: PeopleEntity;
 }

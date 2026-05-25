@@ -13,6 +13,8 @@ import { CourierModule } from "src/courier/courier.module";
 import { RegisterVendorUseCase } from './application/use-cases/register-vendor.use-case';
 import { VendorModule } from 'src/vendor/vendor.module';
 import { EmailModule } from 'src/email/email.module';
+import { ForgotPasswordUseCase } from "./application/use-cases/forgot-password.use-case";
+import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use-case";
 
 @Module({
     imports: [
@@ -38,6 +40,8 @@ import { EmailModule } from 'src/email/email.module';
         JwtStrategy,
         RolesGuard,
         RegisterVendorUseCase,
+        ForgotPasswordUseCase,
+        ResetPasswordUseCase,
     ],
     controllers: [AuthController],
     exports: [RolesGuard, JwtStrategy, PassportModule, JwtModule], 

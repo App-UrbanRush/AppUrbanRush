@@ -1,13 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-
-export interface SendEmailDto {
-  to: string;
-  subject: string;
-  html: string;
-  text?: string;
-}
+import * as handlebars from 'handlebars';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class EmailService {
@@ -26,60 +22,65 @@ export class EmailService {
     });
   }
 
-  async sendMail(dto: SendEmailDto): Promise<void> {
+  private compileTemplate(templateName: string, context: Record<string, any>): string {
+    const templatePath = path.join(__dirname, 'templates', `${templateName}.hbs`);
+    const templateSource = fs.readFileSync(templatePath, 'utf8');
+    const compiled = handlebars.compile(templateSource);
+    return compiled(context);
+  }
+
+  private async sendMail(options: {
+    to: string;
+    subject: string;
+    template: string;
+    context: Record<string, any>;
+    attachments?: nodemailer.Attachment[];
+  }): Promise<void> {
     const from = this.configService.get<string>('SMTP_FROM', 'UrbanRush <noreply@urbanrush.com>');
+    const html = this.compileTemplate(options.template, options.context);
 
     try {
       await this.transporter.sendMail({
         from,
-        to: dto.to,
-        subject: dto.subject,
-        html: dto.html,
-        text: dto.text,
+        to: options.to,
+        subject: options.subject,
+        html,
+        attachments: options.attachments,
       });
-      this.logger.log(`Email sent to ${dto.to}`);
+      this.logger.log(`Email [${options.template}] enviado a ${options.to}`);
     } catch (error) {
-      this.logger.error(`Failed to send email to ${dto.to}`, error);
-      throw error;
+      this.logger.error(`Error enviando email [${options.template}] a ${options.to}`, error.message);
+      // No relanzamos — el email no debe bloquear el flujo principal
     }
   }
 
   async sendWelcomeEmail(to: string, name: string): Promise<void> {
+    const logoPath = path.join(__dirname, 'templates', 'assets', 'logo-urbanrush.png');
     await this.sendMail({
       to,
-      subject: 'Bienvenido a UrbanRush',
-      html: `
-        <h1>Bienvenido ${name}!</h1>
-        <p>Tu cuenta ha sido creada exitosamente en UrbanRush.</p>
-        <p>Ahora puedes comenzar a disfrutar de nuestros servicios.</p>
-      `,
+      subject: '¡Bienvenido a UrbanRush! 🚀',
+      template: 'welcome',
+      context: { name },
+      attachments: [
+        { filename: 'logo-urbanrush.png', path: logoPath, cid: 'logo-urbanrush' },
+      ],
     });
   }
 
-  async sendVerificationEmail(to: string, name: string): Promise<void> {
+  async sendPasswordResetEmail(to: string, name: string, resetCode: string): Promise<void> {
+    const logoPath = path.join(__dirname, 'templates', 'assets', 'logo-urbanrush.png');
+  
     await this.sendMail({
       to,
-      subject: 'Verificación de identidad - UrbanRush',
-      html: `
-        <h1>Hola ${name}</h1>
-        <p>Tu identidad ha sido verificada exitosamente.</p>
-        <p>Ya puedes comenzar a realizar entregas en nuestra plataforma.</p>
-      `,
-    });
-  }
-
-  async sendPasswordResetEmail(to: string, name: string, resetToken: string): Promise<void> {
-    const resetUrl = `${this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173')}/reset-password?token=${resetToken}`;
-
-    await this.sendMail({
-      to,
-      subject: 'Recuperar contraseña - UrbanRush',
-      html: `
-        <h1>Hola ${name}</h1>
-        <p>Has solicitado recuperar tu contraseña.</p>
-        <p><a href="${resetUrl}">Haz clic aquí para restablecer tu contraseña</a></p>
-        <p>Este enlace expirará en 1 hora.</p>
-      `,
+      subject: 'Código de recuperación — UrbanRush',
+      template: 'reset-password',
+      context: { 
+        name,      // El nombre real que le enviaremos desde el Caso de Uso
+        resetCode  // El código de 6 números
+      },
+      attachments: [
+        { filename: 'logo-urbanrush.png', path: logoPath, cid: 'logo-urbanrush' },
+      ],
     });
   }
 }

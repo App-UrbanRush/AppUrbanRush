@@ -8,6 +8,10 @@ import { RegisterCourierUseCase } from 'src/auth/application/use-cases/register-
 import { RegisterCourierDto } from 'src/auth/application/dtos/register/register-courier.dto';
 import { RegisterVendorUseCase } from 'src/auth/application/use-cases/register-vendor.use-case';
 import { RegisterVendorDto } from 'src/auth/application/dtos/register/register-vendor.dto';
+import { ResetPasswordDto } from 'src/auth/application/dtos/reset-password/reset-password.dto';
+import { ForgotPasswordDto } from 'src/auth/application/dtos/reset-password/forgot-password.dto';
+import { ForgotPasswordUseCase } from 'src/auth/application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from 'src/auth/application/use-cases/reset-password.use-case';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -17,6 +21,8 @@ export class AuthController {
     private readonly _registerUseCase: RegisterUseCase,
     private readonly _registerCourierUseCase: RegisterCourierUseCase,
     private readonly _registerVendorUseCase: RegisterVendorUseCase,
+    private readonly _forgotPasswordUseCase: ForgotPasswordUseCase,
+    private readonly _resetPasswordUseCase: ResetPasswordUseCase,
   ) {}
 
   @Post('login')
@@ -57,4 +63,21 @@ export class AuthController {
  async registerVendor(@Body() dto: RegisterVendorDto) {
    return this._registerVendorUseCase.execute(dto);
  }
+ 
+ @Post('forgot-password')
+  @ApiOperation({ summary: 'Solicitar código de recuperación', description: 'Genera un PIN de 6 dígitos y lo envía por correo' })
+  @ApiResponse({ status: 200, description: 'Código enviado.' })
+  @ApiResponse({ status: 404, description: 'Correo no registrado.' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this._forgotPasswordUseCase.execute(dto);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Restablecer contraseña con código', description: 'Valida el PIN y actualiza la contraseña' })
+  @ApiResponse({ status: 200, description: 'Contraseña cambiada con éxito.' })
+  @ApiResponse({ status: 400, description: 'Código inválido, expirado o datos incorrectos.' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this._resetPasswordUseCase.execute(dto);
+  }
+
 }

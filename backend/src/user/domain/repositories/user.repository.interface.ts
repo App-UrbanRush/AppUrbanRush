@@ -7,7 +7,7 @@ export interface IUserRepository {
   findOneById(id: number): Promise<User | null>;
   findAll(): Promise<User[]>;
   remove(id: number): Promise<void>;
-  
+
   // Auxiliares para Roles (Hablando en lenguaje de Dominio)
   updateUserRole(userId: number, rolId: number): Promise<void>;
   findRolById(id: number): Promise<any>;
@@ -16,4 +16,13 @@ export interface IUserRepository {
 
   savePeople(peopleData: any): Promise<any>;
   create(user: User, personData: any): Promise<User>;
+
+
+  saveResetCode(user_id: number, code: string, expiresAt: Date): Promise<void>;
+  validateResetCode(user_email: string, code: string): Promise<boolean>;
+  updatePassword(user_id: number, passwordHashed: string): Promise<void>;
+  clearResetCode(user_id: number): Promise<void>;
+
+  // Agrega esto dentro de la interfaz IUserRepository:
+  getPersonFirstNameByUserId(userId: number): Promise<string | null>;
 }
