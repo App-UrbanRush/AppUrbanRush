@@ -15,7 +15,7 @@ export class CourierEntity {
   @Column({ type: 'varchar', nullable: true })
   soat_number: string | null;
 
-  @Column({ type: 'varchar', default: 'VERIFIED' })
+  @Column({ type: 'varchar', default: 'PENDING' })
   status: string;
 
   @OneToOne(() => UserEntity)
