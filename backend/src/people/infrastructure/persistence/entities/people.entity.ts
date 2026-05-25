@@ -30,6 +30,9 @@ export class PeopleEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   expedition_place: string;
 
+  @Column({ nullable: true })
+  user_id: number;
+
   @OneToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;

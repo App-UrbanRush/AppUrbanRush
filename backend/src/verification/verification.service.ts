@@ -292,7 +292,7 @@ Si la imagen no es la cara posterior de una cédula colombiana, pon isValidDocum
   async updateVerificationStatus(userId: number, documentNumber: string): Promise<void> {
     await this.userRepository.update(userId, {
       verification_status: VerificationStatus.VERIFIED,
-      // ❌ Eliminar: document_number: documentNumber,
+
     });
   
     await this.peopleRepo.update(

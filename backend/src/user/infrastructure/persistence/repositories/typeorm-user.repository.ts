@@ -34,7 +34,7 @@ export class TypeOrmUserRepository implements IUserRepository {
       // 2. Guardar la Persona asociada al usuario
       const personEntity = queryRunner.manager.create(PeopleEntity, {
         ...personData,
-        user_id: savedUser.user_id, 
+        user: { user_id: savedUser.user_id }, 
       });
       await queryRunner.manager.save(personEntity);
 
