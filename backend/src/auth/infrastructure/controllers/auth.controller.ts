@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from 'src/auth/application/dtos/login/login.dto';
 import { RegisterUseCase } from 'src/auth/application/use-cases/register.use-case';
@@ -12,6 +12,8 @@ import { ResetPasswordDto } from 'src/auth/application/dtos/reset-password/reset
 import { ForgotPasswordDto } from 'src/auth/application/dtos/reset-password/forgot-password.dto';
 import { ForgotPasswordUseCase } from 'src/auth/application/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from 'src/auth/application/use-cases/reset-password.use-case';
+import { GoogleAuthGuard } from '../guards/google-auth.guard';
+import { GoogleLoginUseCase } from 'src/auth/application/use-cases/google-login.use-case';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -23,6 +25,7 @@ export class AuthController {
     private readonly _registerVendorUseCase: RegisterVendorUseCase,
     private readonly _forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly _resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly googleLoginUseCase: GoogleLoginUseCase,
   ) {}
 
   @Post('login')
@@ -79,5 +82,19 @@ export class AuthController {
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this._resetPasswordUseCase.execute(dto);
   }
+
+@Get('google')
+@UseGuards(GoogleAuthGuard)
+@ApiOperation({ summary: 'Iniciar sesión con Google' })
+async googleAuth() {
+  // Passport redirige automáticamente a Google
+}
+
+@Get('google/callback')
+@UseGuards(GoogleAuthGuard)
+@ApiOperation({ summary: 'Callback de Google OAuth' })
+async googleCallback(@Request() req) {
+  return this.googleLoginUseCase.execute(req.user);
+}
 
 }
