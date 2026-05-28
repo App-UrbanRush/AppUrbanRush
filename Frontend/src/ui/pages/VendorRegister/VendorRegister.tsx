@@ -4,8 +4,7 @@ import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { vendorApi } from "../../../infrastructure/api/vendorApi";
-import { verifyDocumentApi } from "../../../infrastructure/api/verificationApi";
+import { useAuth } from "../../context/useAuth";
 import type { RegisterVendorRequest } from "../../../domain/types/vendor.types";
 
 const schema = z.object({
@@ -42,6 +41,7 @@ const stepTitles: Record<number, string> = {
 
 const VendorRegister = () => {
   const navigate = useNavigate();
+  const { verifyDocument: verifyDocumentApi, registerVendor, error: contextError } = useAuth();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -162,7 +162,7 @@ const VendorRegister = () => {
         nit: data.nit,
         document_url: data.document_url,
       };
-      await vendorApi.register(payload);
+      await registerVendor(payload as RegisterVendorRequest);
       setShowSuccess(true);
     } catch (error: any) {
       if (error.response) {
@@ -224,7 +224,7 @@ const VendorRegister = () => {
 
           <p className="step-title">{stepTitle}</p>
 
-          {apiError && <div className="api-error">{apiError}</div>}
+          {(apiError || contextError) && <div className="api-error">{apiError || contextError}</div>}
 
           <form onSubmit={handleSubmit(onSubmit)}>
             {step === 1 && (
