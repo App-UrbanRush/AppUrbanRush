@@ -1,5 +1,7 @@
+import Home from "../Home/Home";
+
 const Dashboard = () => {
-  return <h1>Bienvenido 🚀</h1>;
+  return <Home />;
 };
 
 export default Dashboard;

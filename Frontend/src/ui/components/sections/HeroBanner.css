@@ -1,0 +1,7 @@
+.hero-banner-cta {
+  transition: background-color 0.18s;
+}
+
+.hero-banner-cta:hover {
+  background-color: #c84000 !important;
+}

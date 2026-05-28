@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect,
    type ReactNode } from "react";
 import { AuthContext, type AuthContextType } from "./AuthContext";
 import type { AuthState } from "../../domain/types/auth.types";
+import type { UserProfile } from "../../domain/interfaces/IAuthRepository";
 import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
 import { RegisterUseCase } from "../../application/use-cases/RegisterUseCase";
 import { LogoutUseCase } from "../../application/use-cases/LogoutUseCase";
@@ -9,6 +10,7 @@ import { AuthRepositoryImpl } from "../../infrastructure/repositories/AuthReposi
 import { authLocalStorage } from "../../infrastructure/persistence/authLocalStorage";
 import { RegisterDeliveryUseCase } from "../../application/use-cases/RegisterDeliveryUseCase";
 import { RegisterVendorUseCase } from "../../application/use-cases/RegisterVendorUseCase";
+import { GetMyProfileUseCase } from "../../application/use-cases/GetMyProfileUseCase";
 import { VerifyDocumentUseCase } from "../../application/use-cases/VerifyDocumentUseCase";
 import { VerificationRepositoryImpl } from "../../infrastructure/repositories/VerificationRepositoryImpl";
 import type { RegisterDeliveryRequest, RegisterRequest } from "../../domain/types/auth.types";
@@ -33,6 +35,11 @@ const registerDeliveryUseCase = useMemo(
 
 const registerVendorUseCase = useMemo(
   () => new RegisterVendorUseCase(authRepository),
+  [authRepository]
+);
+
+const getMyProfileUseCase = useMemo(
+  () => new GetMyProfileUseCase(authRepository),
   [authRepository]
 );
 
@@ -82,6 +89,23 @@ const [state, setState] = useState<AuthState>({
         isLoading: false,
         error: null,
       }));
+
+      // Fetch full profile after login to get firstName + firstLastName
+      try {
+        const profile = await getMyProfileUseCase.execute();
+        setMyProfile(profile);
+        // Update user name with real name from profile
+        if (profile.firstName) {
+          setState((prev) => ({
+            ...prev,
+            user: prev.user
+              ? { ...prev.user, name: `${profile.firstName} ${profile.firstLastName}` }
+              : null,
+          }));
+        }
+      } catch {
+        // Profile fetch is best-effort
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Error en login";
@@ -94,7 +118,7 @@ const [state, setState] = useState<AuthState>({
 
       throw error;
     }
-  }, [loginUseCase]);
+  }, [loginUseCase, getMyProfileUseCase]);
 
   // REGISTER
   const register = useCallback(
@@ -221,6 +245,27 @@ const [state, setState] = useState<AuthState>({
     }
   }, [logoutUseCase]);
 
+  // MY PROFILE
+  const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
+
+  const fetchMyProfile = useCallback(async () => {
+    try {
+      const profile = await getMyProfileUseCase.execute();
+      setMyProfile(profile);
+      // Update user name from profile
+      if (profile.firstName) {
+        setState((prev) => ({
+          ...prev,
+          user: prev.user
+            ? { ...prev.user, name: `${profile.firstName} ${profile.firstLastName}` }
+            : null,
+        }));
+      }
+    } catch {
+      setMyProfile(null);
+    }
+  }, [getMyProfileUseCase]);
+
   // VERIFY DOCUMENT
   const verifyDocument = useCallback(
     async (images: File[], data: VerifyDocumentRequest) => {
@@ -237,6 +282,8 @@ const [state, setState] = useState<AuthState>({
     registerDelivery,
     registerVendor,
     verifyDocument,
+    myProfile,
+    fetchMyProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

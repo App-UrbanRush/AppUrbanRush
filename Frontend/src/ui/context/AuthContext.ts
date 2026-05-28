@@ -7,6 +7,7 @@ import { createContext } from "react";
 import type { AuthState, RegisterDeliveryRequest, RegisterRequest } from "../../domain/types/auth.types";
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
 import type { VerifyDocumentRequest, VerificationResult } from "../../domain/types/verification.types";
+import type { UserProfile } from "../../domain/interfaces/IAuthRepository";
 
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
@@ -19,6 +20,8 @@ export interface AuthContextType extends AuthState {
 
   isLoading: boolean;
   error: string | null;
+  myProfile: UserProfile | null;
+  fetchMyProfile: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
