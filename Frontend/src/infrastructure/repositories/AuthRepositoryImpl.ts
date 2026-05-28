@@ -1,8 +1,8 @@
 import type { IAuthRepository } from "../../domain/interfaces/IAuthRepository";
 import type { AuthResponse, LoginRequest, RegisterRequest, RegisterDeliveryRequest } from "../../domain/types/auth.types";
-import { loginApi, registerApi, logoutApi } from "../api/authApi";
+import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
+import { loginApi, registerApi, registerDeliveryApi, registerVendorApi } from "../api/authApi";
 import { authLocalStorage } from "../persistence/authLocalStorage";
-import { registerDeliveryApi } from "../api/authApi";
 
 export class AuthRepositoryImpl implements IAuthRepository {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
@@ -58,16 +58,11 @@ export class AuthRepositoryImpl implements IAuthRepository {
     }
   }
 
-  async logout(): Promise<void> {
-    try {
-      await logoutApi();
-    } finally {
-      // Limpiar localStorage sin importar si la llamada falló
-      authLocalStorage.clear();
-    }
+  async registerVendor(data: RegisterVendorRequest): Promise<VendorRegisterResponse> {
+    return registerVendorApi(data);
   }
 
-  async getCurrentUser(): Promise<void> {
-    // Implementar si es necesario
+  async logout(): Promise<void> {
+    authLocalStorage.clear();
   }
 }
