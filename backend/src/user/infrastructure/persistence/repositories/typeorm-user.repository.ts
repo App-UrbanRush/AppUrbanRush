@@ -197,4 +197,18 @@ export class TypeOrmUserRepository implements IUserRepository {
       resetPasswordExpiresAt: null,
     });
   }
+
+  async createFromGoogle(data: {
+    user_email: string;
+    google_id: string;
+  }): Promise<User> {
+    const entity = this.repo.create({
+      user_email: data.user_email,
+      user_password: null,
+      google_id: data.google_id,
+      status: true,
+    });
+    const saved = await this.repo.save(entity);
+    return UserMapper.toDomain(saved)!;
+  }
 }

@@ -17,6 +17,8 @@ export interface IUserRepository {
   savePeople(peopleData: any): Promise<any>;
   create(user: User, personData: any): Promise<User>;
 
+  createFromGoogle(data: { user_email: string; google_id: string }): Promise<User>;
+
 
   saveResetCode(user_id: number, code: string, expiresAt: Date): Promise<void>;
   validateResetCode(user_email: string, code: string): Promise<boolean>;

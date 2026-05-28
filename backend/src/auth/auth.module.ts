@@ -15,6 +15,10 @@ import { VendorModule } from 'src/vendor/vendor.module';
 import { EmailModule } from 'src/email/email.module';
 import { ForgotPasswordUseCase } from "./application/use-cases/forgot-password.use-case";
 import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use-case";
+import { GoogleStrategy } from "./infrastructure/strategies/google.strategy";
+import { GoogleAuthGuard } from "./infrastructure/guards/google-auth.guard";
+import { GoogleLoginUseCase } from "./application/use-cases/google-login.use-case";
+import { UserRolModule } from "src/user_rol/user_rol.module";
 
 @Module({
     imports: [
@@ -27,11 +31,12 @@ import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use
                 signOptions: { expiresIn: '30m' }
             })
         }),
-   
+
         UserModule,
         CourierModule,
         VendorModule,
         EmailModule,
+        UserRolModule,
     ],
     providers: [
         LoginUseCase,
@@ -42,8 +47,11 @@ import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use
         RegisterVendorUseCase,
         ForgotPasswordUseCase,
         ResetPasswordUseCase,
+        GoogleStrategy,      
+        GoogleAuthGuard,   
+        GoogleLoginUseCase,
     ],
     controllers: [AuthController],
-    exports: [RolesGuard, JwtStrategy, PassportModule, JwtModule], 
+    exports: [RolesGuard, JwtStrategy, PassportModule, JwtModule],
 })
 export class AuthModule { }

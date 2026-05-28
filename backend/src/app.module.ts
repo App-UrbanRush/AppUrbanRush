@@ -39,6 +39,7 @@ import { EmailModule } from './email/email.module';
     VerificationModule,
     VendorModule,
     EmailModule,
+    
   ],
 })
 export class AppModule {}

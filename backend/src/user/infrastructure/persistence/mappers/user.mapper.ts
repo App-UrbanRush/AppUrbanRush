@@ -5,7 +5,6 @@ export class UserMapper {
   static toDomain(entity: UserEntity | null): User | null {
     if (!entity) return null;
     
-    // Extraemos los IDs de los roles como números para que el Guard funcione
     const rolIds = entity.userroles 
       ? entity.userroles.map(ur => Number(ur.rol.rol_id)) 
       : [];
@@ -13,7 +12,7 @@ export class UserMapper {
     return new User(
       entity.user_id,
       entity.user_email,
-      entity.user_password,
+      entity.user_password ?? undefined, // ← null → undefined
       rolIds as any,
     );
   }
@@ -21,7 +20,6 @@ export class UserMapper {
   static toPersistence(domain: User): UserEntity {
     const entity = new UserEntity();
     
-    // Ajustado a los nombres de tu clase User (user_id, user_email...)
     if (domain.user_id !== null) {
         entity.user_id = domain.user_id;
     }
@@ -32,7 +30,6 @@ export class UserMapper {
         entity.user_password = domain.user_password;
     }
 
-    
     return entity;
   }
 }

@@ -16,8 +16,8 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 255, unique: true })
   user_email: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  user_password: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  user_password: string | null;
 
   @Column({ type: 'boolean', default: true })
   status: boolean;
@@ -27,6 +27,9 @@ export class UserEntity {
 
   @Column({ name: 'reset_password_expires_at', type: 'timestamp', nullable: true })
   resetPasswordExpiresAt: Date | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  google_id: string;
 
 
   @Column({
