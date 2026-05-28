@@ -62,3 +62,18 @@ export const registerVendorApi = async (data: RegisterVendorRequest): Promise<Ve
   const response = await authApi.post<VendorRegisterResponse>("/auth/register-vendor", data);
   return response.data;
 };
+
+export interface MyProfileApiResponse {
+  id: number;
+  firstName: string;
+  firstLastName: string;
+  cellphone: string;
+  address: string;
+  gender: string;
+  userId: number;
+}
+
+export const getMyProfileApi = async (): Promise<MyProfileApiResponse> => {
+  const response = await authApi.get("/people/my-profile");
+  return response.data;
+};

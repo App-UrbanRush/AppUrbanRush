@@ -1,0 +1,7 @@
+.store-card-rec, .store-card-nearby {
+  transition: box-shadow 0.18s;
+}
+
+.store-card-rec:hover, .store-card-nearby:hover {
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12) !important;
+}

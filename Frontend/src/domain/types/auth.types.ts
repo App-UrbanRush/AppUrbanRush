@@ -10,6 +10,13 @@ export interface User {
   role: string;
 }
 
+export const ROLE_MAP: Record<number, string> = {
+  1: "Administrador",
+  2: "Usuario",
+  3: "Domiciliario",
+  4: "Negocio",
+};
+
 export interface AuthResponse {
   access_token: string;
   user: User;
