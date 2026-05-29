@@ -1,8 +1,8 @@
 import type { IAuthRepository, UserProfile } from "../../domain/interfaces/IAuthRepository";
 import { ROLE_MAP } from "../../domain/types/auth.types";
-import type { AuthResponse, LoginRequest, RegisterRequest, RegisterDeliveryRequest } from "../../domain/types/auth.types";
+import type { AuthResponse, LoginRequest, RegisterRequest, RegisterDeliveryRequest, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from "../../domain/types/auth.types";
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
-import { loginApi, registerApi, registerDeliveryApi, registerVendorApi, getMyProfileApi } from "../api/authApi";
+import { loginApi, registerApi, registerDeliveryApi, registerVendorApi, getMyProfileApi, forgotPasswordApi, resetPasswordApi } from "../api/authApi";
 import { authLocalStorage } from "../persistence/authLocalStorage";
 import { decodeJwt } from "../utils/jwtDecoder";
 
@@ -85,6 +85,16 @@ export class AuthRepositoryImpl implements IAuthRepository {
 
   async registerVendor(data: RegisterVendorRequest): Promise<VendorRegisterResponse> {
     return registerVendorApi(data);
+  }
+
+  async forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
+    const response = await forgotPasswordApi(data.user_email);
+    return response;
+  }
+
+  async resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse> {
+    const response = await resetPasswordApi(data);
+    return response;
   }
 
   async getMyProfile(): Promise<UserProfile> {

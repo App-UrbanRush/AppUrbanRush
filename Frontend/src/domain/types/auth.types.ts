@@ -61,4 +61,22 @@ export interface RegisterDeliveryRequest {
   expedition_date?: string;
   expedition_place?: string;
 }
+
+export interface ForgotPasswordRequest {
+  user_email: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+}
+
+export interface ResetPasswordRequest {
+  user_email: string;
+  code: string;
+  new_password: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}
 

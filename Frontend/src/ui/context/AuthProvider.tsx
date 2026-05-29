@@ -6,6 +6,8 @@ import type { UserProfile } from "../../domain/interfaces/IAuthRepository";
 import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
 import { RegisterUseCase } from "../../application/use-cases/RegisterUseCase";
 import { LogoutUseCase } from "../../application/use-cases/LogoutUseCase";
+import { ForgotPasswordUseCase } from "../../application/use-cases/ForgotPasswordUseCase";
+import { ResetPasswordUseCase } from "../../application/use-cases/ResetPasswordUseCase";
 import { AuthRepositoryImpl } from "../../infrastructure/repositories/AuthRepositoryImpl";
 import { authLocalStorage } from "../../infrastructure/persistence/authLocalStorage";
 import { RegisterDeliveryUseCase } from "../../application/use-cases/RegisterDeliveryUseCase";
@@ -16,6 +18,8 @@ import { VerificationRepositoryImpl } from "../../infrastructure/repositories/Ve
 import type { RegisterDeliveryRequest, RegisterRequest } from "../../domain/types/auth.types";
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
 import type { VerifyDocumentRequest } from "../../domain/types/verification.types";
+import type { ForgotPasswordRequest, ForgotPasswordResponse } from "../../domain/types/auth.types";
+import type { ResetPasswordRequest, ResetPasswordResponse } from "../../domain/types/auth.types";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -35,6 +39,16 @@ const registerDeliveryUseCase = useMemo(
 
 const registerVendorUseCase = useMemo(
   () => new RegisterVendorUseCase(authRepository),
+  [authRepository]
+);
+
+const forgotPasswordUseCase = useMemo(
+  () => new ForgotPasswordUseCase(authRepository),
+  [authRepository]
+);
+
+const resetPasswordUseCase = useMemo(
+  () => new ResetPasswordUseCase(authRepository),
   [authRepository]
 );
 
@@ -245,6 +259,68 @@ const [state, setState] = useState<AuthState>({
     }
   }, [logoutUseCase]);
 
+  // FORGOT PASSWORD
+  const forgotPassword = useCallback(
+    async (email: string) => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        const response = await forgotPasswordUseCase.execute({ user_email: email });
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: null,
+        }));
+
+        return response;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Error al enviar código de recuperación";
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+
+        throw error;
+      }
+    },
+    [forgotPasswordUseCase]
+  );
+
+  // RESET PASSWORD
+  const resetPassword = useCallback(
+    async (data: { user_email: string; code: string; new_password: string }) => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        const response = await resetPasswordUseCase.execute(data);
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: null,
+        }));
+
+        return response;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Error al restablecer contraseña";
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+
+        throw error;
+      }
+    },
+    [resetPasswordUseCase]
+  );
+
   // MY PROFILE
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
 
@@ -274,17 +350,19 @@ const [state, setState] = useState<AuthState>({
     [verifyDocumentUseCase]
   );
 
-  const value: AuthContextType = {
-    ...state,
-    login,
-    register,
-    logout,
-    registerDelivery,
-    registerVendor,
-    verifyDocument,
-    myProfile,
-    fetchMyProfile,
-  };
+const value: AuthContextType = {
+  ...state,
+  login,
+  register,
+  logout,
+  registerDelivery,
+  registerVendor,
+  forgotPassword,
+  resetPassword,
+  verifyDocument,
+  myProfile,
+  fetchMyProfile,
+};
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -5,6 +5,8 @@ import Register from "../pages/Register/Register";
 import DeliveryRegister from "../pages/DeliveryRegister/DeliveryRegister";
 import RegisterSelect from "../pages/RegisterSelect/RegisterSelect";
 import VendorRegister from "../pages/VendorRegister/VendorRegister";
+import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import PrivateRoute from "../components/PrivateRoute";
 import Layout from "../components/layout/Layout/Layout";
 
@@ -17,6 +19,8 @@ const AppRouter = () => {
         <Route path="/register-delivery" element={<DeliveryRegister />} />
         <Route path="/register-select" element={<RegisterSelect />} />
         <Route path="/register-vendor" element={<VendorRegister />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/"
           element={
