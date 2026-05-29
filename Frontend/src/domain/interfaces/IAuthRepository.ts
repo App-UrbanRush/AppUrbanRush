@@ -1,5 +1,5 @@
 
-import type { AuthResponse, LoginRequest, RegisterRequest, RegisterDeliveryRequest } from "../types/auth.types";
+import type { AuthResponse, LoginRequest, RegisterRequest, RegisterDeliveryRequest, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from "../types/auth.types";
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../types/vendor.types";
 
 export interface UserProfile {
@@ -17,4 +17,6 @@ export interface IAuthRepository {
   registerVendor(data: RegisterVendorRequest): Promise<VendorRegisterResponse>;
   getMyProfile(): Promise<UserProfile>;
   logout(): Promise<void>;
+  forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse>;
+  resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse>;
 }

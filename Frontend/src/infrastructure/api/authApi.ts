@@ -77,3 +77,19 @@ export const getMyProfileApi = async (): Promise<MyProfileApiResponse> => {
   const response = await authApi.get("/people/my-profile");
   return response.data;
 };
+
+export const forgotPasswordApi = async (email: string) => {
+  const response = await authApi.post("/auth/forgot-password", { 
+    user_email: email 
+  });
+  return response.data;
+};
+
+export const resetPasswordApi = async (data: {
+  user_email: string;
+  code: string;
+  new_password: string;
+}) => {
+  const response = await authApi.post("/auth/reset-password", data);
+  return response.data;
+};
