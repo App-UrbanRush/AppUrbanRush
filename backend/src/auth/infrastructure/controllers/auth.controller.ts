@@ -1,3 +1,4 @@
+// src/auth/infrastructure/controllers/auth.controller.ts
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from 'src/auth/application/dtos/login/login.dto';
@@ -14,6 +15,9 @@ import { ForgotPasswordUseCase } from 'src/auth/application/use-cases/forgot-pas
 import { ResetPasswordUseCase } from 'src/auth/application/use-cases/reset-password.use-case';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { GoogleLoginUseCase } from 'src/auth/application/use-cases/google-login.use-case';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
+import { Inject } from '@nestjs/common';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,49 +30,53 @@ export class AuthController {
     private readonly _forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly _resetPasswordUseCase: ResetPasswordUseCase,
     private readonly googleLoginUseCase: GoogleLoginUseCase,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: ISessionRepository,
   ) {}
 
   @Post('login')
-  @ApiOperation({ summary: 'Inicio de sesión', description: 'Valida credenciales y devuelve un JWT' })
+  @ApiOperation({ summary: 'Inicio de sesión' })
   @ApiResponse({ status: 200, description: 'Login exitoso.' })
   @ApiResponse({ status: 401, description: 'Credenciales incorrectas.' })
   async login(@Body() loginDto: LoginDto) {
     return this._loginUseCase.execute(loginDto);
   }
 
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Cerrar sesión', description: 'Invalida el token en Redis' })
+  @ApiResponse({ status: 200, description: 'Sesión cerrada correctamente.' })
+  async logout(@Request() req) {
+    await this.sessionRepository.delete(req.user.user_id);
+    return { message: 'Sesión cerrada correctamente' };
+  }
+
   @Post('register')
-  @ApiOperation({ summary: 'Registro de usuario completo', description: 'Crea Usuario, Persona y asigna Rol' })
+  @ApiOperation({ summary: 'Registro de usuario completo' })
   @ApiResponse({ status: 201, description: 'Usuario creado correctamente.' })
   @ApiResponse({ status: 400, description: 'El correo ya existe o datos inválidos.' })
   async register(@Body() dto: CreateFullUserDto) {
     return this._registerUseCase.execute(dto);
   }
 
+  @Post('register-courier')
+  @ApiOperation({ summary: 'Registro para Repartidores' })
+  @ApiResponse({ status: 201, description: 'Repartidor registrado exitosamente.' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
+  async registerCourier(@Body() dto: RegisterCourierDto) {
+    return this._registerCourierUseCase.execute(dto);
+  }
 
- @Post('register-courier') 
- @ApiOperation({ 
-   summary: 'Registro para Repartidores', 
-   description: 'Crea cuenta de usuario y perfil de repartidor con datos de vehículo' 
- })
- @ApiResponse({ status: 201, description: 'Repartidor registrado exitosamente.' })
- @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
- async registerCourier(@Body() dto: RegisterCourierDto) {
-   return this._registerCourierUseCase.execute(dto);
- }
+  @Post('register-vendor')
+  @ApiOperation({ summary: 'Registro para Vendedores/Restaurantes' })
+  @ApiResponse({ status: 201, description: 'Vendedor registrado exitosamente.' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
+  async registerVendor(@Body() dto: RegisterVendorDto) {
+    return this._registerVendorUseCase.execute(dto);
+  }
 
- @Post('register-vendor')
- @ApiOperation({
-   summary: 'Registro para Vendedores/Restaurantes',
-   description: 'Crea cuenta de usuario y perfil de negocio'
- })
- @ApiResponse({ status: 201, description: 'Vendedor registrado exitosamente.' })
- @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
- async registerVendor(@Body() dto: RegisterVendorDto) {
-   return this._registerVendorUseCase.execute(dto);
- }
- 
- @Post('forgot-password')
-  @ApiOperation({ summary: 'Solicitar código de recuperación', description: 'Genera un PIN de 6 dígitos y lo envía por correo' })
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Solicitar código de recuperación' })
   @ApiResponse({ status: 200, description: 'Código enviado.' })
   @ApiResponse({ status: 404, description: 'Correo no registrado.' })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
@@ -76,25 +84,22 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  @ApiOperation({ summary: 'Restablecer contraseña con código', description: 'Valida el PIN y actualiza la contraseña' })
+  @ApiOperation({ summary: 'Restablecer contraseña con código' })
   @ApiResponse({ status: 200, description: 'Contraseña cambiada con éxito.' })
-  @ApiResponse({ status: 400, description: 'Código inválido, expirado o datos incorrectos.' })
+  @ApiResponse({ status: 400, description: 'Código inválido o expirado.' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this._resetPasswordUseCase.execute(dto);
   }
 
-@Get('google')
-@UseGuards(GoogleAuthGuard)
-@ApiOperation({ summary: 'Iniciar sesión con Google' })
-async googleAuth() {
-  // Passport redirige automáticamente a Google
-}
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Iniciar sesión con Google' })
+  async googleAuth() {}
 
-@Get('google/callback')
-@UseGuards(GoogleAuthGuard)
-@ApiOperation({ summary: 'Callback de Google OAuth' })
-async googleCallback(@Request() req) {
-  return this.googleLoginUseCase.execute(req.user);
-}
-
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Callback de Google OAuth' })
+  async googleCallback(@Request() req) {
+    return this.googleLoginUseCase.execute(req.user);
+  }
 }

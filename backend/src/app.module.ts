@@ -10,6 +10,7 @@ import { CourierModule } from './courier/courier.module';
 import { VerificationModule } from './verification/verification.module';
 import { VendorModule } from './vendor/vendor.module';
 import { EmailModule } from './email/email.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { EmailModule } from './email/email.module';
     VerificationModule,
     VendorModule,
     EmailModule,
+    RedisModule
     
   ],
 })

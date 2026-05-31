@@ -1,7 +1,9 @@
+// src/auth/application/use-cases/google-login.use-case.ts
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IUserRepository } from 'src/user/domain/repositories/user.repository.interface';
 import { IUserRolesRepository } from 'src/user_rol/domain/repositories/user-roles.repository.interface';
+import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
 
 @Injectable()
 export class GoogleLoginUseCase {
@@ -10,8 +12,10 @@ export class GoogleLoginUseCase {
     private readonly userRepository: IUserRepository,
     @Inject('IUserRolesRepository')
     private readonly userRolesRepository: IUserRolesRepository,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: ISessionRepository,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async execute(googleUser: {
     google_id: string;
@@ -38,8 +42,10 @@ export class GoogleLoginUseCase {
       rolIds,
     };
 
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    const access_token = this.jwtService.sign(payload);
+
+    await this.sessionRepository.save(user.user_id, access_token, 1800); 
+
+    return { access_token };
   }
 }
