@@ -97,6 +97,9 @@ src/people/infrastructure/persistence/entities/people.entity.ts
 src/people/infrastructure/persistence/mappers/people.mapper.ts
 src/people/infrastructure/persistence/repositories/typeorm-people.repository.ts
 src/people/people.module.ts
+src/redis/domain/repositories/session.repository.interface.ts
+src/redis/infrastructure/repositories/redis-session.repository.ts
+src/redis/redis.module.ts
 src/roles/application/services/roles.service.ts
 src/roles/domain/repositories/roles.repository.interface.ts
 src/roles/infrastructure/persistence/entity/rol.entity.ts
@@ -281,6 +284,7 @@ export default tseslint.config(
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/cache-manager": "^3.1.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
@@ -290,10 +294,13 @@ export default tseslint.config(
     "@nestjs/swagger": "^11.2.7",
     "@nestjs/typeorm": "^11.0.1",
     "bcrypt": "^6.0.0",
+    "cache-manager": "^7.2.8",
+    "cache-manager-ioredis": "^2.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "groq-sdk": "^1.1.2",
     "handlebars": "^4.7.9",
+    "ioredis": "^5.11.0",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.5",
     "passport": "^0.7.0",
@@ -834,11 +841,10 @@ export class ForgotPasswordUseCase {
 </file>
 
 <file path="src/auth/application/use-cases/google-login.use-case.ts">
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IUserRepository } from 'src/user/domain/repositories/user.repository.interface';
 import { IUserRolesRepository } from 'src/user_rol/domain/repositories/user-roles.repository.interface';
-import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class GoogleLoginUseCase {
@@ -848,8 +854,7 @@ export class GoogleLoginUseCase {
     @Inject('IUserRolesRepository')
     private readonly userRolesRepository: IUserRolesRepository,
     private readonly jwtService: JwtService,
-    private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   async execute(googleUser: {
     google_id: string;
@@ -857,38 +862,17 @@ export class GoogleLoginUseCase {
     firstName: string;
     firstLastName: string;
     picture?: string;
-  }): Promise<{ access_token: string; isNewUser: boolean }> {
+  }): Promise<{ access_token: string }> {
 
-    // Buscar si ya existe el usuario por email
-    let user = await this.userRepository.findOneByEmail(googleUser.email);
-    let isNewUser = false;
+    const user = await this.userRepository.findOneByEmail(googleUser.email);
 
-    if (!user) {
-      // Registro automático como cliente (rol 2)
-      isNewUser = true;
-      user = await this.userRepository.create({
-        user_email: googleUser.email,
-        user_password: null, // Sin contraseña — solo Google
-        google_id: googleUser.google_id,
-        status: 'ACTIVE', // Google ya verificó el email
-      });
-
-      // Asignar rol cliente (rol_id = 2)
-      await this.userRolesRepository.assignRole(user.user_id, 2);
-
-      // Email de bienvenida
-      try {
-        await this.emailService.sendWelcomeEmail(
-          googleUser.email,
-          googleUser.firstName,
-        );
-      } catch (e) {
-        console.warn('Email de bienvenida no enviado:', e.message);
-      }
+    if (!user || user.user_id === null) {
+      throw new UnauthorizedException(
+        'No tienes una cuenta registrada. Por favor regístrate primero.',
+      );
     }
 
-    // Obtener roles para el token
-    const roles = await this.userRolesRepository.findRolesByUserId(user.user_id);
+    const roles = await this.userRolesRepository.findByUser(user.user_id);
     const rolIds = roles.map((r) => r.rol_id);
 
     const payload = {
@@ -899,7 +883,6 @@ export class GoogleLoginUseCase {
 
     return {
       access_token: this.jwtService.sign(payload),
-      isNewUser,
     };
   }
 }
@@ -908,15 +891,18 @@ export class GoogleLoginUseCase {
 <file path="src/auth/application/use-cases/login.use-case.ts">
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt'; // Cambiado para evitar problemas de importación
+import * as bcrypt from 'bcrypt'; 
 import { IUserRepository } from '../../../user/domain/repositories/user.repository.interface';
 import { LoginDto } from '../dtos/login/login.dto';
+import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
 
 @Injectable()
 export class LoginUseCase {
   constructor(
     @Inject('IUserRepository') private readonly _userRepo: IUserRepository,
     private readonly jwtService: JwtService,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: ISessionRepository,
   ) {}
 
   async execute(dto: LoginDto) {
@@ -933,14 +919,18 @@ export class LoginUseCase {
     }
 
     const payload = { 
-        user_id: user.user_id, 
-        user_email: user.user_email,
-        rolIds: user.roles || [] 
-      };
-  
-      return {
-        access_token: this.jwtService.sign(payload),
-        message: 'Login exitoso',
+      user_id: user.user_id, 
+      user_email: user.user_email,
+      rolIds: user.roles || [] 
+    };
+
+    const access_token = this.jwtService.sign(payload); // ← separar para usarlo abajo
+
+    await this.sessionRepository.save(user.user_id!, access_token, 1800); // ← aquí dentro
+
+    return {
+      access_token,
+      message: 'Login exitoso',
       user: {
         email: user.user_email,
         roles: user.roles
@@ -1263,6 +1253,7 @@ import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use
 import { GoogleStrategy } from "./infrastructure/strategies/google.strategy";
 import { GoogleAuthGuard } from "./infrastructure/guards/google-auth.guard";
 import { GoogleLoginUseCase } from "./application/use-cases/google-login.use-case";
+import { UserRolModule } from "src/user_rol/user_rol.module";
 
 @Module({
     imports: [
@@ -1280,6 +1271,7 @@ import { GoogleLoginUseCase } from "./application/use-cases/google-login.use-cas
         CourierModule,
         VendorModule,
         EmailModule,
+        UserRolModule,
     ],
     providers: [
         LoginUseCase,
@@ -1494,7 +1486,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET'),
       callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL'),
       scope: ['email', 'profile'],
-    });
+    } as any);
   }
 
   async validate(
@@ -2395,6 +2387,42 @@ import { PeopleController } from './infrastructure/controllers/people.controller
 export class PeopleModule {}
 </file>
 
+<file path="src/redis/domain/repositories/session.repository.interface.ts">
+export interface ISessionRepository {
+    save(userId: number, token: string, ttlSeconds: number): Promise<void>;
+    find(userId: number): Promise<string | null>;
+    delete(userId: number): Promise<void>;
+  }
+</file>
+
+<file path="src/redis/infrastructure/repositories/redis-session.repository.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { ISessionRepository } from '../../domain/repositories/session.repository.interface';
+
+@Injectable()
+export class RedisSessionRepository implements ISessionRepository {
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+
+  async save(userId: number, token: string, ttlSeconds: number): Promise<void> {
+    await this.cacheManager.set(`session:${userId}`, token, ttlSeconds * 1000); 
+  }
+
+  async find(userId: number): Promise<string | null> {
+    return await this.cacheManager.get<string>(`session:${userId}`) ?? null;
+  }
+
+  async delete(userId: number): Promise<void> {
+    await this.cacheManager.del(`session:${userId}`);
+  }
+}
+</file>
+
+<file path="src/redis/redis.module.ts">
+
+</file>
+
 <file path="src/roles/application/services/roles.service.ts">
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { IRolesRepository } from '../../domain/repositories/roles.repository.interface';
@@ -2820,6 +2848,8 @@ export interface IUserRepository {
   savePeople(peopleData: any): Promise<any>;
   create(user: User, personData: any): Promise<User>;
 
+  createFromGoogle(data: { user_email: string; google_id: string }): Promise<User>;
+
 
   saveResetCode(user_id: number, code: string, expiresAt: Date): Promise<void>;
   validateResetCode(user_email: string, code: string): Promise<boolean>;
@@ -2928,7 +2958,6 @@ export class UserMapper {
   static toDomain(entity: UserEntity | null): User | null {
     if (!entity) return null;
     
-    // Extraemos los IDs de los roles como números para que el Guard funcione
     const rolIds = entity.userroles 
       ? entity.userroles.map(ur => Number(ur.rol.rol_id)) 
       : [];
@@ -2936,7 +2965,7 @@ export class UserMapper {
     return new User(
       entity.user_id,
       entity.user_email,
-      entity.user_password,
+      entity.user_password ?? undefined, // ← null → undefined
       rolIds as any,
     );
   }
@@ -2944,7 +2973,6 @@ export class UserMapper {
   static toPersistence(domain: User): UserEntity {
     const entity = new UserEntity();
     
-    // Ajustado a los nombres de tu clase User (user_id, user_email...)
     if (domain.user_id !== null) {
         entity.user_id = domain.user_id;
     }
@@ -2955,7 +2983,6 @@ export class UserMapper {
         entity.user_password = domain.user_password;
     }
 
-    
     return entity;
   }
 }
