@@ -1,6 +1,8 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './config/constants';
@@ -11,6 +13,9 @@ import { VerificationModule } from './verification/verification.module';
 import { VendorModule } from './vendor/vendor.module';
 import { EmailModule } from './email/email.module';
 import { RedisModule } from './redis/redis.module';
+import { ProductModule } from './product/product.module';
+import { OrderModule } from './order/order.module';
+
 
 @Module({
   imports: [
@@ -18,6 +23,8 @@ import { RedisModule } from './redis/redis.module';
       envFilePath: '.env',
       isGlobal: true,
     }),
+
+    // PostgreSQL — usuarios, roles, auth
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -27,11 +34,20 @@ import { RedisModule } from './redis/redis.module';
         username: configService.get<string>(DB_USER),
         password: configService.get<string>(DB_PASSWORD),
         database: configService.get<string>(DB_DATABASE),
-        autoLoadEntities: true, 
-        synchronize: true,      
+        autoLoadEntities: true,
+        synchronize: true,
         logging: false,
       }),
     }),
+
+    // MongoDB — productos, pedidos
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI'),
+      }),
+    }),
+
     UserModule,
     RolesModule,
     PeopleModule,
@@ -40,8 +56,9 @@ import { RedisModule } from './redis/redis.module';
     VerificationModule,
     VendorModule,
     EmailModule,
-    RedisModule
-    
+    RedisModule,
+    ProductModule,
+    OrderModule,
   ],
 })
 export class AppModule {}
