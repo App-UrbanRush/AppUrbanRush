@@ -6,6 +6,8 @@ import { WompiService } from './infrastructure/services/wompi.service';
 import { CreatePaymentUseCase } from './application/use-cases/create-payment.use-case';
 import { ConfirmPaymentUseCase } from './application/use-cases/confirm-payment.use-case';
 import { GetPaymentByOrderUseCase } from './application/use-cases/get-payment-by-order.use-case';
+import { GetPaymentsByUserUseCase } from './application/use-cases/get-payments-by-user.use-case';
+import { GetPaymentsByVendorUseCase } from './application/use-cases/get-payments-by-vendor.use-case';
 import { PaymentController } from './infrastructure/controllers/payment.controller';
 import { OrderModule } from 'src/order/order.module';
 
@@ -22,6 +24,8 @@ import { OrderModule } from 'src/order/order.module';
     CreatePaymentUseCase,
     ConfirmPaymentUseCase,
     GetPaymentByOrderUseCase,
+    GetPaymentsByUserUseCase,    
+    GetPaymentsByVendorUseCase, 
   ],
   exports: ['IPaymentRepository'],
 })

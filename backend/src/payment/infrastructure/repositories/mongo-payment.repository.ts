@@ -16,6 +16,8 @@ export class MongoPaymentRepository implements IPaymentRepository {
   async create(payment: PaymentModel): Promise<PaymentModel> {
     const created = new this.paymentModel({
       order_id: payment.order_id,
+      user_id: payment.user_id,
+      vendor_id: payment.vendor_id,        
       wompi_transaction_id: payment.wompi_transaction_id,
       amount: payment.amount,
       currency: payment.currency,
@@ -36,6 +38,22 @@ export class MongoPaymentRepository implements IPaymentRepository {
   async findByReference(reference: string): Promise<PaymentModel | null> {
     const doc = await this.paymentModel.findOne({ reference }).exec();
     return doc ? PaymentMapper.toDomain(doc) : null;
+  }
+
+  async findByUserId(userId: number): Promise<PaymentModel[]> {
+    const docs = await this.paymentModel
+      .find({ user_id: userId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map(PaymentMapper.toDomain);
+  }
+
+  async findByVendorId(vendorId: number): Promise<PaymentModel[]> {
+    const docs = await this.paymentModel
+      .find({ vendor_id: vendorId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map(PaymentMapper.toDomain);
   }
 
   async updateStatus(id: string, status: string): Promise<PaymentModel | null> {
