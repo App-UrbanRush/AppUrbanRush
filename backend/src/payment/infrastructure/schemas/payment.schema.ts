@@ -6,6 +6,8 @@ export type PaymentDocument = Payment & Document;
 @Schema({ timestamps: true, collection: 'payments' })
 export class Payment {
   @Prop({ required: true }) order_id: string;
+  @Prop({ required: true }) user_id: number; 
+  @Prop({ required: true }) vendor_id: number;
   @Prop({ required: true }) wompi_transaction_id: string;
   @Prop({ required: true }) amount: number;
   @Prop({ default: 'COP' }) currency: string;

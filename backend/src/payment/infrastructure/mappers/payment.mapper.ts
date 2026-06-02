@@ -6,6 +6,8 @@ export class PaymentMapper {
     return new PaymentModel(
       doc._id.toString(),
       doc.order_id,
+      doc.user_id,
+      doc.vendor_id,                     
       doc.wompi_transaction_id,
       doc.amount,
       doc.currency,
