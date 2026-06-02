@@ -15,6 +15,8 @@ import { EmailModule } from './email/email.module';
 import { RedisModule } from './redis/redis.module';
 import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module';
+import { PaymentModule } from './payment/payment.module';
+import { SharedModule } from './shared/shared.module';
 
 
 @Module({
@@ -59,6 +61,8 @@ import { OrderModule } from './order/order.module';
     RedisModule,
     ProductModule,
     OrderModule,
+    PaymentModule,
+    SharedModule,
   ],
 })
 export class AppModule {}

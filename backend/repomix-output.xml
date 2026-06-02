@@ -87,6 +87,34 @@ src/email/templates/assets/logo-urbanrush.png
 src/email/templates/reset-password.hbs
 src/email/templates/welcome.hbs
 src/main.ts
+src/order/application/dtos/create-order.dto.ts
+src/order/application/use-cases/create-order.use-case.ts
+src/order/application/use-cases/get-available-orders.use-case.ts
+src/order/application/use-cases/get-orders-by-user.use-case.ts
+src/order/application/use-cases/get-orders-by-vendor.use-case.ts
+src/order/application/use-cases/update-order-status.use-case.ts
+src/order/domain/entities/order.model.ts
+src/order/domain/repositories/order.repository.interface.ts
+src/order/infrastructure/controllers/order.controller.ts
+src/order/infrastructure/mappers/order.mapper.ts
+src/order/infrastructure/repositories/mongo-order.repository.ts
+src/order/infrastructure/schemas/order.schema.ts
+src/order/order.module.ts
+src/payment/application/dtos/create-payment.dto.ts
+src/payment/application/dtos/wompi-webhook.dto.ts
+src/payment/application/use-cases/confirm-payment.use-case.ts
+src/payment/application/use-cases/create-payment.use-case.ts
+src/payment/application/use-cases/get-payment-by-order.use-case.ts
+src/payment/application/use-cases/get-payments-by-user.use-case.ts
+src/payment/application/use-cases/get-payments-by-vendor.use-case.ts
+src/payment/domain/entities/payment.model.ts
+src/payment/domain/repositories/payment.repository.interface.ts
+src/payment/infrastructure/controllers/payment.controller.ts
+src/payment/infrastructure/mappers/payment.mapper.ts
+src/payment/infrastructure/repositories/mongo-payment.repository.ts
+src/payment/infrastructure/schemas/payment.schema.ts
+src/payment/infrastructure/services/wompi.service.ts
+src/payment/payment.module.ts
 src/people/application/dtos/create-people.dto.ts
 src/people/application/dtos/update-people.dto.ts
 src/people/application/services/people.service.ts
@@ -97,6 +125,21 @@ src/people/infrastructure/persistence/entities/people.entity.ts
 src/people/infrastructure/persistence/mappers/people.mapper.ts
 src/people/infrastructure/persistence/repositories/typeorm-people.repository.ts
 src/people/people.module.ts
+src/product/application/dtos/create-product.dto.ts
+src/product/application/dtos/update-product.dto.ts
+src/product/application/use-cases/create-product.use-case.ts
+src/product/application/use-cases/delete-product.use-case.ts
+src/product/application/use-cases/get-all-products.use-case.ts
+src/product/application/use-cases/get-products-by-vendor.use-case.ts
+src/product/application/use-cases/update-product.use-case.ts
+src/product/domain/entities/product.model.ts
+src/product/domain/repositories/product.repository.interface.ts
+src/product/infrastructure/controllers/product.controller.ts
+src/product/infrastructure/entities/product.entity.ts
+src/product/infrastructure/mappers/product.mapper.ts
+src/product/infrastructure/repositories/mongo-product.repository.ts
+src/product/infrastructure/schemas/product.schema.ts
+src/product/product.module.ts
 src/redis/domain/repositories/session.repository.interface.ts
 src/redis/infrastructure/repositories/redis-session.repository.ts
 src/redis/redis.module.ts
@@ -105,6 +148,8 @@ src/roles/domain/repositories/roles.repository.interface.ts
 src/roles/infrastructure/persistence/entity/rol.entity.ts
 src/roles/infrastructure/persistence/repositories/typeorm-roles.repository.ts
 src/roles/roles.module.ts
+src/shared/services/fastapi.service.ts
+src/shared/shared.module.ts
 src/user_rol/application/services/user-roles.service.ts
 src/user_rol/domain/repositories/user-roles.repository.interface.ts
 src/user_rol/infrastructure/controllers/user_rol.controller.ts
@@ -289,10 +334,12 @@ export default tseslint.config(
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
+    "@nestjs/mongoose": "^11.0.4",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.7",
     "@nestjs/typeorm": "^11.0.1",
+    "axios": "^1.16.1",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.2.8",
     "cache-manager-ioredis": "^2.1.0",
@@ -301,6 +348,7 @@ export default tseslint.config(
     "groq-sdk": "^1.1.2",
     "handlebars": "^4.7.9",
     "ioredis": "^5.11.0",
+    "mongoose": "^9.6.3",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.5",
     "passport": "^0.7.0",
@@ -504,9 +552,11 @@ export class AppController {
 </file>
 
 <file path="src/app.module.ts">
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './config/constants';
@@ -516,6 +566,12 @@ import { CourierModule } from './courier/courier.module';
 import { VerificationModule } from './verification/verification.module';
 import { VendorModule } from './vendor/vendor.module';
 import { EmailModule } from './email/email.module';
+import { RedisModule } from './redis/redis.module';
+import { ProductModule } from './product/product.module';
+import { OrderModule } from './order/order.module';
+import { PaymentModule } from './payment/payment.module';
+import { SharedModule } from './shared/shared.module';
+
 
 @Module({
   imports: [
@@ -523,6 +579,8 @@ import { EmailModule } from './email/email.module';
       envFilePath: '.env',
       isGlobal: true,
     }),
+
+    // PostgreSQL — usuarios, roles, auth
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -532,11 +590,20 @@ import { EmailModule } from './email/email.module';
         username: configService.get<string>(DB_USER),
         password: configService.get<string>(DB_PASSWORD),
         database: configService.get<string>(DB_DATABASE),
-        autoLoadEntities: true, 
-        synchronize: true,      
+        autoLoadEntities: true,
+        synchronize: true,
         logging: false,
       }),
     }),
+
+    // MongoDB — productos, pedidos
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI'),
+      }),
+    }),
+
     UserModule,
     RolesModule,
     PeopleModule,
@@ -545,7 +612,11 @@ import { EmailModule } from './email/email.module';
     VerificationModule,
     VendorModule,
     EmailModule,
-    
+    RedisModule,
+    ProductModule,
+    OrderModule,
+    PaymentModule,
+    SharedModule,
   ],
 })
 export class AppModule {}
@@ -841,10 +912,12 @@ export class ForgotPasswordUseCase {
 </file>
 
 <file path="src/auth/application/use-cases/google-login.use-case.ts">
+// src/auth/application/use-cases/google-login.use-case.ts
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IUserRepository } from 'src/user/domain/repositories/user.repository.interface';
 import { IUserRolesRepository } from 'src/user_rol/domain/repositories/user-roles.repository.interface';
+import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
 
 @Injectable()
 export class GoogleLoginUseCase {
@@ -853,8 +926,10 @@ export class GoogleLoginUseCase {
     private readonly userRepository: IUserRepository,
     @Inject('IUserRolesRepository')
     private readonly userRolesRepository: IUserRolesRepository,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: ISessionRepository,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async execute(googleUser: {
     google_id: string;
@@ -881,9 +956,11 @@ export class GoogleLoginUseCase {
       rolIds,
     };
 
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    const access_token = this.jwtService.sign(payload);
+
+    await this.sessionRepository.save(user.user_id, access_token, 1800); 
+
+    return { access_token };
   }
 }
 </file>
@@ -1304,6 +1381,7 @@ export interface PayloadInterface {
 </file>
 
 <file path="src/auth/infrastructure/controllers/auth.controller.ts">
+// src/auth/infrastructure/controllers/auth.controller.ts
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from 'src/auth/application/dtos/login/login.dto';
@@ -1320,6 +1398,9 @@ import { ForgotPasswordUseCase } from 'src/auth/application/use-cases/forgot-pas
 import { ResetPasswordUseCase } from 'src/auth/application/use-cases/reset-password.use-case';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { GoogleLoginUseCase } from 'src/auth/application/use-cases/google-login.use-case';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
+import { Inject } from '@nestjs/common';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -1332,49 +1413,53 @@ export class AuthController {
     private readonly _forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly _resetPasswordUseCase: ResetPasswordUseCase,
     private readonly googleLoginUseCase: GoogleLoginUseCase,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: ISessionRepository,
   ) {}
 
   @Post('login')
-  @ApiOperation({ summary: 'Inicio de sesión', description: 'Valida credenciales y devuelve un JWT' })
+  @ApiOperation({ summary: 'Inicio de sesión' })
   @ApiResponse({ status: 200, description: 'Login exitoso.' })
   @ApiResponse({ status: 401, description: 'Credenciales incorrectas.' })
   async login(@Body() loginDto: LoginDto) {
     return this._loginUseCase.execute(loginDto);
   }
 
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Cerrar sesión', description: 'Invalida el token en Redis' })
+  @ApiResponse({ status: 200, description: 'Sesión cerrada correctamente.' })
+  async logout(@Request() req) {
+    await this.sessionRepository.delete(req.user.user_id);
+    return { message: 'Sesión cerrada correctamente' };
+  }
+
   @Post('register')
-  @ApiOperation({ summary: 'Registro de usuario completo', description: 'Crea Usuario, Persona y asigna Rol' })
+  @ApiOperation({ summary: 'Registro de usuario completo' })
   @ApiResponse({ status: 201, description: 'Usuario creado correctamente.' })
   @ApiResponse({ status: 400, description: 'El correo ya existe o datos inválidos.' })
   async register(@Body() dto: CreateFullUserDto) {
     return this._registerUseCase.execute(dto);
   }
 
+  @Post('register-courier')
+  @ApiOperation({ summary: 'Registro para Repartidores' })
+  @ApiResponse({ status: 201, description: 'Repartidor registrado exitosamente.' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
+  async registerCourier(@Body() dto: RegisterCourierDto) {
+    return this._registerCourierUseCase.execute(dto);
+  }
 
- @Post('register-courier') 
- @ApiOperation({ 
-   summary: 'Registro para Repartidores', 
-   description: 'Crea cuenta de usuario y perfil de repartidor con datos de vehículo' 
- })
- @ApiResponse({ status: 201, description: 'Repartidor registrado exitosamente.' })
- @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
- async registerCourier(@Body() dto: RegisterCourierDto) {
-   return this._registerCourierUseCase.execute(dto);
- }
+  @Post('register-vendor')
+  @ApiOperation({ summary: 'Registro para Vendedores/Restaurantes' })
+  @ApiResponse({ status: 201, description: 'Vendedor registrado exitosamente.' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
+  async registerVendor(@Body() dto: RegisterVendorDto) {
+    return this._registerVendorUseCase.execute(dto);
+  }
 
- @Post('register-vendor')
- @ApiOperation({
-   summary: 'Registro para Vendedores/Restaurantes',
-   description: 'Crea cuenta de usuario y perfil de negocio'
- })
- @ApiResponse({ status: 201, description: 'Vendedor registrado exitosamente.' })
- @ApiResponse({ status: 400, description: 'Datos inválidos o email ya existente.' })
- async registerVendor(@Body() dto: RegisterVendorDto) {
-   return this._registerVendorUseCase.execute(dto);
- }
- 
- @Post('forgot-password')
-  @ApiOperation({ summary: 'Solicitar código de recuperación', description: 'Genera un PIN de 6 dígitos y lo envía por correo' })
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Solicitar código de recuperación' })
   @ApiResponse({ status: 200, description: 'Código enviado.' })
   @ApiResponse({ status: 404, description: 'Correo no registrado.' })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
@@ -1382,27 +1467,24 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  @ApiOperation({ summary: 'Restablecer contraseña con código', description: 'Valida el PIN y actualiza la contraseña' })
+  @ApiOperation({ summary: 'Restablecer contraseña con código' })
   @ApiResponse({ status: 200, description: 'Contraseña cambiada con éxito.' })
-  @ApiResponse({ status: 400, description: 'Código inválido, expirado o datos incorrectos.' })
+  @ApiResponse({ status: 400, description: 'Código inválido o expirado.' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this._resetPasswordUseCase.execute(dto);
   }
 
-@Get('google')
-@UseGuards(GoogleAuthGuard)
-@ApiOperation({ summary: 'Iniciar sesión con Google' })
-async googleAuth() {
-  // Passport redirige automáticamente a Google
-}
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Iniciar sesión con Google' })
+  async googleAuth() {}
 
-@Get('google/callback')
-@UseGuards(GoogleAuthGuard)
-@ApiOperation({ summary: 'Callback de Google OAuth' })
-async googleCallback(@Request() req) {
-  return this.googleLoginUseCase.execute(req.user);
-}
-
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Callback de Google OAuth' })
+  async googleCallback(@Request() req) {
+    return this.googleLoginUseCase.execute(req.user);
+  }
 }
 </file>
 
@@ -1510,23 +1592,29 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 </file>
 
 <file path="src/auth/infrastructure/strategies/jwt.strategy.ts">
+// src/auth/infrastructure/strategies/jwt.strategy.ts
 import { Injectable, UnauthorizedException, Inject, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { IUserRepository } from 'src/user/domain/repositories/user.repository.interface';
+import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
 import { JWT_SECRET } from 'src/config/constants';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) implements OnModuleInit {
   constructor(
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: ISessionRepository,
     private readonly configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
+      passReqToCallback: true,
       secretOrKeyProvider: (_request, _rawJwtToken, done) => {
         const secret = configService.get<string>(JWT_SECRET);
         if (!secret) {
@@ -1545,22 +1633,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) implements OnModuleI
     }
   }
 
-  async validate(payload: any) {
-    const { user_email } = payload;
+  async validate(req: Request, payload: any) {
+    const token = req.headers['authorization']?.split(' ')[1];
+    const storedToken = await this.sessionRepository.find(payload.user_id);
 
-    // Buscamos al usuario usando nuestra interfaz de repositorio
-    const usuario = await this.userRepository.findOneByEmail(user_email);
-
-    if (!usuario) {
-      throw new UnauthorizedException('Token no válido o usuario no encontrado');
+    if (!storedToken || storedToken !== token) {
+      throw new UnauthorizedException('Sesión inválida o expirada');
     }
 
-    // Retornamos el objeto que Nest pegará en request.user
+    // Sliding session: reinicia el contador de 30 min en cada request
+    await this.sessionRepository.save(payload.user_id, token, 1800);
+
     return {
       user_id: payload.user_id,
       user_email: payload.user_email,
-      rolIds: payload.rolIds || [],
-      // Agregamos lo que necesitemos en el request
+      rolIds: payload.rolIds,
     };
   }
 }
@@ -1580,6 +1667,14 @@ export const JWT_SECRET = 'JWT_SECRET';
 export const GOOGLE_CLIENT_ID = 'GOOGLE_CLIENT_ID';
 export const GOOGLE_CLIENT_SECRET = 'GOOGLE_CLIENT_SECRET';
 export const GOOGLE_CALLBACK_URL = 'GOOGLE_CALLBACK_URL';
+
+export const MONGO_URI = 'MONGO_URI';
+
+export const WOMPI_PUBLIC_KEY = 'WOMPI_PUBLIC_KEY';
+export const WOMPI_PRIVATE_KEY = 'WOMPI_PRIVATE_KEY';
+export const WOMPI_EVENTS_SECRET = 'WOMPI_EVENTS_SECRET';
+export const WOMPI_BASE_URL = 'WOMPI_BASE_URL';
+export const WOMPI_INTEGRITY_SECRET = 'WOMPI_INTEGRITY_SECRET';
 </file>
 
 <file path="src/courier/application/use-cases/get-courier-profile.use-case.ts">
@@ -2060,6 +2155,1021 @@ async function bootstrap() {
 bootstrap();
 </file>
 
+<file path="src/order/application/dtos/create-order.dto.ts">
+import { IsNumber, IsString, IsArray, ValidateNested, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class OrderItemDto {
+  @ApiProperty() @IsString() product_id: string;
+  @ApiProperty() @IsNumber() @Min(1) quantity: number;
+}
+
+export class CreateOrderDto {
+  @ApiProperty() @IsNumber() user_id: number;
+  @ApiProperty() @IsNumber() vendor_id: number;
+  @ApiProperty() @IsString() delivery_address: string;
+  @ApiProperty({ type: [OrderItemDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OrderItemDto)
+  items: OrderItemDto[];
+}
+</file>
+
+<file path="src/order/application/use-cases/create-order.use-case.ts">
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+import { IProductRepository } from 'src/product/domain/repositories/product.repository.interface';
+import { FastApiService } from 'src/shared/services/fastapi.service';
+import { CreateOrderDto } from '../dtos/create-order.dto';
+import { OrderModel, OrderItemModel } from '../../domain/entities/order.model';
+
+@Injectable()
+export class CreateOrderUseCase {
+  constructor(
+    @Inject('IOrderRepository')
+    private readonly orderRepository: IOrderRepository,
+    @Inject('IProductRepository')
+    private readonly productRepository: IProductRepository,
+    private readonly fastApiService: FastApiService,
+  ) {}
+
+  async execute(dto: CreateOrderDto): Promise<OrderModel & { estimated_delivery?: any }> {
+    let total = 0;
+    const items: OrderItemModel[] = [];
+
+    for (const item of dto.items) {
+      const product = await this.productRepository.findById(item.product_id);
+      if (!product) throw new NotFoundException(`Producto ${item.product_id} no encontrado`);
+
+      total += product.price * item.quantity;
+      items.push(new OrderItemModel(item.product_id, product.name, item.quantity, product.price));
+    }
+
+    const order = new OrderModel(
+      null, dto.user_id, dto.vendor_id, null,
+      'PENDING', dto.delivery_address, total, items, null,
+    );
+
+    const savedOrder = await this.orderRepository.create(order);
+
+    // Estimación de tiempo — no bloquea si FastAPI está caído
+    const estimated_delivery = await this.fastApiService.estimateDelivery({
+      order_id: savedOrder.order_id!,
+      vendor_id: dto.vendor_id,
+      delivery_address: dto.delivery_address,
+      total_items: items.reduce((sum, i) => sum + i.quantity, 0),
+    });
+
+    return { ...savedOrder, estimated_delivery };
+  }
+}
+</file>
+
+<file path="src/order/application/use-cases/get-available-orders.use-case.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+
+@Injectable()
+export class GetAvailableOrdersUseCase {
+  constructor(@Inject('IOrderRepository') private readonly orderRepository: IOrderRepository) {}
+  async execute() { return this.orderRepository.findAvailableForCourier(); }
+}
+</file>
+
+<file path="src/order/application/use-cases/get-orders-by-user.use-case.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+
+@Injectable()
+export class GetOrdersByUserUseCase {
+  constructor(@Inject('IOrderRepository') private readonly orderRepository: IOrderRepository) {}
+  async execute(userId: number) { return this.orderRepository.findByUser(userId); }
+}
+</file>
+
+<file path="src/order/application/use-cases/get-orders-by-vendor.use-case.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+
+@Injectable()
+export class GetOrdersByVendorUseCase {
+  constructor(@Inject('IOrderRepository') private readonly orderRepository: IOrderRepository) {}
+  async execute(vendorId: number) { return this.orderRepository.findByVendor(vendorId); }
+}
+</file>
+
+<file path="src/order/application/use-cases/update-order-status.use-case.ts">
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  PENDING:     ['ACCEPTED', 'CANCELLED'],
+  ACCEPTED:    ['PREPARING'],
+  PREPARING:   ['READY'],
+  READY:       ['IN_DELIVERY'],
+  IN_DELIVERY: ['DELIVERED'],
+};
+
+@Injectable()
+export class UpdateOrderStatusUseCase {
+  constructor(@Inject('IOrderRepository') private readonly orderRepository: IOrderRepository) {}
+
+  async execute(orderId: string, newStatus: string, courierId?: number) {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) throw new NotFoundException('Pedido no encontrado');
+
+    const allowed = VALID_TRANSITIONS[order.status] ?? [];
+    if (!allowed.includes(newStatus)) {
+      throw new BadRequestException(`No se puede pasar de ${order.status} a ${newStatus}`);
+    }
+
+    return this.orderRepository.updateStatus(orderId, newStatus, courierId);
+  }
+}
+</file>
+
+<file path="src/order/domain/entities/order.model.ts">
+export class OrderItemModel {
+    constructor(
+      public product_id: string,
+      public product_name: string,
+      public quantity: number,
+      public unit_price: number,
+    ) {}
+  }
+  
+  export class OrderModel {
+    constructor(
+      public order_id: string | null,
+      public user_id: number,
+      public vendor_id: number,
+      public courier_id: number | null,
+      public status: string,
+      public delivery_address: string,
+      public total: number,
+      public items: OrderItemModel[],
+      public created_at: Date | null,
+    ) {}
+  }
+</file>
+
+<file path="src/order/domain/repositories/order.repository.interface.ts">
+import { OrderModel } from '../entities/order.model';
+
+export interface IOrderRepository {
+  create(order: OrderModel): Promise<OrderModel>;
+  findById(id: string): Promise<OrderModel | null>;
+  findByUser(userId: number): Promise<OrderModel[]>;
+  findByVendor(vendorId: number): Promise<OrderModel[]>;
+  findAvailableForCourier(): Promise<OrderModel[]>;
+  updateStatus(id: string, status: string, courierId?: number): Promise<OrderModel | null>;
+}
+</file>
+
+<file path="src/order/infrastructure/controllers/order.controller.ts">
+import { Controller, Get, Post, Put, Body, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
+import { Roles, UserRole } from 'src/auth/infrastructure/decorators/roles.decorator';
+import { CreateOrderUseCase } from '../../application/use-cases/create-order.use-case';
+import { GetOrdersByUserUseCase } from '../../application/use-cases/get-orders-by-user.use-case';
+import { GetOrdersByVendorUseCase } from '../../application/use-cases/get-orders-by-vendor.use-case';
+import { GetAvailableOrdersUseCase } from '../../application/use-cases/get-available-orders.use-case';
+import { UpdateOrderStatusUseCase } from '../../application/use-cases/update-order-status.use-case';
+import { CreateOrderDto } from '../../application/dtos/create-order.dto';
+
+@ApiTags('Orders')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('orders')
+export class OrderController {
+  constructor(
+    private readonly createOrder: CreateOrderUseCase,
+    private readonly getByUser: GetOrdersByUserUseCase,
+    private readonly getByVendor: GetOrdersByVendorUseCase,
+    private readonly getAvailable: GetAvailableOrdersUseCase,
+    private readonly updateStatus: UpdateOrderStatusUseCase,
+  ) {}
+
+  // Usuario crea el pedido
+  @Post()
+  @Roles(UserRole.USER)
+  @ApiOperation({ summary: 'Crear pedido (usuario)' })
+  create(@Body() dto: CreateOrderDto) {
+    return this.createOrder.execute(dto);
+  }
+
+  // Usuario ve su historial
+  @Get('user/:userId')
+  @Roles(UserRole.USER)
+  @ApiOperation({ summary: 'Historial de pedidos del usuario' })
+  getByUserId(@Param('userId') userId: string) {
+    return this.getByUser.execute(Number(userId));
+  }
+
+  // Vendor ve sus pedidos entrantes
+  @Get('vendor/:vendorId')
+  @Roles(UserRole.BUSINESS)
+  @ApiOperation({ summary: 'Pedidos recibidos por el vendedor' })
+  getByVendorId(@Param('vendorId') vendorId: string) {
+    return this.getByVendor.execute(Number(vendorId));
+  }
+
+  // Domiciliario ve pedidos disponibles para reclamar
+  @Get('available')
+  @Roles(UserRole.DOMICILIARIO)
+  @ApiOperation({ summary: 'Pedidos disponibles para domiciliarios (READY)' })
+  getAvailableOrders() {
+    return this.getAvailable.execute();
+  }
+
+  // Vendor mueve: PENDING→ACCEPTED, ACCEPTED→PREPARING, PREPARING→READY
+  @Put(':id/status/vendor')
+  @Roles(UserRole.BUSINESS)
+  @ApiOperation({ summary: 'Vendor actualiza estado del pedido' })
+  updateVendorStatus(
+    @Param('id') id: string,
+    @Body() body: { status: 'ACCEPTED' | 'PREPARING' | 'READY' | 'CANCELLED' },
+  ) {
+    return this.updateStatus.execute(id, body.status);
+  }
+
+  // Domiciliario mueve: READY→IN_DELIVERY, IN_DELIVERY→DELIVERED
+  @Put(':id/status/courier')
+  @Roles(UserRole.DOMICILIARIO)
+  @ApiOperation({ summary: 'Domiciliario actualiza estado del pedido' })
+  updateCourierStatus(
+    @Param('id') id: string,
+    @Body() body: { status: 'IN_DELIVERY' | 'DELIVERED'; courier_id: number },
+  ) {
+    return this.updateStatus.execute(id, body.status, body.courier_id);
+  }
+}
+</file>
+
+<file path="src/order/infrastructure/mappers/order.mapper.ts">
+import { OrderModel, OrderItemModel } from '../../domain/entities/order.model';
+import { OrderDocument } from '../schemas/order.schema';
+
+export class OrderMapper {
+  static toDomain(doc: OrderDocument): OrderModel {
+    const items = (doc.items ?? []).map(
+      (i) => new OrderItemModel(i.product_id, i.product_name, i.quantity, i.unit_price),
+    );
+    return new OrderModel(
+      doc._id.toString(),
+      doc.user_id,
+      doc.vendor_id,
+      doc.courier_id,
+      doc.status,
+      doc.delivery_address,
+      doc.total,
+      items,
+      (doc as any).createdAt ?? null,
+    );
+  }
+}
+</file>
+
+<file path="src/order/infrastructure/repositories/mongo-order.repository.ts">
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Order, OrderDocument } from '../schemas/order.schema';
+import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+import { OrderModel } from '../../domain/entities/order.model';
+import { OrderMapper } from '../mappers/order.mapper';
+
+@Injectable()
+export class MongoOrderRepository implements IOrderRepository {
+  constructor(
+    @InjectModel(Order.name)
+    private readonly orderModel: Model<OrderDocument>,
+  ) {}
+
+  async create(order: OrderModel): Promise<OrderModel> {
+    const created = new this.orderModel({
+      user_id: order.user_id,
+      vendor_id: order.vendor_id,
+      courier_id: order.courier_id,
+      status: order.status,
+      delivery_address: order.delivery_address,
+      total: order.total,
+      items: order.items,
+    });
+    const saved = await created.save();
+    return OrderMapper.toDomain(saved);
+  }
+
+  async findById(id: string): Promise<OrderModel | null> {
+    const doc = await this.orderModel.findById(id).exec();
+    return doc ? OrderMapper.toDomain(doc) : null;
+  }
+
+  async findByUser(userId: number): Promise<OrderModel[]> {
+    const docs = await this.orderModel
+      .find({ user_id: userId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map(OrderMapper.toDomain);
+  }
+
+  async findByVendor(vendorId: number): Promise<OrderModel[]> {
+    const docs = await this.orderModel
+      .find({ vendor_id: vendorId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map(OrderMapper.toDomain);
+  }
+
+  async findAvailableForCourier(): Promise<OrderModel[]> {
+    const docs = await this.orderModel
+      .find({ status: 'READY' })
+      .sort({ createdAt: 1 })
+      .exec();
+    return docs.map(OrderMapper.toDomain);
+  }
+
+
+async updateStatus(id: string, status: string, courierId?: number): Promise<OrderModel | null> {
+    const update: any = { status };
+    if (courierId) update.courier_id = courierId;
+    const updated = await this.orderModel
+      .findByIdAndUpdate(id, update, { returnDocument: 'after' }) 
+      .exec();
+    return updated ? OrderMapper.toDomain(updated) : null;
+  }
+}
+</file>
+
+<file path="src/order/infrastructure/schemas/order.schema.ts">
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+
+export type OrderDocument = Order & Document;
+
+class OrderItemSchema {
+  @Prop({ required: true }) product_id: string;
+  @Prop({ required: true }) product_name: string;
+  @Prop({ required: true }) quantity: number;
+  @Prop({ required: true }) unit_price: number;
+}
+
+@Schema({ timestamps: true, collection: 'orders' })
+export class Order {
+  @Prop({ required: true }) user_id: number;
+  @Prop({ required: true }) vendor_id: number;
+  @Prop({ type: Number, default: null }) courier_id: number | null; // ← type: Number
+  @Prop({ default: 'PENDING' }) status: string;
+  @Prop({ required: true }) delivery_address: string;
+  @Prop({ required: true }) total: number;
+  @Prop({ type: [OrderItemSchema], default: [] }) items: OrderItemSchema[];
+}
+
+export const OrderSchema = SchemaFactory.createForClass(Order);
+</file>
+
+<file path="src/order/order.module.ts">
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Order, OrderSchema } from './infrastructure/schemas/order.schema';
+import { MongoOrderRepository } from './infrastructure/repositories/mongo-order.repository';
+import { CreateOrderUseCase } from './application/use-cases/create-order.use-case';
+import { GetOrdersByUserUseCase } from './application/use-cases/get-orders-by-user.use-case';
+import { GetOrdersByVendorUseCase } from './application/use-cases/get-orders-by-vendor.use-case';
+import { GetAvailableOrdersUseCase } from './application/use-cases/get-available-orders.use-case';
+import { UpdateOrderStatusUseCase } from './application/use-cases/update-order-status.use-case';
+import { OrderController } from './infrastructure/controllers/order.controller';
+import { ProductModule } from 'src/product/product.module';
+
+@Module({
+  imports: [
+    MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
+    ProductModule,
+  ],
+  controllers: [OrderController],
+  providers: [
+    MongoOrderRepository,
+    { provide: 'IOrderRepository', useClass: MongoOrderRepository },
+    CreateOrderUseCase,
+    GetOrdersByUserUseCase,
+    GetOrdersByVendorUseCase,
+    GetAvailableOrdersUseCase,
+    UpdateOrderStatusUseCase,
+  ],
+  exports: ['IOrderRepository'],
+})
+export class OrderModule {}
+</file>
+
+<file path="src/payment/application/dtos/create-payment.dto.ts">
+import { IsString, IsEmail, IsObject } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreatePaymentDto {
+  @ApiProperty({ description: 'ID del pedido en MongoDB' })
+  @IsString()
+  order_id: string;
+
+  @ApiProperty({
+    description: 'Objeto de método de pago de Wompi',
+    example: { type: 'CARD', token: 'tok_stagtest_...' },
+  })
+  @IsObject()
+  payment_method: Record<string, any>;
+
+  @ApiProperty({ description: 'Email del cliente', example: 'user@example.com' })
+  @IsEmail()
+  customer_email: string;
+}
+</file>
+
+<file path="src/payment/application/dtos/wompi-webhook.dto.ts">
+import { IsString, IsNumber, IsObject, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+
+class WompiTransactionData {
+  @ApiProperty() @IsString() id: string;
+  @ApiProperty() @IsString() status: string;
+  @ApiProperty() @IsNumber() amount_in_cents: number;
+  @ApiProperty() @IsString() reference: string;
+  @ApiProperty() @IsString() currency: string;
+  @ApiProperty() @IsString() payment_method_type: string;
+}
+
+class WompiEventData {
+  @ApiProperty()
+  @ValidateNested()
+  @Type(() => WompiTransactionData)
+  transaction: WompiTransactionData;
+}
+
+class WompiSignature {
+  @ApiProperty() @IsArray() properties: string[];
+  @ApiProperty() @IsString() checksum: string;
+}
+
+export class WompiWebhookDto {
+  @ApiProperty() @IsString() event: string;
+
+  @ApiProperty()
+  @ValidateNested()
+  @Type(() => WompiEventData)
+  data: WompiEventData;
+
+  @ApiProperty()
+  @ValidateNested()
+  @Type(() => WompiSignature)
+  signature: WompiSignature;
+
+  @ApiProperty() @IsNumber() timestamp: number;
+}
+</file>
+
+<file path="src/payment/application/use-cases/confirm-payment.use-case.ts">
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { IPaymentRepository } from '../../domain/repositories/payment.repository.interface';
+import { IOrderRepository } from 'src/order/domain/repositories/order.repository.interface';
+import { WompiService } from '../../infrastructure/services/wompi.service';
+import { WompiWebhookDto } from '../dtos/wompi-webhook.dto';
+
+const TERMINAL_STATUSES = ['APPROVED', 'DECLINED', 'VOIDED', 'ERROR'];
+
+@Injectable()
+export class ConfirmPaymentUseCase {
+  constructor(
+    @Inject('IPaymentRepository')
+    private readonly paymentRepository: IPaymentRepository,
+    @Inject('IOrderRepository')
+    private readonly orderRepository: IOrderRepository,
+    private readonly wompiService: WompiService,
+  ) {}
+
+  async execute(dto: WompiWebhookDto): Promise<{ status: string }> {
+    const { transaction } = dto.data;
+
+    const isValid = this.wompiService.validateSignature(
+      dto.signature.properties,
+      transaction as any,
+      dto.timestamp,
+      dto.signature.checksum,
+    );
+    if (!isValid) throw new BadRequestException('Firma del webhook inválida');
+
+    const payment = await this.paymentRepository.findByReference(transaction.reference);
+    if (!payment) throw new BadRequestException('Pago no encontrado para esta referencia');
+
+    if (TERMINAL_STATUSES.includes(payment.status)) {
+      return { status: payment.status };
+    }
+
+    await this.paymentRepository.updateStatus(payment.payment_id!, transaction.status);
+
+    if (transaction.status === 'APPROVED') {
+      await this.orderRepository.updateStatus(payment.order_id, 'ACCEPTED');
+    }
+
+    return { status: transaction.status };
+  }
+}
+</file>
+
+<file path="src/payment/application/use-cases/create-payment.use-case.ts">
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { IPaymentRepository } from '../../domain/repositories/payment.repository.interface';
+import { IOrderRepository } from 'src/order/domain/repositories/order.repository.interface';
+import { WompiService } from '../../infrastructure/services/wompi.service';
+import { FastApiService } from 'src/shared/services/fastapi.service';
+import { CreatePaymentDto } from '../dtos/create-payment.dto';
+import { PaymentModel } from '../../domain/entities/payment.model';
+import { randomUUID } from 'crypto';
+
+@Injectable()
+export class CreatePaymentUseCase {
+  constructor(
+    @Inject('IPaymentRepository')
+    private readonly paymentRepository: IPaymentRepository,
+    @Inject('IOrderRepository')
+    private readonly orderRepository: IOrderRepository,
+    private readonly wompiService: WompiService,
+    private readonly fastApiService: FastApiService,
+  ) {}
+
+  async execute(dto: CreatePaymentDto, userId: number): Promise<PaymentModel> {
+    const order = await this.orderRepository.findById(dto.order_id);
+    if (!order) throw new NotFoundException('Pedido no encontrado');
+    if (order.status !== 'PENDING') {
+      throw new BadRequestException('El pedido no está en estado PENDING');
+    }
+
+    const existing = await this.paymentRepository.findByOrderId(dto.order_id);
+    if (existing && existing.status === 'PENDING') {
+      throw new BadRequestException('Ya existe un pago pendiente para este pedido');
+    }
+
+    const amountInCents = Math.round(order.total * 100);
+
+    // Análisis de fraude — bloquea si es sospechoso
+    const fraudResult = await this.fastApiService.analyzeFraud({
+      user_id: userId,
+      order_id: dto.order_id,
+      amount: amountInCents,
+      payment_method: dto.payment_method.type ?? 'UNKNOWN',
+      delivery_address: order.delivery_address,
+    });
+
+    if (fraudResult.is_suspicious && fraudResult.risk_score >= 0.8) {
+      throw new BadRequestException(
+        `Pago bloqueado por seguridad. Razones: ${fraudResult.reasons.join(', ')}`
+      );
+    }
+
+    const reference = `urbanrush-${dto.order_id}-${randomUUID()}`;
+
+    const wompiResponse = await this.wompiService.createTransaction(
+      amountInCents,
+      'COP',
+      dto.customer_email,
+      dto.payment_method,
+      reference,
+    );
+
+    const transaction = wompiResponse.data;
+
+    const payment = new PaymentModel(
+      null,
+      dto.order_id,
+      userId,
+      order.vendor_id,
+      transaction.id,
+      amountInCents,
+      'COP',
+      'PENDING',
+      dto.payment_method.type ?? 'UNKNOWN',
+      reference,
+      dto.customer_email,
+      null,
+      null,
+    );
+
+    return this.paymentRepository.create(payment);
+  }
+}
+</file>
+
+<file path="src/payment/application/use-cases/get-payment-by-order.use-case.ts">
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { IPaymentRepository } from '../../domain/repositories/payment.repository.interface';
+import { PaymentModel } from '../../domain/entities/payment.model';
+
+@Injectable()
+export class GetPaymentByOrderUseCase {
+  constructor(
+    @Inject('IPaymentRepository')
+    private readonly paymentRepository: IPaymentRepository,
+  ) {}
+
+  async execute(orderId: string): Promise<PaymentModel> {
+    const payment = await this.paymentRepository.findByOrderId(orderId);
+    if (!payment) throw new NotFoundException('No se encontró pago para este pedido');
+    return payment;
+  }
+}
+</file>
+
+<file path="src/payment/application/use-cases/get-payments-by-user.use-case.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { IPaymentRepository } from '../../domain/repositories/payment.repository.interface';
+
+@Injectable()
+export class GetPaymentsByUserUseCase {
+  constructor(
+    @Inject('IPaymentRepository')
+    private readonly paymentRepository: IPaymentRepository,
+  ) {}
+
+  async execute(userId: number) {
+    return this.paymentRepository.findByUserId(userId);
+  }
+}
+</file>
+
+<file path="src/payment/application/use-cases/get-payments-by-vendor.use-case.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { IPaymentRepository } from '../../domain/repositories/payment.repository.interface';
+
+@Injectable()
+export class GetPaymentsByVendorUseCase {
+  constructor(
+    @Inject('IPaymentRepository')
+    private readonly paymentRepository: IPaymentRepository,
+  ) {}
+
+  async execute(vendorId: number) {
+    return this.paymentRepository.findByVendorId(vendorId);
+  }
+}
+</file>
+
+<file path="src/payment/domain/entities/payment.model.ts">
+export class PaymentModel {
+  constructor(
+    public payment_id: string | null,
+    public order_id: string,
+    public user_id: number,
+    public vendor_id: number,             
+    public wompi_transaction_id: string,
+    public amount: number,
+    public currency: string,
+    public status: string,
+    public payment_method: string,
+    public reference: string,
+    public customer_email: string,
+    public created_at: Date | null,
+    public updated_at: Date | null,
+  ) {}
+}
+</file>
+
+<file path="src/payment/domain/repositories/payment.repository.interface.ts">
+import { PaymentModel } from '../entities/payment.model';
+
+export interface IPaymentRepository {
+  create(payment: PaymentModel): Promise<PaymentModel>;
+  findByOrderId(orderId: string): Promise<PaymentModel | null>;
+  findByReference(reference: string): Promise<PaymentModel | null>;
+  findByUserId(userId: number): Promise<PaymentModel[]>;      
+  findByVendorId(vendorId: number): Promise<PaymentModel[]>;  
+  updateStatus(id: string, status: string): Promise<PaymentModel | null>;
+}
+</file>
+
+<file path="src/payment/infrastructure/controllers/payment.controller.ts">
+import { Controller, Get, Post, Body, Param, Request, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
+import { Roles, UserRole } from 'src/auth/infrastructure/decorators/roles.decorator';
+import { CreatePaymentUseCase } from '../../application/use-cases/create-payment.use-case';
+import { ConfirmPaymentUseCase } from '../../application/use-cases/confirm-payment.use-case';
+import { GetPaymentByOrderUseCase } from '../../application/use-cases/get-payment-by-order.use-case';
+import { GetPaymentsByUserUseCase } from '../../application/use-cases/get-payments-by-user.use-case';
+import { GetPaymentsByVendorUseCase } from '../../application/use-cases/get-payments-by-vendor.use-case';
+import { CreatePaymentDto } from '../../application/dtos/create-payment.dto';
+import { WompiWebhookDto } from '../../application/dtos/wompi-webhook.dto';
+
+@ApiTags('Payments')
+@Controller('payments')
+export class PaymentController {
+  constructor(
+    private readonly createPayment: CreatePaymentUseCase,
+    private readonly confirmPayment: ConfirmPaymentUseCase,
+    private readonly getPaymentByOrder: GetPaymentByOrderUseCase,
+    private readonly getPaymentsByUser: GetPaymentsByUserUseCase,
+    private readonly getPaymentsByVendor: GetPaymentsByVendorUseCase,
+  ) {}
+
+  @Post('create')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear pago para un pedido (usuario)' })
+  create(@Body() dto: CreatePaymentDto, @Request() req) {
+    return this.createPayment.execute(dto, req.user.user_id); // ← pasar user_id del token
+  }
+
+  @Post('webhook')
+  @ApiOperation({ summary: 'Webhook de Wompi (público)' })
+  webhook(@Body() dto: WompiWebhookDto) {
+    return this.confirmPayment.execute(dto);
+  }
+
+  @Get('order/:orderId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER, UserRole.ADMIN, UserRole.BUSINESS) // ← agregar BUSINESS
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Consultar pago por ID de pedido' })
+  getByOrder(@Param('orderId') orderId: string) {
+    return this.getPaymentByOrder.execute(orderId);
+  }
+
+  @Get('user/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER, UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Historial de pagos de un usuario' })
+  getByUser(@Param('userId') userId: string) {
+    return this.getPaymentsByUser.execute(Number(userId));
+  }
+
+  @Get('vendor/:vendorId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.BUSINESS, UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Liquidaciones de un vendor' })
+  getByVendor(@Param('vendorId') vendorId: string) {
+    return this.getPaymentsByVendor.execute(Number(vendorId));
+  }
+}
+</file>
+
+<file path="src/payment/infrastructure/mappers/payment.mapper.ts">
+import { PaymentModel } from '../../domain/entities/payment.model';
+import { PaymentDocument } from '../schemas/payment.schema';
+
+export class PaymentMapper {
+  static toDomain(doc: PaymentDocument): PaymentModel {
+    return new PaymentModel(
+      doc._id.toString(),
+      doc.order_id,
+      doc.user_id,
+      doc.vendor_id,                     
+      doc.wompi_transaction_id,
+      doc.amount,
+      doc.currency,
+      doc.status,
+      doc.payment_method,
+      doc.reference,
+      doc.customer_email,
+      (doc as any).createdAt ?? null,
+      (doc as any).updatedAt ?? null,
+    );
+  }
+}
+</file>
+
+<file path="src/payment/infrastructure/repositories/mongo-payment.repository.ts">
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Payment, PaymentDocument } from '../schemas/payment.schema';
+import { IPaymentRepository } from '../../domain/repositories/payment.repository.interface';
+import { PaymentModel } from '../../domain/entities/payment.model';
+import { PaymentMapper } from '../mappers/payment.mapper';
+
+@Injectable()
+export class MongoPaymentRepository implements IPaymentRepository {
+  constructor(
+    @InjectModel(Payment.name)
+    private readonly paymentModel: Model<PaymentDocument>,
+  ) {}
+
+  async create(payment: PaymentModel): Promise<PaymentModel> {
+    const created = new this.paymentModel({
+      order_id: payment.order_id,
+      user_id: payment.user_id,
+      vendor_id: payment.vendor_id,        
+      wompi_transaction_id: payment.wompi_transaction_id,
+      amount: payment.amount,
+      currency: payment.currency,
+      status: payment.status,
+      payment_method: payment.payment_method,
+      reference: payment.reference,
+      customer_email: payment.customer_email,
+    });
+    const saved = await created.save();
+    return PaymentMapper.toDomain(saved);
+  }
+
+  async findByOrderId(orderId: string): Promise<PaymentModel | null> {
+    const doc = await this.paymentModel.findOne({ order_id: orderId }).exec();
+    return doc ? PaymentMapper.toDomain(doc) : null;
+  }
+
+  async findByReference(reference: string): Promise<PaymentModel | null> {
+    const doc = await this.paymentModel.findOne({ reference }).exec();
+    return doc ? PaymentMapper.toDomain(doc) : null;
+  }
+
+  async findByUserId(userId: number): Promise<PaymentModel[]> {
+    const docs = await this.paymentModel
+      .find({ user_id: userId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map(PaymentMapper.toDomain);
+  }
+
+  async findByVendorId(vendorId: number): Promise<PaymentModel[]> {
+    const docs = await this.paymentModel
+      .find({ vendor_id: vendorId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map(PaymentMapper.toDomain);
+  }
+
+  async updateStatus(id: string, status: string): Promise<PaymentModel | null> {
+    const updated = await this.paymentModel
+      .findByIdAndUpdate(id, { status }, { returnDocument: 'after' })
+      .exec();
+    return updated ? PaymentMapper.toDomain(updated) : null;
+  }
+}
+</file>
+
+<file path="src/payment/infrastructure/schemas/payment.schema.ts">
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+
+export type PaymentDocument = Payment & Document;
+
+@Schema({ timestamps: true, collection: 'payments' })
+export class Payment {
+  @Prop({ required: true }) order_id: string;
+  @Prop({ required: true }) user_id: number; 
+  @Prop({ required: true }) vendor_id: number;
+  @Prop({ required: true }) wompi_transaction_id: string;
+  @Prop({ required: true }) amount: number;
+  @Prop({ default: 'COP' }) currency: string;
+  @Prop({ default: 'PENDING' }) status: string;
+  @Prop({ required: true }) payment_method: string;
+  @Prop({ required: true, unique: true }) reference: string;
+  @Prop({ required: true }) customer_email: string;
+}
+
+export const PaymentSchema = SchemaFactory.createForClass(Payment);
+</file>
+
+<file path="src/payment/infrastructure/services/wompi.service.ts">
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+import * as crypto from 'crypto';
+import {
+  WOMPI_PRIVATE_KEY,
+  WOMPI_EVENTS_SECRET,
+  WOMPI_BASE_URL,
+  WOMPI_PUBLIC_KEY,
+  WOMPI_INTEGRITY_SECRET, // ← agregar
+} from 'src/config/constants';
+
+@Injectable()
+export class WompiService {
+  private readonly privateKey: string;
+  private readonly eventsSecret: string;
+  private readonly baseUrl: string;
+  private readonly integritySecret: string; // ← agregar
+
+  constructor(private readonly configService: ConfigService) {
+    this.privateKey = this.configService.get<string>(WOMPI_PRIVATE_KEY) ?? '';
+    this.eventsSecret = this.configService.get<string>(WOMPI_EVENTS_SECRET) ?? '';
+    this.baseUrl = this.configService.get<string>(WOMPI_BASE_URL) ?? '';
+    this.integritySecret = this.configService.get<string>(WOMPI_INTEGRITY_SECRET) ?? ''; // ← agregar
+  }
+
+  // Método para generar la firma de integridad
+  private generateSignature(reference: string, amountInCents: number, currency: string): string {
+    const concatenated = `${reference}${amountInCents}${currency}${this.integritySecret}`;
+    return crypto.createHash('sha256').update(concatenated).digest('hex');
+  }
+
+  async createTransaction(
+    amountInCents: number,
+    currency: string,
+    customerEmail: string,
+    paymentMethod: Record<string, any>,
+    reference: string,
+  ): Promise<WompiTransactionResponse> {
+    try {
+      const { acceptance_token, personal_auth_token } = await this.getAcceptanceTokens();
+      const signature = this.generateSignature(reference, amountInCents, currency); // ← agregar
+
+      const body = {
+        amount_in_cents: amountInCents,
+        currency,
+        customer_email: customerEmail,
+        payment_method: paymentMethod,
+        reference,
+        acceptance_token,
+        accept_personal_auth: personal_auth_token,
+        signature: { integrity: signature }, // ← agregar
+      };
+
+      const response = await axios.post<WompiTransactionResponse>(
+        `${this.baseUrl}/transactions`,
+        body,
+        { headers: { Authorization: `Bearer ${this.privateKey}` } },
+      );
+
+      return response.data;
+
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log('WOMPI ERROR COMPLETO:', JSON.stringify(error.response?.data, null, 2));
+        const reason = error.response?.data?.error?.reason
+          ?? error.response?.data?.message
+          ?? error.message;
+        throw new InternalServerErrorException(
+          `Error al procesar pago con Wompi: ${reason}`
+        );
+      }
+      throw new InternalServerErrorException('Error inesperado al conectar con Wompi');
+    }
+  }
+
+  validateSignature(
+    properties: string[],
+    transactionData: Record<string, any>,
+    timestamp: number,
+    checksum: string,
+  ): boolean {
+    const values = properties.map((prop) => transactionData[prop]);
+    const concatenated = values.join('') + timestamp + this.eventsSecret;
+    const hash = crypto.createHash('sha256').update(concatenated).digest('hex');
+    return hash === checksum;
+  }
+
+  private async getAcceptanceTokens(): Promise<{ acceptance_token: string; personal_auth_token: string }> {
+    const response = await axios.get(
+      `${this.baseUrl}/merchants/${this.configService.get<string>(WOMPI_PUBLIC_KEY)}`,
+    );
+    const data = response.data.data;
+    return {
+      acceptance_token: data.presigned_acceptance.acceptance_token,
+      personal_auth_token: data.presigned_personal_data_auth.acceptance_token,
+    };
+  }
+}
+</file>
+
+<file path="src/payment/payment.module.ts">
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Payment, PaymentSchema } from './infrastructure/schemas/payment.schema';
+import { MongoPaymentRepository } from './infrastructure/repositories/mongo-payment.repository';
+import { WompiService } from './infrastructure/services/wompi.service';
+import { CreatePaymentUseCase } from './application/use-cases/create-payment.use-case';
+import { ConfirmPaymentUseCase } from './application/use-cases/confirm-payment.use-case';
+import { GetPaymentByOrderUseCase } from './application/use-cases/get-payment-by-order.use-case';
+import { GetPaymentsByUserUseCase } from './application/use-cases/get-payments-by-user.use-case';
+import { GetPaymentsByVendorUseCase } from './application/use-cases/get-payments-by-vendor.use-case';
+import { PaymentController } from './infrastructure/controllers/payment.controller';
+import { OrderModule } from 'src/order/order.module';
+
+@Module({
+  imports: [
+    MongooseModule.forFeature([{ name: Payment.name, schema: PaymentSchema }]),
+    OrderModule,
+  ],
+  controllers: [PaymentController],
+  providers: [
+    MongoPaymentRepository,
+    { provide: 'IPaymentRepository', useClass: MongoPaymentRepository },
+    WompiService,
+    CreatePaymentUseCase,
+    ConfirmPaymentUseCase,
+    GetPaymentByOrderUseCase,
+    GetPaymentsByUserUseCase,    
+    GetPaymentsByVendorUseCase, 
+  ],
+  exports: ['IPaymentRepository'],
+})
+export class PaymentModule {}
+</file>
+
 <file path="src/people/application/dtos/create-people.dto.ts">
 import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -2387,6 +3497,402 @@ import { PeopleController } from './infrastructure/controllers/people.controller
 export class PeopleModule {}
 </file>
 
+<file path="src/product/application/dtos/create-product.dto.ts">
+import { IsString, IsNumber, IsOptional, Min } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateProductDto {
+  @ApiProperty() @IsNumber() vendor_id: number;
+  @ApiProperty() @IsString() name: string;
+  @ApiProperty() @IsString() description: string;
+  @ApiProperty() @IsNumber() @Min(0) price: number;
+  @ApiProperty() @IsString() category: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() image_url?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsNumber() @Min(0) stock?: number;
+}
+</file>
+
+<file path="src/product/application/dtos/update-product.dto.ts">
+import { IsString, IsNumber, IsOptional, IsBoolean, Min } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class UpdateProductDto {
+  @ApiProperty({ required: false }) @IsOptional() @IsString() name?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() description?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsNumber() @Min(0) price?: number;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() category?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() image_url?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsBoolean() is_available?: boolean;
+  @ApiProperty({ required: false }) @IsOptional() @IsNumber() @Min(0) stock?: number;
+}
+</file>
+
+<file path="src/product/application/use-cases/create-product.use-case.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { IProductRepository } from '../../domain/repositories/product.repository.interface';
+import { CreateProductDto } from '../dtos/create-product.dto';
+import { ProductModel } from '../../domain/entities/product.model';
+
+@Injectable()
+export class CreateProductUseCase {
+  constructor(
+    @Inject('IProductRepository')
+    private readonly productRepository: IProductRepository,
+  ) {}
+
+  async execute(dto: CreateProductDto): Promise<ProductModel> {
+    const product = new ProductModel(
+      null,
+      dto.vendor_id,
+      dto.name,
+      dto.description,
+      dto.price,
+      dto.image_url ?? null,
+      dto.category,
+      true,
+      dto.stock ?? 0,
+    );
+    return this.productRepository.create(product);
+  }
+}
+</file>
+
+<file path="src/product/application/use-cases/delete-product.use-case.ts">
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { IProductRepository } from '../../domain/repositories/product.repository.interface';
+
+@Injectable()
+export class DeleteProductUseCase {
+  constructor(
+    @Inject('IProductRepository')
+    private readonly productRepository: IProductRepository,
+  ) {}
+
+  async execute(id: string): Promise<{ message: string }> {
+    const product = await this.productRepository.findById(id);
+    if (!product) throw new NotFoundException('Producto no encontrado');
+    await this.productRepository.delete(id);
+    return { message: 'Producto eliminado correctamente' };
+  }
+}
+</file>
+
+<file path="src/product/application/use-cases/get-all-products.use-case.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { IProductRepository } from '../../domain/repositories/product.repository.interface';
+
+@Injectable()
+export class GetAllProductsUseCase {
+  constructor(
+    @Inject('IProductRepository')
+    private readonly productRepository: IProductRepository,
+  ) {}
+
+  async execute() {
+    return this.productRepository.findAll();
+  }
+}
+</file>
+
+<file path="src/product/application/use-cases/get-products-by-vendor.use-case.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { IProductRepository } from '../../domain/repositories/product.repository.interface';
+
+@Injectable()
+export class GetProductsByVendorUseCase {
+  constructor(
+    @Inject('IProductRepository')
+    private readonly productRepository: IProductRepository,
+  ) {}
+
+  async execute(vendorId: number) {
+    return this.productRepository.findByVendor(vendorId);
+  }
+}
+</file>
+
+<file path="src/product/application/use-cases/update-product.use-case.ts">
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { IProductRepository } from '../../domain/repositories/product.repository.interface';
+import { UpdateProductDto } from '../dtos/update-product.dto';
+
+@Injectable()
+export class UpdateProductUseCase {
+  constructor(
+    @Inject('IProductRepository')
+    private readonly productRepository: IProductRepository,
+  ) {}
+
+  async execute(id: string, dto: UpdateProductDto) {
+    const updated = await this.productRepository.update(id, dto);
+    if (!updated) throw new NotFoundException('Producto no encontrado');
+    return updated;
+  }
+}
+</file>
+
+<file path="src/product/domain/entities/product.model.ts">
+export class ProductModel {
+    constructor(
+      public product_id: string | null, 
+      public vendor_id: number,
+      public name: string,
+      public description: string,
+      public price: number,
+      public image_url: string | null,
+      public category: string,
+      public is_available: boolean,
+      public stock: number,
+    ) {}
+  }
+</file>
+
+<file path="src/product/domain/repositories/product.repository.interface.ts">
+import { ProductModel } from '../entities/product.model';
+
+export interface IProductRepository {
+  create(product: ProductModel): Promise<ProductModel>;
+  findById(id: string): Promise<ProductModel | null>;
+  findByVendor(vendorId: number): Promise<ProductModel[]>;
+  findAll(): Promise<ProductModel[]>;
+  update(id: string, product: Partial<ProductModel>): Promise<ProductModel | null>;
+  delete(id: string): Promise<void>;
+}
+</file>
+
+<file path="src/product/infrastructure/controllers/product.controller.ts">
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/infrastructure/guards/jwt-auth.guard';
+import { CreateProductUseCase } from '../../application/use-cases/create-product.use-case';
+import { GetProductsByVendorUseCase } from '../../application/use-cases/get-products-by-vendor.use-case';
+import { GetAllProductsUseCase } from '../../application/use-cases/get-all-products.use-case';
+import { UpdateProductUseCase } from '../../application/use-cases/update-product.use-case';
+import { DeleteProductUseCase } from '../../application/use-cases/delete-product.use-case';
+import { CreateProductDto } from '../../application/dtos/create-product.dto';
+import { UpdateProductDto } from '../../application/dtos/update-product.dto';
+
+@ApiTags('Products')
+@Controller('products')
+export class ProductController {
+  constructor(
+    private readonly createProduct: CreateProductUseCase,
+    private readonly getByVendor: GetProductsByVendorUseCase,
+    private readonly getAllProducts: GetAllProductsUseCase,
+    private readonly updateProduct: UpdateProductUseCase,
+    private readonly deleteProduct: DeleteProductUseCase,
+  ) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Obtener todos los productos disponibles' })
+  findAll() {
+    return this.getAllProducts.execute();
+  }
+
+  @Get('vendor/:vendorId')
+  @ApiOperation({ summary: 'Catálogo de un vendedor' })
+  getByVendorId(@Param('vendorId') vendorId: string) {
+    return this.getByVendor.execute(Number(vendorId));
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear producto' })
+  create(@Body() dto: CreateProductDto) {
+    return this.createProduct.execute(dto);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar producto' })
+  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+    return this.updateProduct.execute(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar producto' })
+  remove(@Param('id') id: string) {
+    return this.deleteProduct.execute(id);
+  }
+}
+</file>
+
+<file path="src/product/infrastructure/entities/product.entity.ts">
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { VendorEntity } from 'src/vendor/infrastructure/persistence/entities/vendor.entity';
+
+@Entity('products')
+export class ProductEntity {
+  @PrimaryGeneratedColumn()
+  product_id: number;
+
+  @Column({ type: 'varchar', length: 255 })
+  name: string;
+
+  @Column({ type: 'text' })
+  description: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  price: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  image_url: string | null;
+
+  @Column({ type: 'varchar', length: 100 })
+  category: string;
+
+  @Column({ default: true })
+  is_available: boolean;
+
+  @Column({ default: 0 })
+  stock: number;
+
+  @Column()
+  vendor_id: number;
+
+  @ManyToOne(() => VendorEntity)
+  @JoinColumn({ name: 'vendor_id' })
+  vendor: VendorEntity;
+}
+</file>
+
+<file path="src/product/infrastructure/mappers/product.mapper.ts">
+import { ProductModel } from '../../domain/entities/product.model';
+import { ProductDocument } from '../schemas/product.schema';
+
+export class ProductMapper {
+  static toDomain(doc: ProductDocument): ProductModel {
+    return new ProductModel(
+      doc._id.toString(),
+      doc.vendor_id,
+      doc.name,
+      doc.description,
+      doc.price,
+      doc.image_url,
+      doc.category,
+      doc.is_available,
+      doc.stock,
+    );
+  }
+}
+</file>
+
+<file path="src/product/infrastructure/repositories/mongo-product.repository.ts">
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Product, ProductDocument } from '../schemas/product.schema';
+import { IProductRepository } from '../../domain/repositories/product.repository.interface';
+import { ProductModel } from '../../domain/entities/product.model';
+import { ProductMapper } from '../mappers/product.mapper';
+
+@Injectable()
+export class MongoProductRepository implements IProductRepository {
+  constructor(
+    @InjectModel(Product.name)
+    private readonly productModel: Model<ProductDocument>,
+  ) {}
+
+  async create(product: ProductModel): Promise<ProductModel> {
+    const created = new this.productModel({
+      vendor_id: product.vendor_id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      image_url: product.image_url,
+      category: product.category,
+      is_available: product.is_available,
+      stock: product.stock,
+    });
+    const saved = await created.save();
+    return ProductMapper.toDomain(saved);
+  }
+
+  async findById(id: string): Promise<ProductModel | null> {
+    const doc = await this.productModel.findById(id).exec();
+    return doc ? ProductMapper.toDomain(doc) : null;
+  }
+
+  async findByVendor(vendorId: number): Promise<ProductModel[]> {
+    const docs = await this.productModel.find({ vendor_id: vendorId }).exec();
+    return docs.map(ProductMapper.toDomain);
+  }
+
+  async findAll(): Promise<ProductModel[]> {
+    const docs = await this.productModel.find({ is_available: true }).exec();
+    return docs.map(ProductMapper.toDomain);
+  }
+
+
+async update(id: string, product: Partial<ProductModel>): Promise<ProductModel | null> {
+    const updated = await this.productModel
+      .findByIdAndUpdate(id, product, { returnDocument: 'after' }) 
+      .exec();
+    return updated ? ProductMapper.toDomain(updated) : null;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.productModel.findByIdAndDelete(id).exec();
+  }
+}
+</file>
+
+<file path="src/product/infrastructure/schemas/product.schema.ts">
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+
+export type ProductDocument = Product & Document;
+
+@Schema({ timestamps: true, collection: 'products' })
+export class Product {
+  @Prop({ required: true }) name: string;
+  @Prop({ required: true }) description: string;
+  @Prop({ required: true }) price: number;
+  @Prop({ type: String, default: null }) image_url: string | null; 
+  @Prop({ required: true }) category: string;
+  @Prop({ default: true }) is_available: boolean;
+  @Prop({ default: 0 }) stock: number;
+  @Prop({ required: true }) vendor_id: number;
+}
+
+export const ProductSchema = SchemaFactory.createForClass(Product);
+</file>
+
+<file path="src/product/product.module.ts">
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Product, ProductSchema } from './infrastructure/schemas/product.schema';
+import { MongoProductRepository } from './infrastructure/repositories/mongo-product.repository';
+import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
+import { GetProductsByVendorUseCase } from './application/use-cases/get-products-by-vendor.use-case';
+import { GetAllProductsUseCase } from './application/use-cases/get-all-products.use-case';
+import { UpdateProductUseCase } from './application/use-cases/update-product.use-case';
+import { DeleteProductUseCase } from './application/use-cases/delete-product.use-case';
+import { ProductController } from './infrastructure/controllers/product.controller';
+
+@Module({
+  imports: [
+    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+  ],
+  controllers: [ProductController],
+  providers: [
+    MongoProductRepository,
+    { provide: 'IProductRepository', useClass: MongoProductRepository },
+    CreateProductUseCase,
+    GetProductsByVendorUseCase,
+    GetAllProductsUseCase,
+    UpdateProductUseCase,
+    DeleteProductUseCase,
+  ],
+  exports: ['IProductRepository'],
+})
+export class ProductModule {}
+</file>
+
 <file path="src/redis/domain/repositories/session.repository.interface.ts">
 export interface ISessionRepository {
     save(userId: number, token: string, ttlSeconds: number): Promise<void>;
@@ -2420,7 +3926,36 @@ export class RedisSessionRepository implements ISessionRepository {
 </file>
 
 <file path="src/redis/redis.module.ts">
+// src/redis/redis.module.ts
+import { Module, Global } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisSessionRepository } from './infrastructure/repositories/redis-session.repository';
+import * as redisStore from 'cache-manager-ioredis';
 
+@Global()
+@Module({
+  imports: [
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        store: redisStore,
+        host: config.get('REDIS_HOST'),
+        port: config.get('REDIS_PORT'),
+      }),
+    }),
+  ],
+  providers: [
+    RedisSessionRepository,
+    {
+      provide: 'ISessionRepository',
+      useClass: RedisSessionRepository,
+    },
+  ],
+  exports: ['ISessionRepository'],
+})
+export class RedisModule {}
 </file>
 
 <file path="src/roles/application/services/roles.service.ts">
@@ -2530,6 +4065,66 @@ import { TypeOrmRolesRepository } from './infrastructure/persistence/repositorie
   exports: [RolesService, 'IRolesRepository'], 
 })
 export class RolesModule {}
+</file>
+
+<file path="src/shared/services/fastapi.service.ts">
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+
+@Injectable()
+export class FastApiService {
+  private readonly baseUrl: string;
+
+  constructor(private readonly configService: ConfigService) {
+    this.baseUrl = this.configService.get<string>('FASTAPI_BASE_URL') ?? 'http://localhost:8000';
+  }
+
+  async estimateDelivery(data: {
+    order_id: string;
+    vendor_id: number;
+    delivery_address: string;
+    total_items: number;
+  }) {
+    try {
+      const response = await axios.post(`${this.baseUrl}/delivery-time/estimate`, data);
+      return response.data;
+    } catch (error) {
+      // Si FastAPI está caído, devolver estimación por defecto sin bloquear el pedido
+      console.warn('FastAPI no disponible, usando estimación por defecto');
+      return { estimated_minutes: 45, confidence: 'LOW', breakdown: {} };
+    }
+  }
+
+  async analyzeFraud(data: {
+    user_id: number;
+    order_id: string;
+    amount: number;
+    payment_method: string;
+    delivery_address: string;
+  }) {
+    try {
+      const response = await axios.post(`${this.baseUrl}/fraud/analyze`, data);
+      return response.data;
+    } catch (error) {
+      // Si FastAPI está caído, permitir el pago pero loguear el error
+      console.warn('FastAPI no disponible, omitiendo análisis de fraude');
+      return { is_suspicious: false, risk_score: 0, reasons: [] };
+    }
+  }
+}
+</file>
+
+<file path="src/shared/shared.module.ts">
+import { Module, Global } from '@nestjs/common';
+import { FastApiService } from './services/fastapi.service';
+
+@Global()
+@Module({
+  providers: [FastApiService],
+  exports: [FastApiService],
+})
+export class SharedModule {}
 </file>
 
 <file path="src/user_rol/application/services/user-roles.service.ts">
