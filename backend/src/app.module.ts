@@ -19,6 +19,7 @@ import { PaymentModule } from './payment/payment.module';
 import { SharedModule } from './shared/shared.module';
 import { BackupModule } from './backup/backup.module';
 import { AdminModule } from './admin/admin.module';
+import { StoreVerificationModule } from './store-verification/store-verification.module';
 import { StorageModule } from './storage/storage.module';
 import { HealthModule } from './health/health.module';
 import { EncryptedFileModule } from './encrypted-file/encrypted-file.module';
@@ -71,6 +72,7 @@ import { ReportsModule } from './reports/reports.module';
     SharedModule,
     BackupModule,
     AdminModule,
+    StoreVerificationModule,
     StorageModule,
     HealthModule,
     EncryptedFileModule,
