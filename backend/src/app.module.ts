@@ -18,6 +18,7 @@ import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import { SharedModule } from './shared/shared.module';
 import { BackupModule } from './backup/backup.module';
+import { AdminModule } from './admin/admin.module';
 
 
 @Module({
@@ -65,6 +66,8 @@ import { BackupModule } from './backup/backup.module';
     PaymentModule,
     SharedModule,
     BackupModule,
+    AdminModule,
+
   ],
 })
 export class AppModule {}
