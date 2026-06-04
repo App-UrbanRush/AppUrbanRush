@@ -19,6 +19,7 @@ import { PaymentModule } from './payment/payment.module';
 import { SharedModule } from './shared/shared.module';
 import { BackupModule } from './backup/backup.module';
 import { AdminModule } from './admin/admin.module';
+import { ChatModule } from './chat/chat.module';
 import { StoreVerificationModule } from './store-verification/store-verification.module';
 import { StorageModule } from './storage/storage.module';
 import { HealthModule } from './health/health.module';
@@ -72,6 +73,7 @@ import { ReportsModule } from './reports/reports.module';
     SharedModule,
     BackupModule,
     AdminModule,
+    ChatModule,
     StoreVerificationModule,
     StorageModule,
     HealthModule,
