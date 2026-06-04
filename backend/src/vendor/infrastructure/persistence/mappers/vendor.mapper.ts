@@ -12,6 +12,8 @@ export class VendorMapper {
       entity.description,
       entity.status,
       entity.user_id,
+      entity.logo_url ?? null,
+      entity.storefront_image_url ?? null,
     );
   }
 
@@ -25,6 +27,8 @@ export class VendorMapper {
       description: domain.description,
       status: domain.status,
       user_id: domain.user_id,
+      logo_url: domain.logo_url,
+      storefront_image_url: domain.storefront_image_url,
     };
   }
 }
