@@ -24,6 +24,12 @@ export class VendorEntity {
   @Column({ type: 'varchar', default: 'PENDING' })
   status: string;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  logo_url: string | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  storefront_image_url: string | null;
+
   @OneToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
