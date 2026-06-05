@@ -1,6 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { IStorageRepository } from '../../domain/repositories/storage.repository.interface';
-import { UploadResult } from '../../domain/interfaces/upload-result.interface';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -10,8 +9,9 @@ export class UploadImageUseCase {
     private readonly storageRepo: IStorageRepository,
   ) {}
 
-  async execute(file: Express.Multer.File, folder: string): Promise<UploadResult> {
+  async execute(file: Express.Multer.File, folder: string) {
     const filename = `${Date.now()}-${randomUUID()}`;
-    return this.storageRepo.uploadImage(file.buffer, folder, filename);
+    const result = await this.storageRepo.uploadImage(file.buffer, folder, filename);
+    return { image_url: result.secure_url, public_id: result.public_id };
   }
 }
