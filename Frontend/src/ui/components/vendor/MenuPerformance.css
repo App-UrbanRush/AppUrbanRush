@@ -1,0 +1,183 @@
+.menu-performance-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-top: 32px;
+}
+
+.menu-performance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.menu-performance-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.view-all-btn {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  opacity: 0.5;
+}
+
+.view-all-btn:disabled {
+  cursor: not-allowed;
+}
+
+.performance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.performance-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.performance-row:hover {
+  background: #f9f9f9;
+}
+
+.product-image {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #e0e0e0;
+  border-radius: 8px;
+}
+
+.product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+}
+
+.performance-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.performance-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.product-sold {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 80px;
+}
+
+.sold-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.sold-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.menu-performance-loading,
+.menu-performance-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.menu-performance-empty h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+  margin: 16px 0 8px;
+}
+
+.menu-performance-empty p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .menu-performance-section {
+  background: #1a1a2e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-wrapper.dark-mode .menu-performance-header h2 {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .performance-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode-wrapper.dark-mode .image-placeholder {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .product-name {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .performance-bar-container {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .sold-count {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .sold-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .menu-performance-loading,
+.dark-mode-wrapper.dark-mode .menu-performance-empty {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark-mode-wrapper.dark-mode .menu-performance-empty h3 {
+  color: rgba(255, 255, 255, 0.9);
+}

@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Param, Request, UseGuards, UseInterceptors,
+  Controller, Post, Param, Request, Body, UseGuards, UseInterceptors,
   UploadedFile, BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -9,6 +9,7 @@ import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
 import { Roles, UserRole } from 'src/auth/infrastructure/decorators/roles.decorator';
 import { UploadProductImageUseCase } from '../../application/use-cases/upload-product-image.use-case';
 import { UploadVendorImageUseCase } from '../../application/use-cases/upload-vendor-image.use-case';
+import { UploadImageUseCase } from '../../application/use-cases/upload-image.use-case';
 
 const imageInterceptor = FileInterceptor('image', {
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -27,6 +28,17 @@ const imageApiBody = {
   },
 };
 
+const imageWithFolderApiBody = {
+  schema: {
+    type: 'object' as const,
+    properties: {
+      image: { type: 'string', format: 'binary' },
+      folder: { type: 'string' },
+    },
+    required: ['image'],
+  },
+};
+
 @ApiTags('Images')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -35,7 +47,23 @@ export class StorageController {
   constructor(
     private readonly uploadProductImage: UploadProductImageUseCase,
     private readonly uploadVendorImage: UploadVendorImageUseCase,
+    private readonly uploadImage: UploadImageUseCase,
   ) {}
+
+  @Post('storage/image')
+  @Roles(UserRole.BUSINESS)
+  @UseInterceptors(imageInterceptor)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody(imageWithFolderApiBody)
+  @ApiOperation({ summary: 'Subir imagen genérica (categorías, etc.) (BUSINESS)' })
+  async genericImage(
+    @UploadedFile() image: Express.Multer.File,
+    @Body('folder') folder: string,
+  ) {
+    if (!image) throw new BadRequestException('La imagen es requerida');
+    const safeFolder = (folder || 'misc').replace(/[^a-zA-Z0-9_-]/g, '');
+    return this.uploadImage.execute(image, safeFolder);
+  }
 
   @Post('products/:id/image')
   @Roles(UserRole.BUSINESS)

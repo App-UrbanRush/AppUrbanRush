@@ -1,0 +1,43 @@
+.category-filter {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.category-btn {
+  padding: 10px 24px;
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  color: #666;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.category-btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.category-btn.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .category-btn {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark-mode-wrapper.dark-mode .category-btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}

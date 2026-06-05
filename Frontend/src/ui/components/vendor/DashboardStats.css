@@ -1,0 +1,24 @@
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.dashboard-stats-loading,
+.dashboard-stats-error {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+.dashboard-stats-error {
+  color: #2563eb;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .dashboard-stats-loading,
+.dark-mode-wrapper.dark-mode .dashboard-stats-error {
+  color: rgba(255, 255, 255, 0.7);
+}

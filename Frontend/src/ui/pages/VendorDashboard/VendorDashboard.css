@@ -1,0 +1,30 @@
+.vendor-dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.vendor-dashboard-header {
+  margin-bottom: 32px;
+}
+
+.vendor-dashboard-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+}
+
+.vendor-dashboard-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .vendor-dashboard-header h1 {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-dashboard-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+}

@@ -1,0 +1,116 @@
+.vendor-sidebar {
+  width: 260px;
+  background: #1a1a2e;
+  color: #fff;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.vendor-sidebar-logo {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vendor-sidebar-logo h1 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.vendor-sidebar-nav {
+  padding: 16px 0;
+  flex: 1;
+}
+
+.sidebar-menu-item {
+  margin-bottom: 4px;
+}
+
+.sidebar-menu-link,
+.sidebar-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: #fff !important;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sidebar-menu-link:hover,
+.sidebar-menu-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-menu-link.active,
+.sidebar-menu-button.active {
+  background: #2563eb;
+  color: #fff !important;
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+}
+
+.sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: #fff !important;
+}
+
+.sidebar-chevron {
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+.sidebar-submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-submenu-link {
+  display: block;
+  padding: 10px 20px 10px 56px;
+  color: #fff !important;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.sidebar-submenu-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff !important;
+}
+
+.sidebar-submenu-link.active {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .vendor-sidebar {
+  background: #0f0f1a;
+}

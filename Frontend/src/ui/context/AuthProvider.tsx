@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect,
    type ReactNode } from "react";
 import { AuthContext, type AuthContextType } from "./AuthContext";
 import type { AuthState } from "../../domain/types/auth.types";
-import type { UserProfile } from "../../domain/interfaces/IAuthRepository";
+import type { UserProfile, VendorProfile } from "../../domain/interfaces/IAuthRepository";
 import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
 import { RegisterUseCase } from "../../application/use-cases/RegisterUseCase";
 import { LogoutUseCase } from "../../application/use-cases/LogoutUseCase";
@@ -18,8 +18,7 @@ import { VerificationRepositoryImpl } from "../../infrastructure/repositories/Ve
 import type { RegisterDeliveryRequest, RegisterRequest } from "../../domain/types/auth.types";
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
 import type { VerifyDocumentRequest } from "../../domain/types/verification.types";
-import type { ForgotPasswordRequest, ForgotPasswordResponse } from "../../domain/types/auth.types";
-import type { ResetPasswordRequest, ResetPasswordResponse } from "../../domain/types/auth.types";
+import { getVendorProfile } from "../../infrastructure/repositories/vendorProfileRepository";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -88,6 +87,27 @@ const [state, setState] = useState<AuthState>({
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
+  // Auto-fetch profiles on mount if already authenticated
+  useEffect(() => {
+    if (authLocalStorage.getToken()) {
+      getMyProfileUseCase.execute().then((profile) => {
+        setMyProfile(profile);
+        if (profile.firstName) {
+          setState((prev) => ({
+            ...prev,
+            user: prev.user
+              ? { ...prev.user, name: `${profile.firstName} ${profile.firstLastName}` }
+              : null,
+          }));
+        }
+      }).catch(() => {});
+
+      getVendorProfile().then((profile) => {
+        setVendorProfile(profile);
+      }).catch(() => {});
+    }
+  }, [getMyProfileUseCase]);
+
   // LOGIN
   const login = useCallback(async (email: string, password: string) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -120,6 +140,16 @@ const [state, setState] = useState<AuthState>({
       } catch {
         // Profile fetch is best-effort
       }
+
+      // Fetch vendor profile
+      try {
+        const vProfile = await getVendorProfile();
+        setVendorProfile(vProfile);
+      } catch {
+        // Vendor profile fetch is best-effort
+      }
+
+      return response;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Error en login";
@@ -342,6 +372,18 @@ const [state, setState] = useState<AuthState>({
     }
   }, [getMyProfileUseCase]);
 
+  // VENDOR PROFILE
+  const [vendorProfile, setVendorProfile] = useState<VendorProfile | null>(null);
+
+  const fetchVendorProfile = useCallback(async () => {
+    try {
+      const profile = await getVendorProfile();
+      setVendorProfile(profile);
+    } catch {
+      setVendorProfile(null);
+    }
+  }, []);
+
   // VERIFY DOCUMENT
   const verifyDocument = useCallback(
     async (images: File[], data: VerifyDocumentRequest) => {
@@ -362,6 +404,8 @@ const value: AuthContextType = {
   verifyDocument,
   myProfile,
   fetchMyProfile,
+  vendorProfile,
+  fetchVendorProfile,
 };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -10,6 +10,19 @@ export interface UserProfile {
   email?: string;
 }
 
+export interface VendorProfile {
+  vendor_id: number;
+  business_name: string;
+  business_type: string;
+  address: string;
+  phone: string;
+  description: string | null;
+  status: string;
+  user_id: number;
+  logo_url: string | null;
+  storefront_image_url: string | null;
+}
+
 export interface IAuthRepository {
   login(credentials: LoginRequest): Promise<AuthResponse>;
   register(data: RegisterRequest): Promise<AuthResponse>;

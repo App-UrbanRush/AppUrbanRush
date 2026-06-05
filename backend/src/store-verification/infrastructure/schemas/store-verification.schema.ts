@@ -13,7 +13,7 @@ export class StoreVerification {
   @Prop({ default: false }) is_real_sign: boolean;
   @Prop({ default: false }) name_matches: boolean;
   @Prop({ type: [String], default: [] }) reasons: string[];
-  @Prop({ default: null }) image_url: string | null;
+  @Prop({ type: String, default: null }) image_url: string | null;
 }
 
 export const StoreVerificationSchema = SchemaFactory.createForClass(StoreVerification);

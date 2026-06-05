@@ -184,7 +184,7 @@ const VendorRegister = () => {
 
   const handleSuccessConfirm = () => {
     setShowSuccess(false);
-    navigate("/dashboard");
+    navigate("/vendor/dashboard");
   };
 
   const stepTitle = stepTitles[step] || "";

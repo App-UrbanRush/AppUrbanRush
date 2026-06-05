@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import * as path from 'path';
-
 const PdfPrinter = require('pdfmake');
 
 @Injectable()
@@ -9,14 +8,15 @@ export class PdfGeneratorService {
 
   constructor() {
     const fontsDir = path.resolve('./node_modules/pdfmake/fonts/Roboto');
-    this.printer = new PdfPrinter({
+    const fontFiles = {
       Roboto: {
         normal: path.join(fontsDir, 'Roboto-Regular.ttf'),
         bold: path.join(fontsDir, 'Roboto-Medium.ttf'),
         italics: path.join(fontsDir, 'Roboto-Italic.ttf'),
         bolditalics: path.join(fontsDir, 'Roboto-MediumItalic.ttf'),
       },
-    });
+    };
+    this.printer = new PdfPrinter(fontFiles);
   }
 
   generateTable(

@@ -4,14 +4,13 @@
  */
 
 import { createContext } from "react";
-import type { AuthState, RegisterDeliveryRequest, RegisterRequest } from "../../domain/types/auth.types";
+import type { AuthState, AuthResponse, RegisterDeliveryRequest, RegisterRequest, ForgotPasswordResponse, ResetPasswordResponse } from "../../domain/types/auth.types";
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
 import type { VerifyDocumentRequest, VerificationResult } from "../../domain/types/verification.types";
-import type { UserProfile } from "../../domain/interfaces/IAuthRepository";
-import type { ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from "../../domain/types/auth.types";
+import type { UserProfile, VendorProfile } from "../../domain/interfaces/IAuthRepository";
 
 export interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResponse>;
   register: (data: RegisterRequest) => Promise<void>;
   registerDelivery: (data: RegisterDeliveryRequest) => Promise<void>;
   registerVendor: (data: RegisterVendorRequest) => Promise<VendorRegisterResponse>;
@@ -25,6 +24,8 @@ export interface AuthContextType extends AuthState {
   error: string | null;
   myProfile: UserProfile | null;
   fetchMyProfile: () => Promise<void>;
+  vendorProfile: VendorProfile | null;
+  fetchVendorProfile: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
