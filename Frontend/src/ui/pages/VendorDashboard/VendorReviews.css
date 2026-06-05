@@ -1,0 +1,71 @@
+.vendor-reviews {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.vendor-reviews h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 32px;
+}
+
+.vendor-reviews-loading {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.vendor-reviews-loading h2 {
+  font-size: 20px;
+  color: #666;
+  margin: 0;
+}
+
+.vendor-reviews-empty {
+  text-align: center;
+  padding: 80px 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-reviews-empty h3 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+}
+
+.vendor-reviews-empty p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+.vendor-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .vendor-reviews h1 {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-reviews-loading h2 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark-mode-wrapper.dark-mode .vendor-reviews-empty {
+  background: #1a1a2e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-wrapper.dark-mode .vendor-reviews-empty h3 {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-reviews-empty p {
+  color: rgba(255, 255, 255, 0.7);
+}

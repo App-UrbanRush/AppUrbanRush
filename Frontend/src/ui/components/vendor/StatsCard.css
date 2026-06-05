@@ -1,0 +1,76 @@
+.stats-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stats-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.stats-card-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  margin: 0;
+}
+
+.stats-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.stats-card-icon.blue {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stats-card-icon.green {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.stats-card-icon.orange {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stats-card-icon.purple {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stats-card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .stats-card {
+  background: #1a1a2e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-wrapper.dark-mode .stats-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode-wrapper.dark-mode .stats-card-title {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark-mode-wrapper.dark-mode .stats-card-value {
+  color: #fff;
+}

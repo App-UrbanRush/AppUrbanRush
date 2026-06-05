@@ -1,0 +1,28 @@
+.vendor-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.vendor-layout-content {
+  margin-left: 260px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.vendor-layout-main {
+  margin-top: 64px;
+  padding: 24px;
+  flex: 1;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .vendor-layout {
+  background: #0f0f1a;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-layout-content {
+  background: #0f0f1a;
+}

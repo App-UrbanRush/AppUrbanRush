@@ -1,0 +1,168 @@
+.review-summary {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
+}
+
+.review-summary-header {
+  margin-bottom: 32px;
+}
+
+.review-summary-main {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.review-average {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.average-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.average-number {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.average-out-of {
+  font-size: 24px;
+  color: #999;
+}
+
+.review-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.total-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.total-label {
+  font-size: 14px;
+  color: #999;
+}
+
+.review-recommended {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recommended-percentage {
+  font-size: 32px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.recommended-label {
+  font-size: 14px;
+  color: #999;
+}
+
+.rating-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rating-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rating-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  width: 40px;
+  text-align: right;
+}
+
+.rating-bar {
+  flex: 1;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rating-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffc107 0%, #ff9800 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.rating-count {
+  font-size: 14px;
+  color: #999;
+  width: 40px;
+  text-align: right;
+}
+
+.star-filled {
+  color: #ffc107;
+  font-size: 24px;
+}
+
+.star-empty {
+  color: #e0e0e0;
+  font-size: 24px;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .review-summary {
+  background: #1a1a2e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-wrapper.dark-mode .average-number {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .average-out-of {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .total-number {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .total-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .recommended-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .rating-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark-mode-wrapper.dark-mode .rating-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .rating-count {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .star-empty {
+  color: rgba(255, 255, 255, 0.2);
+}

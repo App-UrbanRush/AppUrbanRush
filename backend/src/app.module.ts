@@ -25,6 +25,7 @@ import { StorageModule } from './storage/storage.module';
 import { HealthModule } from './health/health.module';
 import { EncryptedFileModule } from './encrypted-file/encrypted-file.module';
 import { ReportsModule } from './reports/reports.module';
+import { CategoryModule } from './category/category.module';
 
 
 @Module({
@@ -79,6 +80,7 @@ import { ReportsModule } from './reports/reports.module';
     HealthModule,
     EncryptedFileModule,
     ReportsModule,
+    CategoryModule,
   ],
 })
 export class AppModule {}

@@ -1,0 +1,267 @@
+.vendor-header {
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: fixed;
+  left: 260px;
+  right: 0;
+  top: 0;
+  z-index: 999;
+}
+
+.vendor-header-left {
+  flex: 0;
+  min-width: 0;
+}
+
+.vendor-header-center {
+  flex: 2;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+}
+
+.vendor-header-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 8px 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.vendor-header-search-icon {
+  color: #666;
+}
+
+.vendor-header-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+  color: #333;
+}
+
+.vendor-header-search-input::placeholder {
+  color: #999;
+}
+
+.vendor-header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  min-width: 200px;
+}
+
+.vendor-header-dark-mode-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: background 0.2s ease;
+}
+
+.vendor-header-dark-mode-btn:hover {
+  background: #f5f5f5;
+}
+
+.vendor-header-notification-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: background 0.2s ease;
+}
+
+.vendor-header-notification-btn:hover {
+  background: #f5f5f5;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vendor-header-profile {
+  position: relative;
+}
+
+.vendor-header-profile-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  transition: background 0.2s ease;
+}
+
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.profile-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-address {
+  font-size: 12px;
+  color: #666;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.2s ease;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-item span {
+  color: #2563eb;
+  font-weight: 500;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .vendor-header {
+  background: #1a1a2e;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .vendor-header-search {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .vendor-header-search-icon {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-header-search-input {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-header-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .vendor-header-dark-mode-btn,
+.dark-mode-wrapper.dark-mode .vendor-header-notification-btn {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-header-dark-mode-btn:hover,
+.dark-mode-wrapper.dark-mode .vendor-header-notification-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .vendor-header-profile-btn {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-header-profile-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .profile-name {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .profile-address {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dark-mode-wrapper.dark-mode .profile-dropdown {
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .dropdown-item {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}

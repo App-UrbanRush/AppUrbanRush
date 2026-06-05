@@ -1,0 +1,67 @@
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: successFadeIn 0.3s ease;
+}
+
+.success-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 40px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  animation: successPop 0.4s ease;
+}
+
+.success-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  animation: checkBounce 0.5s ease 0.2s both;
+}
+
+.success-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+@keyframes successFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes successPop {
+  0% { opacity: 0; transform: scale(0.8); }
+  60% { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes checkBounce {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Dark mode */
+.dark-mode-wrapper.dark-mode .success-card {
+  background: #1a1a2e;
+}
+
+.dark-mode-wrapper.dark-mode .success-text {
+  color: #fff;
+}

@@ -1,0 +1,18 @@
+.vendor-placeholder {
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.vendor-placeholder h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+}
+
+.vendor-placeholder p {
+  font-size: 16px;
+  color: #666;
+}

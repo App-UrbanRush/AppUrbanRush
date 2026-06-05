@@ -1,0 +1,68 @@
+.vendor-menu {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.vendor-menu h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 32px;
+}
+
+.menu-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.menu-option-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.menu-option-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-color: #2563eb;
+}
+
+.menu-option-card h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 12px 0;
+}
+
+.menu-option-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .vendor-menu h1 {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .menu-option-card {
+  background: #1a1a2e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-wrapper.dark-mode .menu-option-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode-wrapper.dark-mode .menu-option-card h2 {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .menu-option-card p {
+  color: rgba(255, 255, 255, 0.7);
+}

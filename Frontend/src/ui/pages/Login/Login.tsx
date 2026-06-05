@@ -26,7 +26,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   // Los casos de uso ya vienen inyectados del AuthProvider
-  const { login, isLoading, error: contextError } = useAuth();
+  const { login, isLoading, error: contextError, state } = useAuth();
   const navigate = useNavigate();
   const [apiError, setApiError] = useState<string>("");
 
@@ -47,10 +47,17 @@ const Login = () => {
       // 1. Llamar al repositorio
       // 2. Guardar en localStorage
       // 3. Actualizar el contexto
-      await login(data.email, data.password);
+      const response = await login(data.email, data.password);
 
-      // El estado en el contexto ya está actualizado
-      navigate("/dashboard");
+      console.log("Login response:", response);
+      console.log("User role:", response.user?.role);
+
+      // Redirigir según el rol del usuario desde la respuesta
+      if (response.user?.role === "Negocio") {
+        navigate("/vendor/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Credenciales incorrectas";
       setApiError(errorMsg);

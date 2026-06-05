@@ -1,0 +1,271 @@
+.recent-orders-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-top: 32px;
+}
+
+.recent-orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.recent-orders-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.view-all-btn {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.view-all-btn:hover {
+  color: #1d4ed8;
+}
+
+.recent-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.recent-order-item {
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.recent-order-item:hover {
+  border-color: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.order-main-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.order-id-status {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 100px;
+}
+
+.order-id {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.order-status {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.order-status.status-yellow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.order-status.status-orange {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.order-status.status-blue {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.order-status.status-green {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.order-customer,
+.order-courier {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+}
+
+.courier-label {
+  font-weight: 500;
+  color: #999;
+}
+
+.courier-name {
+  color: #333;
+}
+
+.order-total {
+  margin-left: auto;
+}
+
+.total-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.details-btn {
+  background: #f5f5f5;
+  border: none;
+  color: #333;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.details-btn:hover {
+  background: #e0e0e0;
+}
+
+.order-secondary-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.order-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #999;
+}
+
+.accept-btn {
+  background: #10b981;
+  border: none;
+  color: #fff;
+  padding: 6px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.accept-btn:hover {
+  background: #059669;
+}
+
+.recent-orders-loading,
+.recent-orders-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.recent-orders-empty svg {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.recent-orders-empty h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+  margin: 16px 0 8px;
+}
+
+.recent-orders-empty p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Dark mode styles */
+.dark-mode-wrapper.dark-mode .recent-orders-section {
+  background: #1a1a2e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-wrapper.dark-mode .recent-orders-header h2 {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .recent-order-item {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .recent-order-item:hover {
+  border-color: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.dark-mode-wrapper.dark-mode .order-id {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .order-customer,
+.dark-mode-wrapper.dark-mode .order-courier {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark-mode-wrapper.dark-mode .courier-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .courier-name {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .total-amount {
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .details-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .details-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode-wrapper.dark-mode .order-secondary-info {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .order-time {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .recent-orders-loading,
+.dark-mode-wrapper.dark-mode .recent-orders-empty {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark-mode-wrapper.dark-mode .recent-orders-empty h3 {
+  color: rgba(255, 255, 255, 0.9);
+}

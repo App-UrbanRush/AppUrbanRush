@@ -9,6 +9,15 @@ import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import PrivateRoute from "../components/PrivateRoute";
 import Layout from "../components/layout/Layout/Layout";
+import VendorDashboard from "../pages/VendorDashboard/VendorDashboard";
+import VendorOrders from "../pages/VendorDashboard/VendorOrders";
+import VendorMenu from "../pages/VendorDashboard/VendorMenu";
+import VendorReviews from "../pages/VendorDashboard/VendorReviews";
+import VendorCouriers from "../pages/VendorDashboard/VendorCouriers";
+import VendorReports from "../pages/VendorDashboard/VendorReports";
+import VendorSettings from "../pages/VendorDashboard/VendorSettings";
+import VendorCatalog from "../pages/VendorDashboard/VendorCatalog";
+import VendorCategories from "../pages/VendorDashboard/VendorCategories";
 
 const AppRouter = () => {
   return (
@@ -36,6 +45,80 @@ const AppRouter = () => {
               <Layout>
                 <Dashboard />
               </Layout>
+            </PrivateRoute>
+          }
+        />
+
+        {/* Rutas para Vendor (Restaurante) */}
+        <Route
+          path="/vendor/dashboard"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/pedidos"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorOrders />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/menu"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorMenu />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/menu/catalogo"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorCatalog />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/menu/categorias"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorCategories />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/resenas"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorReviews />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/domiciliarios"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorCouriers />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/reportes"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorReports />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/configuracion"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorSettings />
             </PrivateRoute>
           }
         />
