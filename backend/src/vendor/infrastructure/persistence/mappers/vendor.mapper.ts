@@ -14,6 +14,7 @@ export class VendorMapper {
       entity.user_id,
       entity.logo_url ?? null,
       entity.storefront_image_url ?? null,
+      entity.business_hours ?? null,
     );
   }
 
@@ -29,6 +30,7 @@ export class VendorMapper {
       user_id: domain.user_id,
       logo_url: domain.logo_url,
       storefront_image_url: domain.storefront_image_url,
+      business_hours: domain.business_hours,
     };
   }
 }

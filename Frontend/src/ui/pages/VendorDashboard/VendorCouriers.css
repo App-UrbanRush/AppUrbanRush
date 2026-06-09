@@ -1,0 +1,200 @@
+.vendor-couriers {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.couriers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.couriers-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.couriers-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.couriers-count {
+  background: #6c5ce7;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.couriers-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 16px;
+}
+
+.couriers-search svg {
+  color: #888;
+}
+
+.couriers-search input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #333;
+  background: transparent;
+  width: 200px;
+}
+
+.couriers-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #888;
+}
+
+.couriers-loading .spinner {
+  animation: spin 1s linear infinite;
+  color: #6c5ce7;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.couriers-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #888;
+}
+
+.couriers-empty svg {
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.couriers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.courier-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s;
+}
+
+.courier-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.courier-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.courier-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.courier-info h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.courier-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.courier-status.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.courier-status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.courier-status.inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Dark mode */
+body.dark .vendor-couriers h1,
+body.dark .courier-info h3 {
+  color: #f0f0f0;
+}
+
+body.dark .couriers-search {
+  background: #2d2d44;
+  border-color: #3d3d5c;
+}
+
+body.dark .couriers-search input {
+  color: #f0f0f0;
+}
+
+body.dark .courier-card {
+  background: #2d2d44;
+}
+
+body.dark .courier-status.active {
+  background: #1b4332;
+  color: #74c69d;
+}
+
+body.dark .courier-status.pending {
+  background: #3d3200;
+  color: #ffd166;
+}
+
+body.dark .courier-status.inactive {
+  background: #3d1f1f;
+  color: #ef476f;
+}

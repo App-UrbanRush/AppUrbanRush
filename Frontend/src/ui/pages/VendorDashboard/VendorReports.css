@@ -1,0 +1,416 @@
+.vendor-reports {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+/* Header */
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.reports-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.reports-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.export-btn.pdf {
+  background: #ef4444;
+  color: white;
+}
+
+.export-btn.excel {
+  background: #22c55e;
+  color: white;
+}
+
+.export-btn .spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Filtros */
+.reports-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 14px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.reports-filters svg {
+  color: #6c5ce7;
+}
+
+.reports-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #888;
+  font-weight: 600;
+}
+
+.reports-filters input[type="date"] {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+}
+
+.reports-filters input[type="date"]:focus {
+  border-color: #6c5ce7;
+}
+
+.clear-filters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-filters:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Loading / Empty */
+.reports-loading,
+.reports-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #888;
+}
+
+.reports-loading .spinner,
+.reports-empty svg {
+  color: #6c5ce7;
+  margin-bottom: 16px;
+}
+
+.reports-loading .spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Summary Cards */
+.reports-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.summary-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.summary-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.summary-label {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Charts */
+.reports-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.chart-card h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 16px 0;
+}
+
+/* Status Bars */
+.status-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-name {
+  width: 100px;
+  font-size: 13px;
+  color: #555;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.status-bar-track {
+  flex: 1;
+  height: 20px;
+  background: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.status-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  min-width: 4px;
+}
+
+.status-count {
+  width: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+
+/* Day Chart */
+.day-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 180px;
+  padding-top: 10px;
+}
+
+.day-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.day-bar-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.day-bar {
+  width: 70%;
+  max-width: 30px;
+  background: linear-gradient(180deg, #6c5ce7, #a29bfe);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease;
+  cursor: pointer;
+}
+
+.day-bar:hover {
+  opacity: 0.8;
+}
+
+.day-label {
+  font-size: 10px;
+  color: #888;
+  margin-top: 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Top Products */
+.top-products {
+  grid-column: 1 / -1;
+}
+
+.products-table {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.products-header,
+.products-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 80px 120px;
+  padding: 10px 12px;
+  align-items: center;
+}
+
+.products-header {
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.products-row {
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.products-row:last-child {
+  border-bottom: none;
+}
+
+.product-rank {
+  font-weight: 700;
+  color: #6c5ce7;
+}
+
+.product-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.product-qty {
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+}
+
+.product-revenue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #059669;
+  text-align: right;
+}
+
+.no-data {
+  text-align: center;
+  color: #aaa;
+  padding: 20px;
+}
+
+/* Dark mode */
+body.dark .vendor-reports h1,
+body.dark .chart-card h2,
+body.dark .summary-value {
+  color: #f0f0f0;
+}
+
+body.dark .reports-filters {
+  background: #2d2d44;
+}
+
+body.dark .reports-filters label {
+  color: #aaa;
+}
+
+body.dark .reports-filters input[type="date"] {
+  background: #3d3d5c;
+  border-color: #4d4d6c;
+  color: #f0f0f0;
+}
+
+body.dark .summary-card {
+  background: #2d2d44;
+}
+
+body.dark .chart-card {
+  background: #2d2d44;
+}
+
+body.dark .status-bar-track {
+  background: #3d3d5c;
+}
+
+body.dark .status-name {
+  color: #ccc;
+}
+
+body.dark .products-header {
+  background: #3d3d5c;
+  color: #aaa;
+}
+
+body.dark .products-row {
+  background: #2d2d44;
+  border-color: #3d3d5c;
+}
+
+body.dark .product-name {
+  color: #f0f0f0;
+}

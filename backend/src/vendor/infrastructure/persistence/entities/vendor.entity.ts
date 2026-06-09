@@ -30,6 +30,9 @@ export class VendorEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   storefront_image_url: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  business_hours: string | null;
+
   @OneToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
