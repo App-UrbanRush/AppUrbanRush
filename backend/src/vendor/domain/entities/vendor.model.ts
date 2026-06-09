@@ -10,5 +10,6 @@ export class Vendor {
     public readonly user_id: number,
     public readonly logo_url: string | null = null,
     public readonly storefront_image_url: string | null = null,
+    public readonly business_hours: string | null = null,
   ) {}
 }

@@ -35,5 +35,6 @@ import { ReportsController } from './infrastructure/controllers/reports.controll
     GenerateUsersReportUseCase,
     GenerateVendorReportUseCase,
   ],
+  exports: [PdfGeneratorService, ExcelGeneratorService],
 })
 export class ReportsModule {}

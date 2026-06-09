@@ -21,6 +21,7 @@ export interface VendorProfile {
   user_id: number;
   logo_url: string | null;
   storefront_image_url: string | null;
+  business_hours: string | null;
 }
 
 export interface IAuthRepository {

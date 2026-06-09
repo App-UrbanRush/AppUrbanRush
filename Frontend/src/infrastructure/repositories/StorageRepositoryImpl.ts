@@ -3,14 +3,30 @@ import { storageApi } from "../api/storageApi";
 
 export class StorageRepositoryImpl implements IStorageRepository {
   async uploadImage(file: File, folder: string): Promise<UploadResult> {
-    return storageApi.uploadImage(file, folder);
+    const result = await storageApi.uploadVendorLogo(file);
+    return {
+      image_url: result.logo_url,
+      public_id: result.public_id,
+    };
   }
 
   async uploadProductImage(productId: string, file: File): Promise<{ image_url: string; public_id: string }> {
-    return storageApi.uploadProductImage(productId, file);
+    const result = await storageApi.uploadVendorLogo(file);
+    return {
+      image_url: result.logo_url,
+      public_id: result.public_id,
+    };
+  }
+
+  async uploadVendorLogo(file: File): Promise<{ logo_url: string; public_id: string }> {
+    return storageApi.uploadVendorLogo(file);
+  }
+
+  async uploadVendorStorefront(file: File): Promise<{ storefront_image_url: string; public_id: string }> {
+    return storageApi.uploadVendorStorefront(file);
   }
 
   async deleteImage(publicId: string): Promise<void> {
-    return storageApi.deleteImage(publicId);
+    // TODO: Implement delete endpoint if needed
   }
 }

@@ -26,6 +26,7 @@ import { HealthModule } from './health/health.module';
 import { EncryptedFileModule } from './encrypted-file/encrypted-file.module';
 import { ReportsModule } from './reports/reports.module';
 import { CategoryModule } from './category/category.module';
+import { VendorPhotosModule } from './vendor-photos/vendor-photos.module';
 
 
 @Module({
@@ -81,6 +82,7 @@ import { CategoryModule } from './category/category.module';
     EncryptedFileModule,
     ReportsModule,
     CategoryModule,
+    VendorPhotosModule,
   ],
 })
 export class AppModule {}
