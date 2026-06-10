@@ -19,6 +19,8 @@ import type { RegisterDeliveryRequest, RegisterRequest } from "../../domain/type
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
 import type { VerifyDocumentRequest } from "../../domain/types/verification.types";
 import { getVendorProfile } from "../../infrastructure/repositories/vendorProfileRepository";
+import { courierProfileApi } from "../../infrastructure/api/courierProfileApi";
+import type { CourierProfile } from "../../domain/interfaces/IAuthRepository";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -384,6 +386,20 @@ const [state, setState] = useState<AuthState>({
     }
   }, []);
 
+  // COURIER PROFILE
+  const [courierProfile, setCourierProfile] = useState<CourierProfile | null>(null);
+
+  const fetchCourierProfile = useCallback(async () => {
+    try {
+      const userId = state.user?.id;
+      if (!userId) return;
+      const profile = await courierProfileApi.getProfile(Number(userId));
+      setCourierProfile(profile);
+    } catch {
+      setCourierProfile(null);
+    }
+  }, [state.user?.id]);
+
   // VERIFY DOCUMENT
   const verifyDocument = useCallback(
     async (images: File[], data: VerifyDocumentRequest) => {
@@ -406,6 +422,8 @@ const value: AuthContextType = {
   fetchMyProfile,
   vendorProfile,
   fetchVendorProfile,
+  courierProfile,
+  fetchCourierProfile,
 };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

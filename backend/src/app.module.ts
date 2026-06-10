@@ -27,6 +27,7 @@ import { EncryptedFileModule } from './encrypted-file/encrypted-file.module';
 import { ReportsModule } from './reports/reports.module';
 import { CategoryModule } from './category/category.module';
 import { VendorPhotosModule } from './vendor-photos/vendor-photos.module';
+import { CourierVendorRequestModule } from './courier-vendor-request/courier-vendor-request.module';
 
 
 @Module({
@@ -83,6 +84,7 @@ import { VendorPhotosModule } from './vendor-photos/vendor-photos.module';
     ReportsModule,
     CategoryModule,
     VendorPhotosModule,
+    CourierVendorRequestModule,
   ],
 })
 export class AppModule {}

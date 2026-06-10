@@ -55,6 +55,8 @@ const Login = () => {
       // Redirigir según el rol del usuario desde la respuesta
       if (response.user?.role === "Negocio") {
         navigate("/vendor/dashboard");
+      } else if (response.user?.role === "Domiciliario") {
+        navigate("/courier/dashboard");
       } else {
         navigate("/dashboard");
       }

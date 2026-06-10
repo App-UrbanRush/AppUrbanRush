@@ -10,6 +10,7 @@ import {
   Settings,
   ChevronDown,
   ChevronUp,
+  Send,
 } from "lucide-react";
 import "./VendorSidebar.css";
 
@@ -48,6 +49,11 @@ const menuItems: MenuItem[] = [
     label: "Domiciliarios",
     path: "/vendor/dashboard/domiciliarios",
     icon: <Bike size={28} />,
+  },
+  {
+    label: "Solicitudes",
+    path: "/vendor/dashboard/solicitudes",
+    icon: <Send size={28} />,
   },
   {
     label: "Reportes",

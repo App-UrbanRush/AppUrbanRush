@@ -32,7 +32,9 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
     console.log("PrivateRoute - User role:", userRole);
     console.log("PrivateRoute - Allowed roles:", allowedRoles);
     
-    const isAllowed = allowedRoles.includes(4) && userRole === "Negocio";
+    const isAllowed =
+      (allowedRoles.includes(4) && userRole === "Negocio") ||
+      (allowedRoles.includes(3) && userRole === "Domiciliario");
     
     if (!isAllowed) {
       console.log("PrivateRoute - Not allowed, redirecting to /dashboard");

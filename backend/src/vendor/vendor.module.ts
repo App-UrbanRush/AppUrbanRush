@@ -11,6 +11,11 @@ import { GetVendorReportDataUseCase } from './application/use-cases/get-vendor-r
 import { GenerateVendorOrdersPdfUseCase } from './application/use-cases/generate-vendor-orders-pdf.use-case';
 import { GenerateVendorOrdersExcelUseCase } from './application/use-cases/generate-vendor-orders-excel.use-case';
 import { GetVendorPendingOrdersUseCase } from './application/use-cases/get-vendor-pending-orders.use-case';
+import { GetAllVendorsUseCase } from './application/use-cases/get-all-vendors.use-case';
+import { GetVendorPhotosByIdUseCase } from '../vendor-photos/application/use-cases/get-vendor-photos-by-id.use-case';
+import { VendorPhoto, VendorPhotoSchema } from '../vendor-photos/infrastructure/schemas/vendor-photo.schema';
+import { MongoVendorPhotoRepository } from '../vendor-photos/infrastructure/repositories/mongo-vendor-photo.repository';
+import { UpdateVendorProfileDto } from './application/dts/update-vendor-profile.dto';
 import { Order, OrderSchema } from '../order/infrastructure/schemas/order.schema';
 import { CourierEntity } from '../courier/infrastructure/persistence/entities/courier.entity';
 import { PeopleEntity } from '../people/infrastructure/persistence/entities/people.entity';
@@ -19,7 +24,10 @@ import { ReportsModule } from '../reports/reports.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([VendorEntity, CourierEntity, PeopleEntity]),
-    MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
+    MongooseModule.forFeature([
+      { name: Order.name, schema: OrderSchema },
+      { name: VendorPhoto.name, schema: VendorPhotoSchema },
+    ]),
     ReportsModule,
   ],
   controllers: [VendorController],
@@ -31,9 +39,15 @@ import { ReportsModule } from '../reports/reports.module';
     GenerateVendorOrdersPdfUseCase,
     GenerateVendorOrdersExcelUseCase,
     GetVendorPendingOrdersUseCase,
+    GetAllVendorsUseCase,
+    GetVendorPhotosByIdUseCase,
     {
       provide: 'IVendorRepository',
       useClass: TypeOrmVendorRepository,
+    },
+    {
+      provide: 'IVendorPhotoRepository',
+      useClass: MongoVendorPhotoRepository,
     },
   ],
   exports: ['IVendorRepository'],

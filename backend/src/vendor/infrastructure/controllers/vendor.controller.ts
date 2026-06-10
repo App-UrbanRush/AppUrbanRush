@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, UseGuards, Request, Query, Res } from '@nestjs/common';
+import { Controller, Get, Put, Body, UseGuards, Request, Query, Res, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -9,6 +9,8 @@ import { GetVendorReportDataUseCase } from '../../application/use-cases/get-vend
 import { GenerateVendorOrdersPdfUseCase } from '../../application/use-cases/generate-vendor-orders-pdf.use-case';
 import { GenerateVendorOrdersExcelUseCase } from '../../application/use-cases/generate-vendor-orders-excel.use-case';
 import { GetVendorPendingOrdersUseCase } from '../../application/use-cases/get-vendor-pending-orders.use-case';
+import { GetAllVendorsUseCase } from '../../application/use-cases/get-all-vendors.use-case';
+import { GetVendorPhotosByIdUseCase } from '../../../vendor-photos/application/use-cases/get-vendor-photos-by-id.use-case';
 import { UpdateVendorProfileDto } from '../../application/dts/update-vendor-profile.dto';
 
 @ApiTags('Vendor')
@@ -23,7 +25,24 @@ export class VendorController {
     private readonly generateVendorOrdersPdfUseCase: GenerateVendorOrdersPdfUseCase,
     private readonly generateVendorOrdersExcelUseCase: GenerateVendorOrdersExcelUseCase,
     private readonly getVendorPendingOrdersUseCase: GetVendorPendingOrdersUseCase,
+    private readonly getAllVendorsUseCase: GetAllVendorsUseCase,
+    private readonly getVendorPhotosByIdUseCase: GetVendorPhotosByIdUseCase,
   ) {}
+
+  @Get('all')
+  @ApiOperation({ summary: 'Obtener todos los negocios registrados' })
+  @ApiResponse({ status: 200, description: 'Lista de negocios.' })
+  async getAllVendors() {
+    return this.getAllVendorsUseCase.execute();
+  }
+
+  @Get(':vendorId/photos')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Obtener fotos de un negocio por ID' })
+  @ApiResponse({ status: 200, description: 'Lista de fotos del negocio.' })
+  async getVendorPhotos(@Param('vendorId') vendorId: number) {
+    return this.getVendorPhotosByIdUseCase.execute(vendorId);
+  }
 
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))

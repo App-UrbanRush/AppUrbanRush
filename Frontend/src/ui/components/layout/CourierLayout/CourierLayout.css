@@ -1,0 +1,27 @@
+.courier-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.courier-layout-content {
+  margin-left: 260px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.courier-layout-main {
+  margin-top: 64px;
+  padding: 24px;
+  flex: 1;
+}
+
+.dark-mode-wrapper.dark-mode .courier-layout {
+  background: #0f0f1a;
+}
+
+.dark-mode-wrapper.dark-mode .courier-layout-content {
+  background: #0f0f1a;
+}
