@@ -18,6 +18,9 @@ import VendorReports from "../pages/VendorDashboard/VendorReports";
 import VendorSettings from "../pages/VendorDashboard/VendorSettings";
 import VendorCatalog from "../pages/VendorDashboard/VendorCatalog";
 import VendorCategories from "../pages/VendorDashboard/VendorCategories";
+import VendorCourierRequests from "../pages/VendorDashboard/VendorCourierRequests";
+import CourierDashboard from "../pages/CourierDashboard/CourierDashboard";
+import CourierProfile from "../pages/CourierDashboard/CourierProfile";
 
 const AppRouter = () => {
   return (
@@ -119,6 +122,32 @@ const AppRouter = () => {
           element={
             <PrivateRoute allowedRoles={[4]}>
               <VendorSettings />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/vendor/dashboard/solicitudes"
+          element={
+            <PrivateRoute allowedRoles={[4]}>
+              <VendorCourierRequests />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Rutas para Domiciliario */}
+        <Route
+          path="/courier/dashboard"
+          element={
+            <PrivateRoute allowedRoles={[3]}>
+              <CourierDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/courier/profile"
+          element={
+            <PrivateRoute allowedRoles={[3]}>
+              <CourierProfile />
             </PrivateRoute>
           }
         />

@@ -24,6 +24,15 @@ export interface VendorProfile {
   business_hours: string | null;
 }
 
+export interface CourierProfile {
+  couriers_id: number;
+  vehicle_type: string;
+  vehicle_plate: string | null;
+  soat_number: string | null;
+  status: string;
+  user_id: number;
+}
+
 export interface IAuthRepository {
   login(credentials: LoginRequest): Promise<AuthResponse>;
   register(data: RegisterRequest): Promise<AuthResponse>;

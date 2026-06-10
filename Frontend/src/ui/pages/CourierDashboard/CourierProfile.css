@@ -1,0 +1,234 @@
+.courier-profile {
+  max-width: 900px;
+}
+
+.courier-profile h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.courier-profile-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 24px 0;
+}
+
+.courier-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.courier-profile-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.courier-profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  background: #2563eb;
+  color: #fff;
+}
+
+.courier-profile-card-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.courier-profile-card-body {
+  padding: 16px 20px;
+}
+
+.courier-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.courier-profile-field:last-child {
+  border-bottom: none;
+}
+
+.courier-profile-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.courier-profile-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.courier-profile-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.courier-profile-status.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.courier-profile-status.pending {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+.courier-profile-status.inactive {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.courier-profile-requests {
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.courier-profile-requests-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  background: #2563eb;
+  color: #fff;
+}
+
+.courier-profile-requests-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.courier-profile-requests-empty {
+  padding: 24px 20px;
+  color: #9ca3af;
+  font-size: 14px;
+  text-align: center;
+}
+
+.courier-profile-requests-list {
+  padding: 8px 0;
+}
+
+.courier-profile-request-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.courier-profile-request-item:last-child {
+  border-bottom: none;
+}
+
+.courier-profile-request-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.courier-profile-request-vendor {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.courier-profile-request-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.courier-profile-request-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.courier-profile-request-status.pending {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+.courier-profile-request-status.accepted {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.courier-profile-request-status.rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile h1 {
+  color: #f3f4f6;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-subtitle {
+  color: #9ca3af;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-card {
+  background: #1a1a2e;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-card-header {
+  background: #1e40af;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-value {
+  color: #e5e7eb;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-field {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-requests {
+  background: #1a1a2e;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-requests-header {
+  background: #1e40af;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-requests-empty {
+  color: #6b7280;
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-request-item {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-wrapper.dark-mode .courier-profile-request-vendor {
+  color: #f3f4f6;
+}
