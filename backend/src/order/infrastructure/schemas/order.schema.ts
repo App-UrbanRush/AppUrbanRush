@@ -14,9 +14,12 @@ class OrderItemSchema {
 export class Order {
   @Prop({ required: true }) user_id: number;
   @Prop({ required: true }) vendor_id: number;
-  @Prop({ type: Number, default: null }) courier_id: number | null; // ← type: Number
+  @Prop({ type: Number, default: null }) courier_id: number | null;
   @Prop({ default: 'PENDING' }) status: string;
   @Prop({ required: true }) delivery_address: string;
+  @Prop({ required: true }) subtotal: number;
+  @Prop({ required: true }) delivery_fee: number;
+  @Prop({ required: true }) platform_commission: number;
   @Prop({ required: true }) total: number;
   @Prop({ type: [OrderItemSchema], default: [] }) items: OrderItemSchema[];
 }

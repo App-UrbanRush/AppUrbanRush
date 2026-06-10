@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+import { RegisterCourierEarningUseCase } from 'src/liquidation/application/use-cases/register-courier-earning.use-case';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   PENDING:     ['ACCEPTED', 'CANCELLED'],
@@ -11,7 +12,10 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
 
 @Injectable()
 export class UpdateOrderStatusUseCase {
-  constructor(@Inject('IOrderRepository') private readonly orderRepository: IOrderRepository) {}
+  constructor(
+    @Inject('IOrderRepository') private readonly orderRepository: IOrderRepository,
+    private readonly registerCourierEarning: RegisterCourierEarningUseCase,
+  ) {}
 
   async execute(orderId: string, newStatus: string, courierId?: number) {
     const order = await this.orderRepository.findById(orderId);
@@ -22,6 +26,12 @@ export class UpdateOrderStatusUseCase {
       throw new BadRequestException(`No se puede pasar de ${order.status} a ${newStatus}`);
     }
 
-    return this.orderRepository.updateStatus(orderId, newStatus, courierId);
+    const updated = await this.orderRepository.updateStatus(orderId, newStatus, courierId);
+
+    if (newStatus === 'DELIVERED') {
+      await this.registerCourierEarning.execute(orderId);
+    }
+
+    return updated;
   }
 }

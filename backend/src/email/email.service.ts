@@ -37,9 +37,9 @@ export class EmailService {
     attachments?: nodemailer.Attachment[];
   }): Promise<void> {
     const from = this.configService.get<string>('SMTP_FROM', 'UrbanRush <noreply@urbanrush.com>');
-    const html = this.compileTemplate(options.template, options.context);
 
     try {
+      const html = this.compileTemplate(options.template, options.context);
       await this.transporter.sendMail({
         from,
         to: options.to,
@@ -69,15 +69,77 @@ export class EmailService {
 
   async sendPasswordResetEmail(to: string, name: string, resetCode: string): Promise<void> {
     const logoPath = path.join(__dirname, 'templates', 'assets', 'logo-urbanrush.png');
-  
+
     await this.sendMail({
       to,
       subject: 'Código de recuperación — UrbanRush',
       template: 'reset-password',
-      context: { 
+      context: {
         name,      // El nombre real que le enviaremos desde el Caso de Uso
         resetCode  // El código de 6 números
       },
+      attachments: [
+        { filename: 'logo-urbanrush.png', path: logoPath, cid: 'logo-urbanrush' },
+      ],
+    });
+  }
+
+  async sendPayoutSuccessEmail(to: string, ctx: {
+    name: string;
+    amount: string;
+    reference: string;
+    bank_name: string;
+    account_masked: string;
+    concept: string;
+    date: string;
+  }): Promise<void> {
+    const logoPath = path.join(__dirname, 'templates', 'assets', 'logo-urbanrush.png');
+    await this.sendMail({
+      to,
+      subject: '¡Transferencia recibida! — UrbanRush',
+      template: 'payout-success',
+      context: ctx,
+      attachments: [
+        { filename: 'logo-urbanrush.png', path: logoPath, cid: 'logo-urbanrush' },
+      ],
+    });
+  }
+
+  async sendPayoutFailedEmail(to: string, ctx: {
+    name: string;
+    amount: string;
+    reference: string;
+    bank_name: string;
+    account_masked: string;
+    reason: string;
+  }): Promise<void> {
+    const logoPath = path.join(__dirname, 'templates', 'assets', 'logo-urbanrush.png');
+    await this.sendMail({
+      to,
+      subject: 'Tu transferencia no pudo completarse — UrbanRush',
+      template: 'payout-failed',
+      context: ctx,
+      attachments: [
+        { filename: 'logo-urbanrush.png', path: logoPath, cid: 'logo-urbanrush' },
+      ],
+    });
+  }
+
+  async sendWeeklyLiquidationSummary(to: string, ctx: {
+    name: string;
+    week_start: string;
+    week_end: string;
+    total_amount: string;
+    operations_label: string;
+    operations_count: number;
+    commission_total?: string;
+  }): Promise<void> {
+    const logoPath = path.join(__dirname, 'templates', 'assets', 'logo-urbanrush.png');
+    await this.sendMail({
+      to,
+      subject: 'Resumen semanal de liquidación — UrbanRush',
+      template: 'weekly-liquidation-summary',
+      context: ctx,
       attachments: [
         { filename: 'logo-urbanrush.png', path: logoPath, cid: 'logo-urbanrush' },
       ],

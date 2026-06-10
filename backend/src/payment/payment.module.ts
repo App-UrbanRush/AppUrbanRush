@@ -10,11 +10,13 @@ import { GetPaymentsByUserUseCase } from './application/use-cases/get-payments-b
 import { GetPaymentsByVendorUseCase } from './application/use-cases/get-payments-by-vendor.use-case';
 import { PaymentController } from './infrastructure/controllers/payment.controller';
 import { OrderModule } from 'src/order/order.module';
+import { LiquidationModule } from 'src/liquidation/liquidation.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Payment.name, schema: PaymentSchema }]),
     OrderModule,
+    LiquidationModule,
   ],
   controllers: [PaymentController],
   providers: [

@@ -1,4 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { IProductRepository } from 'src/product/domain/repositories/product.repository.interface';
 import { FastApiService } from 'src/shared/services/fastapi.service';
@@ -13,28 +14,43 @@ export class CreateOrderUseCase {
     @Inject('IProductRepository')
     private readonly productRepository: IProductRepository,
     private readonly fastApiService: FastApiService,
+    private readonly configService: ConfigService,
   ) {}
 
   async execute(dto: CreateOrderDto): Promise<OrderModel & { estimated_delivery?: any }> {
-    let total = 0;
+    let subtotal = 0;
     const items: OrderItemModel[] = [];
 
     for (const item of dto.items) {
       const product = await this.productRepository.findById(item.product_id);
       if (!product) throw new NotFoundException(`Producto ${item.product_id} no encontrado`);
 
-      total += product.price * item.quantity;
+      subtotal += product.price * item.quantity;
       items.push(new OrderItemModel(item.product_id, product.name, item.quantity, product.price));
     }
 
+    const deliveryFee = Number(this.configService.get<string>('DELIVERY_FEE') ?? 3000);
+    const commissionRate = Number(this.configService.get<string>('PLATFORM_COMMISSION') ?? 0.15);
+    const platformCommission = Math.round(subtotal * commissionRate);
+    const total = subtotal + deliveryFee + platformCommission;
+
     const order = new OrderModel(
-      null, dto.user_id, dto.vendor_id, null,
-      'PENDING', dto.delivery_address, total, items, null,
+      null,
+      dto.user_id,
+      dto.vendor_id,
+      null,
+      'PENDING',
+      dto.delivery_address,
+      subtotal,
+      deliveryFee,
+      platformCommission,
+      total,
+      items,
+      null,
     );
 
     const savedOrder = await this.orderRepository.create(order);
 
-    // Estimación de tiempo — no bloquea si FastAPI está caído
     const estimated_delivery = await this.fastApiService.estimateDelivery({
       order_id: savedOrder.order_id!,
       vendor_id: dto.vendor_id,

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f8; color:#333; margin:0; padding:0; }
+    .container { max-width:600px; margin:0 auto; background:#fff; padding:32px; }
+    .header { text-align:center; padding-bottom:16px; border-bottom:2px solid #ff6b35; }
+    .header img { max-width:120px; }
+    h1 { color:#dc3545; }
+    .amount { font-size:24px; font-weight:bold; color:#333; margin:16px 0; }
+    .alert { background:#fff3cd; border-left:4px solid #ffc107; padding:16px; margin:20px 0; border-radius:4px; }
+    .details { background:#f9f9f9; padding:16px; border-radius:8px; margin:20px 0; }
+    .footer { font-size:12px; color:#777; margin-top:32px; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="cid:logo-urbanrush" alt="UrbanRush" />
+      <h1>No pudimos procesar tu transferencia ⚠️</h1>
+    </div>
+    <p>Hola <strong>{{name}}</strong>,</p>
+    <p>Intentamos liquidar tu saldo pendiente, pero la transferencia no se completó.</p>
+
+    <div class="amount">Monto: $ {{amount}} COP</div>
+
+    <div class="alert">
+      <strong>Motivo:</strong> {{reason}}
+    </div>
+
+    <div class="details">
+      <p><strong>Referencia:</strong> {{reference}}</p>
+      <p><strong>Banco destino:</strong> {{bank_name}}</p>
+      <p><strong>Cuenta destino:</strong> {{account_masked}}</p>
+    </div>
+
+    <p><strong>¿Qué hacer ahora?</strong></p>
+    <ul>
+      <li>Verifica que los datos de tu cuenta bancaria sean correctos en la app.</li>
+      <li>Si todo está bien, el equipo de UrbanRush reintentará el envío.</li>
+      <li>Puedes contactarnos para acelerar el proceso.</li>
+    </ul>
+
+    <div class="footer">
+      <p>UrbanRush — Liquidaciones automáticas</p>
+    </div>
+  </div>
+</body>
+</html>

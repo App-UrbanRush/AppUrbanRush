@@ -20,6 +20,9 @@ export class MongoOrderRepository implements IOrderRepository {
       courier_id: order.courier_id,
       status: order.status,
       delivery_address: order.delivery_address,
+      subtotal: order.subtotal,
+      delivery_fee: order.delivery_fee,
+      platform_commission: order.platform_commission,
       total: order.total,
       items: order.items,
     });
