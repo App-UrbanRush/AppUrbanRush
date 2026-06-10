@@ -1,6 +1,7 @@
 // src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
@@ -28,6 +29,7 @@ import { ReportsModule } from './reports/reports.module';
 import { CategoryModule } from './category/category.module';
 import { VendorPhotosModule } from './vendor-photos/vendor-photos.module';
 import { CourierVendorRequestModule } from './courier-vendor-request/courier-vendor-request.module';
+import { LiquidationModule } from './liquidation/liquidation.module';
 
 
 @Module({
@@ -36,6 +38,7 @@ import { CourierVendorRequestModule } from './courier-vendor-request/courier-ven
       envFilePath: '.env',
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
 
     // PostgreSQL — usuarios, roles, auth
     TypeOrmModule.forRootAsync({
@@ -85,6 +88,7 @@ import { CourierVendorRequestModule } from './courier-vendor-request/courier-ven
     CategoryModule,
     VendorPhotosModule,
     CourierVendorRequestModule,
+    LiquidationModule,
   ],
 })
 export class AppModule {}

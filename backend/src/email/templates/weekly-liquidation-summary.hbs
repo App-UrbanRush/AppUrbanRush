@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f8; color:#333; margin:0; padding:0; }
+    .container { max-width:600px; margin:0 auto; background:#fff; padding:32px; }
+    .header { text-align:center; padding-bottom:16px; border-bottom:2px solid #ff6b35; }
+    .header img { max-width:120px; }
+    h1 { color:#ff6b35; }
+    .amount { font-size:28px; font-weight:bold; color:#28a745; margin:16px 0; }
+    .grid { display:table; width:100%; margin:20px 0; }
+    .grid-cell { display:table-cell; padding:16px; background:#f9f9f9; border-radius:8px; text-align:center; }
+    .grid-label { font-size:12px; color:#777; text-transform:uppercase; }
+    .grid-value { font-size:18px; font-weight:bold; color:#333; }
+    .footer { font-size:12px; color:#777; margin-top:32px; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="cid:logo-urbanrush" alt="UrbanRush" />
+      <h1>Resumen semanal de liquidación 📊</h1>
+    </div>
+    <p>Hola <strong>{{name}}</strong>,</p>
+    <p>Procesamos tu liquidación de la semana del <strong>{{week_start}}</strong> al <strong>{{week_end}}</strong>.</p>
+
+    <div class="amount">Total liquidado: $ {{total_amount}} COP</div>
+
+    <div class="grid">
+      <div class="grid-cell">
+        <div class="grid-label">{{operations_label}}</div>
+        <div class="grid-value">{{operations_count}}</div>
+      </div>
+      {{#if commission_total}}
+      <div class="grid-cell" style="margin-left:8px;">
+        <div class="grid-label">Comisión retenida</div>
+        <div class="grid-value">$ {{commission_total}}</div>
+      </div>
+      {{/if}}
+    </div>
+
+    <p>El dinero ya está en camino a tu cuenta bancaria registrada. Recibirás otro correo cuando la transferencia se complete.</p>
+
+    <div class="footer">
+      <p>UrbanRush — Liquidaciones automáticas</p>
+    </div>
+  </div>
+</body>
+</html>

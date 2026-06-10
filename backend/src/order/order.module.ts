@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Order, OrderSchema } from './infrastructure/schemas/order.schema';
 import { MongoOrderRepository } from './infrastructure/repositories/mongo-order.repository';
@@ -9,11 +9,13 @@ import { GetAvailableOrdersUseCase } from './application/use-cases/get-available
 import { UpdateOrderStatusUseCase } from './application/use-cases/update-order-status.use-case';
 import { OrderController } from './infrastructure/controllers/order.controller';
 import { ProductModule } from 'src/product/product.module';
+import { LiquidationModule } from 'src/liquidation/liquidation.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     ProductModule,
+    forwardRef(() => LiquidationModule),
   ],
   controllers: [OrderController],
   providers: [
