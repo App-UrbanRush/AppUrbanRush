@@ -44,8 +44,8 @@ const VendorOrders = () => {
     setIsModalOpen(true);
   };
 
-  const handleAcceptClick = (orderId: string) => {
-    console.log("Aceptar pedido:", orderId);
+  const handleAcceptClick = (_orderId: string) => {
+    // TODO: implementar lógica de aceptar pedido via API
   };
 
   if (loading) {

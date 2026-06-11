@@ -21,23 +21,17 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
 
   // Si se especifican roles permitidos, verificar el rol del usuario
   if (allowedRoles && allowedRoles.length > 0) {
-    // Si el usuario no está cargado aún, mostrar loading o permitir acceso temporalmente
     if (!user) {
-      console.log("PrivateRoute - User not loaded yet, allowing access");
-      return children;
+      return <Navigate to="/" replace />;
     }
 
     const userRole = user.role;
-    console.log("PrivateRoute - User:", user);
-    console.log("PrivateRoute - User role:", userRole);
-    console.log("PrivateRoute - Allowed roles:", allowedRoles);
     
     const isAllowed =
       (allowedRoles.includes(4) && userRole === "Negocio") ||
       (allowedRoles.includes(3) && userRole === "Domiciliario");
     
     if (!isAllowed) {
-      console.log("PrivateRoute - Not allowed, redirecting to /dashboard");
       return <Navigate to="/dashboard" replace />;
     }
   }

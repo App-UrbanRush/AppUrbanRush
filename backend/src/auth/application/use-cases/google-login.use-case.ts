@@ -44,7 +44,7 @@ export class GoogleLoginUseCase {
 
     const access_token = this.jwtService.sign(payload);
 
-    await this.sessionRepository.save(user.user_id, access_token, 1800); 
+    await this.sessionRepository.save(user.user_id, access_token, 1800); // 30 min
 
     return { access_token };
   }

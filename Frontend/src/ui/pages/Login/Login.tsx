@@ -49,9 +49,6 @@ const Login = () => {
       // 3. Actualizar el contexto
       const response = await login(data.email, data.password);
 
-      console.log("Login response:", response);
-      console.log("User role:", response.user?.role);
-
       // Redirigir según el rol del usuario desde la respuesta
       if (response.user?.role === "Negocio") {
         navigate("/vendor/dashboard");

@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 import { SERVER_PORT } from './config/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
 
   const configService = app.get(ConfigService);
 
@@ -53,6 +54,6 @@ async function bootstrap() {
 
   const port = +(configService.get<number>(SERVER_PORT) ?? 3000);
   await app.listen(port);
-  console.log(`UrbanRush corriendo en puerto ${port} [${nodeEnv}]`);
+  logger.log(`UrbanRush corriendo en puerto ${port} [${nodeEnv}]`);
 }
 bootstrap();

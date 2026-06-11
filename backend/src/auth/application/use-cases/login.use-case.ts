@@ -35,7 +35,7 @@ export class LoginUseCase {
 
     const access_token = this.jwtService.sign(payload); // ← separar para usarlo abajo
 
-    await this.sessionRepository.save(user.user_id!, access_token, 1800); // ← aquí dentro
+    await this.sessionRepository.save(user.user_id!, access_token, 1800); // 30 min
 
     return {
       access_token,
