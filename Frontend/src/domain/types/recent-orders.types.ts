@@ -7,7 +7,7 @@ export interface OrderItem {
 export interface RecentOrder {
   order_id: string;
   customer_name: string;
-  status: 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY';
+  status: 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY' | 'IN_DELIVERY' | 'DELIVERED' | 'CANCELLED';
   courier_name: string | null;
   total: number;
   time_elapsed: string;

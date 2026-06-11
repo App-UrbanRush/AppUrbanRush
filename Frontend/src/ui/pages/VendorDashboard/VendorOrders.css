@@ -147,6 +147,26 @@
   background: #e0e0e0;
 }
 
+.track-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ff6b35;
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+}
+
+.track-btn:hover {
+  background: #e85d2a;
+}
+
 .order-secondary-info {
   display: flex;
   align-items: center;

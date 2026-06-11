@@ -51,6 +51,14 @@ export class MongoOrderRepository implements IOrderRepository {
     return docs.map(OrderMapper.toDomain);
   }
 
+  async findByCourier(courierId: number): Promise<OrderModel[]> {
+    const docs = await this.orderModel
+      .find({ courier_id: courierId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map(OrderMapper.toDomain);
+  }
+
   async findAvailableForCourier(): Promise<OrderModel[]> {
     const docs = await this.orderModel
       .find({ status: 'READY' })
