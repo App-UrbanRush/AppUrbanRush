@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
@@ -7,7 +7,7 @@ import {
   WOMPI_EVENTS_SECRET,
   WOMPI_BASE_URL,
   WOMPI_PUBLIC_KEY,
-  WOMPI_INTEGRITY_SECRET, // ← agregar
+  WOMPI_INTEGRITY_SECRET,
 } from 'src/config/constants';
 
 export interface WompiTransactionResponse {
@@ -22,6 +22,7 @@ export interface WompiTransactionResponse {
 
 @Injectable()
 export class WompiService {
+  private readonly logger = new Logger(WompiService.name);
   private readonly privateKey: string;
   private readonly eventsSecret: string;
   private readonly baseUrl: string;
@@ -72,7 +73,7 @@ export class WompiService {
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log('WOMPI ERROR COMPLETO:', JSON.stringify(error.response?.data, null, 2));
+        this.logger.error(`Wompi error: ${error.response?.data?.error?.reason ?? error.message}`);
         const reason = error.response?.data?.error?.reason
           ?? error.response?.data?.message
           ?? error.message;
