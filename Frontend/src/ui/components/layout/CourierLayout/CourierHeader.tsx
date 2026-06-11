@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Bell, User, LogOut, Moon, Sun } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bell, User, LogOut, Moon, Sun, UserCircle } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
 import { useDarkMode } from "../../../context/useDarkMode";
 import "./CourierHeader.css";
 
 const CourierHeader = () => {
+  const navigate = useNavigate();
   const { logout, user } = useAuth();
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -12,6 +14,11 @@ const CourierHeader = () => {
   const handleLogout = async () => {
     await logout();
     setShowProfileMenu(false);
+  };
+
+  const goToProfile = () => {
+    setShowProfileMenu(false);
+    navigate("/courier/profile");
   };
 
   const displayName = user?.name || "Domiciliario";
@@ -49,7 +56,12 @@ const CourierHeader = () => {
 
           {showProfileMenu && (
             <div className="profile-dropdown">
-              <button onClick={handleLogout} className="dropdown-item">
+              <button onClick={goToProfile} className="dropdown-item">
+                <UserCircle size={16} />
+                <span>Mi Perfil</span>
+              </button>
+              <div className="dropdown-divider" />
+              <button onClick={handleLogout} className="dropdown-item dropdown-item-danger">
                 <LogOut size={16} />
                 <span>Cerrar Sesion</span>
               </button>

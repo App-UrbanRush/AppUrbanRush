@@ -3,7 +3,7 @@ import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { useAuth } from "../../context/useAuth";
 import { courierVendorRequestsApi, type CourierVendorRequest } from "../../../infrastructure/api/courierVendorRequestsApi";
 import { vendorsApi, type VendorListItem } from "../../../infrastructure/api/vendorsApi";
-import { User, Mail, Phone, MapPin, Car, CreditCard, Shield, FileText, Clock, CheckCircle, XCircle, Send } from "lucide-react";
+import { User, Mail, Phone, MapPin, Car, CreditCard, Shield, FileText, Clock, CheckCircle, XCircle, Send, Bike } from "lucide-react";
 import "./CourierProfile.css";
 
 const CourierProfile = () => {
@@ -70,8 +70,19 @@ const CourierProfile = () => {
   return (
     <CourierLayout>
       <div className="courier-profile">
-        <h1>Mi Perfil</h1>
-        <p className="courier-profile-subtitle">Información personal y datos del vehículo</p>
+        {/* Banner de perfil */}
+        <div className="courier-profile-banner">
+          <div className="courier-profile-avatar">
+            {(myProfile?.firstName?.[0] || "D").toUpperCase()}
+          </div>
+          <div className="courier-profile-banner-info">
+            <h1>{myProfile?.firstName || "Domiciliario"} {myProfile?.firstLastName || ""}</h1>
+            <p className="courier-profile-subtitle">{user?.email || "Información personal y datos del vehículo"}</p>
+            <span className="courier-profile-role-chip">
+              <Bike size={13} /> Domiciliario
+            </span>
+          </div>
+        </div>
 
         <div className="courier-profile-grid">
           {/* Datos Personales */}

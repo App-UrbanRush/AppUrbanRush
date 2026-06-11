@@ -22,6 +22,8 @@ import VendorCourierRequests from "../pages/VendorDashboard/VendorCourierRequest
 import CourierDashboard from "../pages/CourierDashboard/CourierDashboard";
 import CourierProfile from "../pages/CourierDashboard/CourierProfile";
 import CourierDeliveries from "../pages/CourierDashboard/CourierDeliveries";
+import CourierAvailableOrders from "../pages/CourierDashboard/CourierAvailableOrders";
+import CourierEarnings from "../pages/CourierDashboard/CourierEarnings";
 import OrderTracking from "../pages/Tracking/OrderTracking";
 import CourierBroadcast from "../pages/Tracking/CourierBroadcast";
 
@@ -155,10 +157,26 @@ const AppRouter = () => {
           }
         />
         <Route
+          path="/courier/available"
+          element={
+            <PrivateRoute allowedRoles={[3]}>
+              <CourierAvailableOrders />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/courier/deliveries"
           element={
             <PrivateRoute allowedRoles={[3]}>
               <CourierDeliveries />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/courier/earnings"
+          element={
+            <PrivateRoute allowedRoles={[3]}>
+              <CourierEarnings />
             </PrivateRoute>
           }
         />

@@ -10,6 +10,11 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.courier-layout-content.collapsed {
+  margin-left: 72px;
 }
 
 .courier-layout-main {

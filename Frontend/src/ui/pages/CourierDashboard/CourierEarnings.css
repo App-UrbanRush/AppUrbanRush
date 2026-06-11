@@ -1,0 +1,396 @@
+.earnings {
+  max-width: 1000px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.earnings h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(90deg, #ff6a00, #ff8c00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.earnings-subtitle {
+  color: #8a909c;
+  margin: 6px 0 24px;
+  font-size: 14px;
+}
+
+/* Tarjetas resumen */
+.earnings-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.earnings-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.earnings-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+.earnings-card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.earnings-card.pending .earnings-card-icon { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+.earnings-card.paid .earnings-card-icon { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.earnings-card.total .earnings-card-icon { background: linear-gradient(135deg, #ff6a00, #ff8c00); }
+
+.earnings-card-label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #aab0bc;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.earnings-card-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1f2430;
+}
+
+/* Secciones */
+.earnings-section {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.05);
+}
+
+.earnings-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #1f2430;
+  margin: 0 0 16px;
+}
+
+.earnings-section h2 svg { color: #ff8c00; }
+
+.earnings-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.earnings-section-head h2 { margin-bottom: 0; }
+
+.earnings-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(90deg, #ff6a00, #ff8c00);
+  color: #fff;
+  border: 0;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.earnings-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 106, 0, 0.4);
+}
+
+.earnings-empty {
+  color: #aab0bc;
+  font-size: 14px;
+  padding: 16px 0;
+  text-align: center;
+}
+
+/* Cuentas bancarias */
+.earnings-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.earnings-account {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #f0f1f4;
+  border-radius: 14px;
+  transition: background 0.2s;
+}
+
+.earnings-account:hover { background: #fafbfc; }
+
+.earnings-account-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff1e6;
+  color: #ff6a00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.earnings-account-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.earnings-account-bank {
+  font-weight: 800;
+  color: #1f2430;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.earnings-default-chip {
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.earnings-account-num {
+  font-size: 13px;
+  color: #8a909c;
+}
+
+.earnings-account-del {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.earnings-account-del:hover { background: #fee2e2; }
+
+/* Tabla de entregas */
+.earnings-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.earnings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  align-items: center;
+  padding: 13px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+}
+
+.earnings-row:last-child { border-bottom: none; }
+
+.earnings-row-order { font-weight: 800; color: #1f2430; }
+.earnings-row-fee { font-weight: 700; color: #16a34a; }
+
+.earnings-row-status {
+  justify-self: start;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.earnings-row-status.paid { background: #dcfce7; color: #16a34a; }
+.earnings-row-status.pending { background: #fef9c3; color: #ca8a04; }
+
+.earnings-row-date { color: #8a909c; font-size: 13px; justify-self: end; }
+
+/* Modal */
+.earnings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.earnings-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: earnings-modal-in 0.2s ease;
+}
+
+@keyframes earnings-modal-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.earnings-modal h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 19px;
+  font-weight: 800;
+  color: #1f2430;
+  margin: 0 0 18px;
+}
+
+.earnings-modal h2 svg { color: #ff8c00; }
+
+.earnings-modal label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  margin: 12px 0 5px;
+}
+
+.earnings-modal input,
+.earnings-modal select {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.25s;
+  background: #fff;
+}
+
+.earnings-modal input:focus,
+.earnings-modal select:focus {
+  border-color: #ff6a00;
+  box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.2);
+}
+
+.earnings-form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.earnings-form-row .grow { flex: 1; }
+
+.earnings-modal-save {
+  width: 100%;
+  margin-top: 22px;
+  padding: 13px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #ff6a00, #ff8c00);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.earnings-modal-save:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 106, 0, 0.4);
+}
+
+.earnings-modal-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.earnings-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: 0;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.earnings-modal-close:hover { background: #e5e7eb; }
+
+@media (max-width: 600px) {
+  .earnings-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .earnings-row-date { justify-self: start; }
+}
+
+/* ====== Modo oscuro ====== */
+.dark-mode-wrapper.dark-mode .earnings-card,
+.dark-mode-wrapper.dark-mode .earnings-section {
+  background: #1a1a2e;
+}
+.dark-mode-wrapper.dark-mode .earnings-card-value,
+.dark-mode-wrapper.dark-mode .earnings-section h2,
+.dark-mode-wrapper.dark-mode .earnings-account-bank,
+.dark-mode-wrapper.dark-mode .earnings-row-order {
+  color: #f3f4f6;
+}
+.dark-mode-wrapper.dark-mode .earnings-account {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.dark-mode-wrapper.dark-mode .earnings-account:hover {
+  background: #22223a;
+}
+.dark-mode-wrapper.dark-mode .earnings-row {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+.dark-mode-wrapper.dark-mode .earnings-modal {
+  background: #1a1a2e;
+}
+.dark-mode-wrapper.dark-mode .earnings-modal h2 { color: #f3f4f6; }
+.dark-mode-wrapper.dark-mode .earnings-modal input,
+.dark-mode-wrapper.dark-mode .earnings-modal select {
+  background: #12121f;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f3f4f6;
+}
+.dark-mode-wrapper.dark-mode .earnings-modal-close {
+  background: #2a2a3e;
+  color: #cbd5e1;
+}

@@ -1,0 +1,165 @@
+.active-delivery {
+  position: relative;
+  background: linear-gradient(135deg, #ff6a00, #ff8c00);
+  border-radius: 22px;
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(255, 106, 0, 0.35);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.active-delivery-glow {
+  position: absolute;
+  right: -60px;
+  top: -60px;
+  width: 220px;
+  height: 220px;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+}
+
+.active-delivery-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 16px;
+}
+
+.active-delivery-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.active-delivery-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation: active-pulse 1.3s infinite;
+}
+
+@keyframes active-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+
+.active-delivery-id {
+  font-size: 16px;
+  font-weight: 800;
+  opacity: 0.95;
+}
+
+.active-delivery-body {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 18px;
+}
+
+.active-delivery-icon {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.active-delivery-info {
+  flex: 1;
+}
+
+.active-delivery-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.active-delivery-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.active-delivery-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.95;
+}
+
+.active-delivery-fee {
+  background: rgba(255, 255, 255, 0.95);
+  color: #ea580c !important;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+.active-delivery-actions {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.active-delivery-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.22s ease;
+  border: 0;
+}
+
+.active-delivery-btn.primary {
+  background: #fff;
+  color: #ea580c;
+}
+
+.active-delivery-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.active-delivery-btn.outline {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+}
+
+.active-delivery-btn.outline:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 600px) {
+  .active-delivery-actions { flex-direction: column; }
+}
