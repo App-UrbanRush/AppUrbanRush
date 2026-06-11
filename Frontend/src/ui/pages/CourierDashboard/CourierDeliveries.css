@@ -1,94 +1,299 @@
+/* ====== COURIER DELIVERIES / AVAILABLE — diseño alineado al Login ====== */
+
 .courier-deliveries {
-  padding: 8px 4px;
+  padding: 8px 4px 32px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Header */
+.courier-deliveries-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .courier-deliveries h1 {
-  font-size: 24px;
+  font-size: 26px;
+  font-weight: 800;
   margin: 0;
-  color: #1f2937;
+  background: linear-gradient(90deg, #ff6a00, #ff8c00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .courier-deliveries-subtitle {
-  color: #6b7280;
-  margin: 4px 0 20px;
+  color: #8a909c;
+  margin: 6px 0 0;
   font-size: 14px;
 }
 
+.courier-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+  color: #ff6a00;
+  border: 1px solid #ffd9bf;
+  padding: 9px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(255, 106, 0, 0.08);
+}
+
+.courier-refresh-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 106, 0, 0.2);
+}
+
+.courier-refresh-btn:active {
+  transform: scale(0.98);
+}
+
+.courier-refresh-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: courier-spin 1s linear infinite;
+}
+
+@keyframes courier-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Estados vacío / carga */
 .courier-deliveries-loading,
 .courier-deliveries-empty {
   text-align: center;
-  color: #9ca3af;
-  padding: 48px 0;
+  color: #aab0bc;
+  padding: 64px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 
+.courier-deliveries-empty svg {
+  color: #ffb589;
+}
+
+.courier-deliveries-empty p {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.courier-deliveries-loading::after {
+  content: "";
+  width: 28px;
+  height: 28px;
+  border: 3px solid #ffe2d1;
+  border-top-color: #ff6a00;
+  border-radius: 50%;
+  animation: courier-spin 0.8s linear infinite;
+}
+
+/* Grid de tarjetas */
 .courier-deliveries-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
+/* Tarjeta */
 .delivery-card {
+  position: relative;
   background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f1f4;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
 }
 
+.delivery-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6a00, #ff8c00);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.delivery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+.delivery-card:hover::before {
+  opacity: 1;
+}
+
+.delivery-card.active {
+  border-color: transparent;
+  box-shadow: 0 12px 34px rgba(255, 106, 0, 0.18);
+}
+
+.delivery-card.active::before {
+  opacity: 1;
+}
+
+/* Top: id + estado */
 .delivery-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .delivery-id {
-  font-weight: 700;
-  color: #1f2937;
+  font-weight: 800;
+  font-size: 16px;
+  color: #1f2430;
+  letter-spacing: 0.3px;
 }
 
 .delivery-status {
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 5px 12px;
   border-radius: 999px;
 }
 
-.status-blue { background: #dbeafe; color: #1d4ed8; }
-.status-purple { background: #ede9fe; color: #7c3aed; }
-.status-gray { background: #f3f4f6; color: #6b7280; }
+.status-blue { background: #e0edff; color: #1d4ed8; }
+.status-purple { background: #efe7ff; color: #7c3aed; }
+.status-gray { background: #eef0f3; color: #6b7280; }
 
+/* Info rows */
 .delivery-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #4b5563;
-  margin: 6px 0;
+  gap: 10px;
+  font-size: 14px;
+  color: #5a616e;
+  margin: 9px 0;
 }
 
+.delivery-info svg {
+  color: #ff8c00;
+  flex-shrink: 0;
+}
+
+/* Acciones */
+.delivery-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* Botón primario (gradiente como login) */
 .delivery-share-btn {
   width: 100%;
-  margin-top: 14px;
+  margin-top: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #ff6b35;
+  background: linear-gradient(90deg, #ff6a00, #ff8c00);
   color: #fff;
   border: 0;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.25s ease;
 }
 
-.delivery-share-btn:hover {
-  background: #e85d2a;
+.delivery-actions .delivery-share-btn {
+  margin-top: 0;
+}
+
+.delivery-share-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 106, 0, 0.4);
+}
+
+.delivery-share-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.delivery-share-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Botón entregado (verde con gradiente) */
+.delivery-done-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  color: #fff;
+  border: 0;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.delivery-done-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.4);
+}
+
+.delivery-done-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.delivery-done-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .courier-deliveries-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .courier-refresh-btn {
+    justify-content: center;
+  }
+  .courier-deliveries-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ====== Modo oscuro ====== */
+.dark-mode-wrapper.dark-mode .delivery-card {
+  background: #1a1a2e;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.dark-mode-wrapper.dark-mode .delivery-id { color: #f3f4f6; }
+.dark-mode-wrapper.dark-mode .delivery-info { color: #b6bcc8; }
+.dark-mode-wrapper.dark-mode .courier-refresh-btn {
+  background: #1a1a2e;
+  border-color: rgba(255, 140, 0, 0.4);
+}
+.dark-mode-wrapper.dark-mode .courier-deliveries-empty,
+.dark-mode-wrapper.dark-mode .courier-deliveries-loading {
+  color: #8a909c;
 }
