@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { Clock, User, Package } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Clock, User, Package, MapPin } from "lucide-react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import { useAuth } from "../../context/useAuth";
 import type { RecentOrder } from "../../../domain/types/recent-orders.types";
@@ -17,6 +18,7 @@ const STATUS_CONFIG: Record<string, { color: string; label: string; icon: string
 };
 
 const VendorOrders = () => {
+  const navigate = useNavigate();
   const { vendorProfile, getAllVendorOrders } = useAuth();
   const [orders, setOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,6 +82,7 @@ const VendorOrders = () => {
           {orders.map((order) => {
             const statusConfig = STATUS_CONFIG[order.status] || { color: 'gray', label: order.status, icon: '' };
             const isPending = order.status === 'PENDING';
+            const isInDelivery = order.status === 'IN_DELIVERY';
 
             return (
               <div key={order.order_id} className="vendor-order-item">
@@ -111,6 +114,15 @@ const VendorOrders = () => {
                   >
                     Detalles
                   </button>
+
+                  {isInDelivery && (
+                    <button
+                      className="track-btn"
+                      onClick={() => navigate(`/tracking/${order.order_id}`)}
+                    >
+                      <MapPin size={14} /> Ver seguimiento
+                    </button>
+                  )}
                 </div>
 
                 <div className="order-secondary-info">

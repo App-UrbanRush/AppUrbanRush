@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UrbanRush — Test GPS Tracking</title>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+    body { margin: 0; background: #f0f2f5; color: #222; padding: 16px; }
+    h1 { color: #ff6b35; text-align: center; margin: 0 0 4px; }
+    .sub { text-align: center; color: #777; margin: 0 0 20px; font-size: 14px; }
+    .config { background: #fff; border-radius: 10px; padding: 16px; max-width: 1000px; margin: 0 auto 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .config label { display:block; font-size:12px; font-weight:600; color:#555; margin: 8px 0 2px; }
+    .config input { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; font-size:13px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1000px; margin: 0 auto; }
+    .panel { background:#fff; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .panel h2 { margin:0 0 12px; font-size:16px; display:flex; align-items:center; gap:8px; }
+    .courier h2 { color:#2563eb; }
+    .viewer h2 { color:#16a34a; }
+    button { background:#ff6b35; color:#fff; border:0; padding:9px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; margin:4px 4px 4px 0; }
+    button.secondary { background:#6b7280; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .status { font-size:12px; padding:4px 8px; border-radius:12px; font-weight:600; }
+    .on { background:#dcfce7; color:#16a34a; }
+    .off { background:#fee2e2; color:#dc2626; }
+    .log { background:#0f172a; color:#86efac; font-family:monospace; font-size:11px; padding:10px; border-radius:6px; height:260px; overflow-y:auto; white-space:pre-wrap; margin-top:10px; }
+    .coords { font-size:13px; margin:4px 0; }
+    .map { height:160px; background:#e5e7eb; border-radius:6px; margin-top:8px; position:relative; overflow:hidden; }
+    .dot { position:absolute; width:14px; height:14px; background:#dc2626; border:2px solid #fff; border-radius:50%; transform:translate(-50%,-50%); transition: all .5s; box-shadow:0 0 0 4px rgba(220,38,38,.3); }
+    small { color:#999; }
+  </style>
+</head>
+<body>
+  <h1>🛰️ UrbanRush — Test GPS Tracking</h1>
+  <p class="sub">Cliente WebSocket para probar el rastreo en tiempo real (namespace <code>/tracking</code>)</p>
+
+  <div class="config">
+    <label>Servidor WebSocket</label>
+    <input id="server" value="http://localhost:3000" />
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div>
+        <label>Order ID (debe estar IN_DELIVERY)</label>
+        <input id="orderId" placeholder="ej: 6a29d7f8..." />
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- COURIER -->
+    <div class="panel courier">
+      <h2>🏍️ Domiciliario <span id="cStatus" class="status off">desconectado</span></h2>
+      <label style="font-size:12px;font-weight:600;color:#555;">Token JWT del DOMICILIARIO</label>
+      <input id="cToken" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:11px;" placeholder="Bearer token del courier" />
+      <div style="margin-top:10px;">
+        <button id="cConnect">Conectar</button>
+        <button id="cStart" class="secondary" disabled>▶ Enviar ubicación (auto)</button>
+        <button id="cStop" class="secondary" disabled>⏸ Detener</button>
+      </div>
+      <div class="coords">📍 Última enviada: <span id="cCoords">—</span></div>
+      <small>Simula movimiento alrededor de Bogotá enviando cada 3s.</small>
+      <div class="log" id="cLog"></div>
+    </div>
+
+    <!-- VIEWER -->
+    <div class="panel viewer">
+      <h2>👤 Usuario (recibe) <span id="vStatus" class="status off">desconectado</span></h2>
+      <label style="font-size:12px;font-weight:600;color:#555;">Token JWT del USUARIO (dueño del pedido)</label>
+      <input id="vToken" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:11px;" placeholder="Bearer token del user" />
+      <div style="margin-top:10px;">
+        <button id="vConnect">Conectar</button>
+        <button id="vSubscribe" class="secondary" disabled>🔔 Suscribirse al tracking</button>
+      </div>
+      <div class="coords">📍 Ubicación recibida: <span id="vCoords">—</span></div>
+      <div class="map" id="vMap"><div class="dot" id="vDot" style="display:none;"></div></div>
+      <div class="log" id="vLog"></div>
+    </div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const now = () => new Date().toLocaleTimeString();
+  function log(el, msg, color) {
+    const line = document.createElement('div');
+    if (color) line.style.color = color;
+    line.textContent = `[${now()}] ${msg}`;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  let courierSocket = null, viewerSocket = null, sendTimer = null;
+  // Punto base: Bogotá
+  let baseLat = 4.6489, baseLng = -74.0635, step = 0;
+
+  // ─── DOMICILIARIO ───
+  $('cConnect').onclick = () => {
+    const server = $('server').value.trim();
+    const token = $('cToken').value.trim().replace('Bearer ', '');
+    if (!token) return alert('Pega el token del domiciliario');
+
+    courierSocket = io(`${server}/tracking`, { auth: { token }, transports: ['websocket'] });
+
+    courierSocket.on('connect', () => {
+      $('cStatus').textContent = 'conectado'; $('cStatus').className = 'status on';
+      $('cStart').disabled = false;
+      log($('cLog'), '✓ Conectado al servidor', '#86efac');
+    });
+    courierSocket.on('disconnect', () => {
+      $('cStatus').textContent = 'desconectado'; $('cStatus').className = 'status off';
+      $('cStart').disabled = true; $('cStop').disabled = true;
+      log($('cLog'), '✗ Desconectado', '#fca5a5');
+    });
+    courierSocket.on('error', (e) => log($('cLog'), '⚠ ERROR: ' + JSON.stringify(e), '#fca5a5'));
+    courierSocket.on('location:saved', (d) => log($('cLog'), '✓ Guardada: ' + JSON.stringify(d), '#86efac'));
+    courierSocket.on('tracking:closed', (d) => log($('cLog'), '🏁 ' + d.message, '#fbbf24'));
+  };
+
+  $('cStart').onclick = () => {
+    const orderId = $('orderId').value.trim();
+    if (!orderId) return alert('Escribe el Order ID arriba');
+    $('cStart').disabled = true; $('cStop').disabled = false;
+
+    const sendOne = () => {
+      step++;
+      // Pequeño movimiento simulado
+      const lat = baseLat + Math.sin(step / 5) * 0.002 + step * 0.0001;
+      const lng = baseLng + Math.cos(step / 5) * 0.002 + step * 0.0001;
+      const payload = { order_id: orderId, lat: +lat.toFixed(6), lng: +lng.toFixed(6), accuracy: 12, speed: 18, heading: (step * 10) % 360 };
+      courierSocket.emit('courier:location:update', payload);
+      $('cCoords').textContent = `${payload.lat}, ${payload.lng}`;
+      log($('cLog'), '→ Enviando: ' + payload.lat + ', ' + payload.lng);
+    };
+    sendOne();
+    sendTimer = setInterval(sendOne, 3000);
+  };
+
+  $('cStop').onclick = () => {
+    clearInterval(sendTimer);
+    $('cStart').disabled = false; $('cStop').disabled = true;
+    log($('cLog'), '⏸ Envío detenido', '#fbbf24');
+  };
+
+  // ─── USUARIO (VIEWER) ───
+  $('vConnect').onclick = () => {
+    const server = $('server').value.trim();
+    const token = $('vToken').value.trim().replace('Bearer ', '');
+    if (!token) return alert('Pega el token del usuario');
+
+    viewerSocket = io(`${server}/tracking`, { auth: { token }, transports: ['websocket'] });
+
+    viewerSocket.on('connect', () => {
+      $('vStatus').textContent = 'conectado'; $('vStatus').className = 'status on';
+      $('vSubscribe').disabled = false;
+      log($('vLog'), '✓ Conectado al servidor', '#86efac');
+    });
+    viewerSocket.on('disconnect', () => {
+      $('vStatus').textContent = 'desconectado'; $('vStatus').className = 'status off';
+      $('vSubscribe').disabled = true;
+      log($('vLog'), '✗ Desconectado', '#fca5a5');
+    });
+    viewerSocket.on('error', (e) => log($('vLog'), '⚠ ERROR: ' + JSON.stringify(e), '#fca5a5'));
+    viewerSocket.on('tracking:subscribed', (d) => log($('vLog'), '🔔 Suscrito: ' + JSON.stringify(d), '#86efac'));
+    viewerSocket.on('tracking:closed', (d) => log($('vLog'), '🏁 ' + d.message, '#fbbf24'));
+
+    viewerSocket.on('courier:location', (d) => {
+      $('vCoords').textContent = `${d.lat}, ${d.lng} (vel: ${d.speed ?? '—'} km/h)`;
+      log($('vLog'), '📍 RECIBIDO: ' + d.lat + ', ' + d.lng, '#7dd3fc');
+      // Pintar punto en el "mapa" relativo
+      const dot = $('vDot');
+      dot.style.display = 'block';
+      const x = 50 + (d.lng - baseLng) * 8000;
+      const y = 50 - (d.lat - baseLat) * 8000;
+      dot.style.left = Math.max(5, Math.min(95, x)) + '%';
+      dot.style.top = Math.max(5, Math.min(95, y)) + '%';
+    });
+  };
+
+  $('vSubscribe').onclick = () => {
+    const orderId = $('orderId').value.trim();
+    if (!orderId) return alert('Escribe el Order ID arriba');
+    viewerSocket.emit('order:tracking', { order_id: orderId });
+    log($('vLog'), '→ Suscribiéndose a order ' + orderId);
+  };
+</script>
+</body>
+</html>

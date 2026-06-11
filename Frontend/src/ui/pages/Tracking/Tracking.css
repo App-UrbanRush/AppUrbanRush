@@ -1,0 +1,135 @@
+.tracking-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.tracking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.tracking-header h1 {
+  font-size: 22px;
+  margin: 0;
+  color: #1f2937;
+}
+
+.tracking-order-id {
+  margin: 2px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.tracking-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.tracking-badge.live {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.tracking-badge.off {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.tracking-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: tracking-pulse 1.4s infinite;
+}
+
+@keyframes tracking-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.tracking-banner {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tracking-banner.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.tracking-banner.error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.tracking-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.tracking-info-item {
+  background: #f9fafb;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.tracking-info-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.tracking-info-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.tracking-waiting {
+  margin-top: 16px;
+  color: #6b7280;
+  font-size: 13px;
+  text-align: center;
+}
+
+.tracking-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.tracking-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+}
+
+.tracking-btn.start {
+  background: #ff6b35;
+}
+
+.tracking-btn.stop {
+  background: #6b7280;
+}

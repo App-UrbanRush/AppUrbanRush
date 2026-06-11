@@ -1,0 +1,94 @@
+.courier-deliveries {
+  padding: 8px 4px;
+}
+
+.courier-deliveries h1 {
+  font-size: 24px;
+  margin: 0;
+  color: #1f2937;
+}
+
+.courier-deliveries-subtitle {
+  color: #6b7280;
+  margin: 4px 0 20px;
+  font-size: 14px;
+}
+
+.courier-deliveries-loading,
+.courier-deliveries-empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.courier-deliveries-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.delivery-card {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.delivery-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.delivery-id {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.delivery-status {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.status-blue { background: #dbeafe; color: #1d4ed8; }
+.status-purple { background: #ede9fe; color: #7c3aed; }
+.status-gray { background: #f3f4f6; color: #6b7280; }
+
+.delivery-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #4b5563;
+  margin: 6px 0;
+}
+
+.delivery-share-btn {
+  width: 100%;
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ff6b35;
+  color: #fff;
+  border: 0;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delivery-share-btn:hover {
+  background: #e85d2a;
+}

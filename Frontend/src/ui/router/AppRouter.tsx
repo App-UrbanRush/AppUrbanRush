@@ -21,6 +21,9 @@ import VendorCategories from "../pages/VendorDashboard/VendorCategories";
 import VendorCourierRequests from "../pages/VendorDashboard/VendorCourierRequests";
 import CourierDashboard from "../pages/CourierDashboard/CourierDashboard";
 import CourierProfile from "../pages/CourierDashboard/CourierProfile";
+import CourierDeliveries from "../pages/CourierDashboard/CourierDeliveries";
+import OrderTracking from "../pages/Tracking/OrderTracking";
+import CourierBroadcast from "../pages/Tracking/CourierBroadcast";
 
 const AppRouter = () => {
   return (
@@ -148,6 +151,33 @@ const AppRouter = () => {
           element={
             <PrivateRoute allowedRoles={[3]}>
               <CourierProfile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/courier/deliveries"
+          element={
+            <PrivateRoute allowedRoles={[3]}>
+              <CourierDeliveries />
+            </PrivateRoute>
+          }
+        />
+        {/* Domiciliario transmite su GPS durante la entrega */}
+        <Route
+          path="/courier/tracking/:orderId"
+          element={
+            <PrivateRoute allowedRoles={[3]}>
+              <CourierBroadcast />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Seguimiento en vivo del pedido (usuario/negocio/admin autenticado) */}
+        <Route
+          path="/tracking/:orderId"
+          element={
+            <PrivateRoute>
+              <OrderTracking />
             </PrivateRoute>
           }
         />

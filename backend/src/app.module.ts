@@ -30,6 +30,7 @@ import { CategoryModule } from './category/category.module';
 import { VendorPhotosModule } from './vendor-photos/vendor-photos.module';
 import { CourierVendorRequestModule } from './courier-vendor-request/courier-vendor-request.module';
 import { LiquidationModule } from './liquidation/liquidation.module';
+import { TrackingModule } from './tracking/tracking.module';
 
 
 @Module({
@@ -89,6 +90,7 @@ import { LiquidationModule } from './liquidation/liquidation.module';
     VendorPhotosModule,
     CourierVendorRequestModule,
     LiquidationModule,
+    TrackingModule,
   ],
 })
 export class AppModule {}

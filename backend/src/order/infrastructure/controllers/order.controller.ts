@@ -7,6 +7,7 @@ import { CreateOrderUseCase } from '../../application/use-cases/create-order.use
 import { GetOrdersByUserUseCase } from '../../application/use-cases/get-orders-by-user.use-case';
 import { GetOrdersByVendorUseCase } from '../../application/use-cases/get-orders-by-vendor.use-case';
 import { GetAvailableOrdersUseCase } from '../../application/use-cases/get-available-orders.use-case';
+import { GetOrdersByCourierUseCase } from '../../application/use-cases/get-orders-by-courier.use-case';
 import { UpdateOrderStatusUseCase } from '../../application/use-cases/update-order-status.use-case';
 import { CreateOrderDto } from '../../application/dtos/create-order.dto';
 
@@ -20,6 +21,7 @@ export class OrderController {
     private readonly getByUser: GetOrdersByUserUseCase,
     private readonly getByVendor: GetOrdersByVendorUseCase,
     private readonly getAvailable: GetAvailableOrdersUseCase,
+    private readonly getByCourier: GetOrdersByCourierUseCase,
     private readonly updateStatus: UpdateOrderStatusUseCase,
   ) {}
 
@@ -53,6 +55,14 @@ export class OrderController {
   @ApiOperation({ summary: 'Pedidos disponibles para domiciliarios (READY)' })
   getAvailableOrders() {
     return this.getAvailable.execute();
+  }
+
+  // Domiciliario ve los pedidos asignados a él (sus entregas)
+  @Get('courier/:courierId')
+  @Roles(UserRole.DOMICILIARIO)
+  @ApiOperation({ summary: 'Pedidos asignados al domiciliario (sus entregas)' })
+  getByCourierId(@Param('courierId') courierId: string) {
+    return this.getByCourier.execute(Number(courierId));
   }
 
   // Vendor mueve: PENDING→ACCEPTED, ACCEPTED→PREPARING, PREPARING→READY
