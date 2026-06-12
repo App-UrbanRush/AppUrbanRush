@@ -1,0 +1,158 @@
+{
+  "vendor_photos": [
+    {
+      "_id": "6a2b319c53829181f3c862c5",
+      "vendor_id": 1,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781215643/urbanrush/vendors/photos/vendor-photo-1-0f60d432-5a20-42f0-a4fe-55ad853a87ee.webp",
+      "public_id": "urbanrush/vendors/photos/vendor-photo-1-0f60d432-5a20-42f0-a4fe-55ad853a87ee",
+      "order": 0,
+      "type": "storefront",
+      "createdAt": "2026-06-11T22:07:24.147Z",
+      "updatedAt": "2026-06-11T22:07:24.147Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b31a253829181f3c862c6",
+      "vendor_id": 1,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781215649/urbanrush/vendors/photos/vendor-photo-1-8e640f9e-17c1-48b5-95cf-7de350120d66.webp",
+      "public_id": "urbanrush/vendors/photos/vendor-photo-1-8e640f9e-17c1-48b5-95cf-7de350120d66",
+      "order": 1,
+      "type": "storefront",
+      "createdAt": "2026-06-11T22:07:30.330Z",
+      "updatedAt": "2026-06-11T22:07:30.330Z",
+      "__v": 0
+    }
+  ],
+  "orders": [],
+  "store_verifications": [],
+  "products": [
+    {
+      "_id": "6a2b3a9253829181f3c862c8",
+      "name": "taco gey",
+      "description": "me gusta el pn",
+      "price": 20000,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781242016/urbanrush/products/product-6a2b3a9253829181f3c862c8-4afd8746-5bff-48cd-bd62-f0d9dfb065a0.jpg",
+      "category": "hamburguesa la mas gey",
+      "is_available": true,
+      "stock": 10,
+      "vendor_id": 1,
+      "createdAt": "2026-06-11T22:45:38.561Z",
+      "updatedAt": "2026-06-12T05:26:57.688Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b7eb79174de637c05ed7b",
+      "name": "hamburguesa pn",
+      "description": "ico",
+      "price": 29999,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781242030/urbanrush/products/product-6a2b7eb79174de637c05ed7b-b3dd78d6-62a7-43b0-936f-c09515b1c2d0.webp",
+      "category": "hamburguesa la mas gey",
+      "is_available": true,
+      "stock": 11,
+      "vendor_id": 1,
+      "createdAt": "2026-06-12T03:36:23.932Z",
+      "updatedAt": "2026-06-12T05:27:11.034Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b7f659174de637c05ed7c",
+      "name": "piernas de pollo",
+      "description": "ven disfrutya",
+      "price": 2000,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781242043/urbanrush/products/product-6a2b7f659174de637c05ed7c-7546e7ed-3d55-434e-a6fb-4506ce677416.webp",
+      "category": "taco",
+      "is_available": true,
+      "stock": 10,
+      "vendor_id": 1,
+      "createdAt": "2026-06-12T03:39:17.661Z",
+      "updatedAt": "2026-06-12T05:27:24.295Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b7f7c9174de637c05ed7d",
+      "name": "ultimo",
+      "description": "aprovecha",
+      "price": 3000,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781242080/urbanrush/products/product-6a2b7f7c9174de637c05ed7d-6e7c353a-c645-4b57-b040-24bd20be54db.webp",
+      "category": "taco",
+      "is_available": true,
+      "stock": 10,
+      "vendor_id": 1,
+      "createdAt": "2026-06-12T03:39:40.901Z",
+      "updatedAt": "2026-06-12T05:28:00.832Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b7fd19174de637c05ed7e",
+      "name": "hola",
+      "description": "hahaha",
+      "price": 232,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781242061/urbanrush/products/product-6a2b7fd19174de637c05ed7e-45ac0fb4-c1d8-492a-bd10-d3e365b87f37.webp",
+      "category": "taco",
+      "is_available": true,
+      "stock": 10,
+      "vendor_id": 1,
+      "createdAt": "2026-06-12T03:41:05.306Z",
+      "updatedAt": "2026-06-12T05:27:42.842Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b7feb9174de637c05ed7f",
+      "name": "aux",
+      "description": "qauschwus",
+      "price": 20039,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781242092/urbanrush/products/product-6a2b7feb9174de637c05ed7f-0644c035-c5b2-40e3-a8a1-8638d181bd5e.webp",
+      "category": "hamburguesa la mas gey",
+      "is_available": true,
+      "stock": 10,
+      "vendor_id": 1,
+      "createdAt": "2026-06-12T03:41:31.992Z",
+      "updatedAt": "2026-06-12T05:28:13.494Z",
+      "__v": 0
+    }
+  ],
+  "messages": [],
+  "payments": [],
+  "courier_earnings": [],
+  "vendor_liquidations": [],
+  "payout_transactions": [],
+  "categories": [
+    {
+      "_id": "6a2b2492a7ca6fe1a2e2b022",
+      "vendor_id": 5,
+      "name": "tacos",
+      "image_url": "",
+      "createdAt": "2026-06-11T21:11:46.716Z",
+      "updatedAt": "2026-06-11T21:11:46.716Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b24baa7ca6fe1a2e2b023",
+      "vendor_id": 1,
+      "name": "taco",
+      "image_url": "",
+      "createdAt": "2026-06-11T21:12:26.643Z",
+      "updatedAt": "2026-06-11T21:12:26.643Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b2fd553829181f3c862c4",
+      "vendor_id": 1,
+      "name": "hamburguesa la mas gey",
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781215188/urbanrush/vendors/logos/vendor-logo-1-92d14a4a-f3d3-46b4-af9e-f9e1a16af3e6.jpg",
+      "createdAt": "2026-06-11T21:59:49.198Z",
+      "updatedAt": "2026-06-11T21:59:49.198Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2b31d353829181f3c862c7",
+      "vendor_id": 5,
+      "name": "tacosss",
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781215698/urbanrush/vendors/logos/vendor-logo-1-997a2c8e-bdad-42c0-8fca-9e610909fb9b.webp",
+      "createdAt": "2026-06-11T22:08:19.240Z",
+      "updatedAt": "2026-06-11T22:08:19.240Z",
+      "__v": 0
+    }
+  ],
+  "audit_logs": []
+}

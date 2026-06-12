@@ -19,7 +19,6 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
     return <Navigate to="/" replace />;
   }
 
-  // Si se especifican roles permitidos, verificar el rol del usuario
   if (allowedRoles && allowedRoles.length > 0) {
     if (!user) {
       return <Navigate to="/" replace />;
@@ -33,6 +32,7 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
     };
     const userRoleId = ROLE_NAME_TO_ID[user.role];
     const isAllowed = userRoleId != null && allowedRoles.includes(userRoleId);
+
 
     if (!isAllowed) {
       return <Navigate to="/dashboard" replace />;

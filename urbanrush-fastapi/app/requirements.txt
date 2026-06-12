@@ -7,4 +7,4 @@ httpx==0.27.2
 scikit-learn==1.5.2
 vaderSentiment==3.3.2
 geopy==2.4.1
-pymongo==4.9.1
+pymongo==4.8.0

@@ -1,11 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/useAuth";
+import { useCart } from "../../../context/CartContext";
+import { useCartDrawer } from "../../../context/CartDrawerContext";
+import CartDrawer from "./CartDrawer";
 import "./Navbar.css";
 
 const Navbar = () => {
   const { user, myProfile, fetchMyProfile, logout, isAuthenticated } = useAuth();
+  const { totalItems } = useCart();
+  const { isOpen: cartOpen, openCart, closeCart } = useCartDrawer();
   const navigate = useNavigate();
+  const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -84,11 +90,14 @@ const Navbar = () => {
           <span style={{ color: '#e8500a', fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px' }}>UrbanRush</span>
         </Link>
 
+        {/* Inicio moved to the right side */}
+
         {/* Spacer for mobile */}
         <div className="navbar-spacer" style={{ display: 'none', flex: 1 }} />
 
-        {/* Search bar - desktop */}
-        <div className={`search-bar-desktop${searchOpen ? " search-bar-desktop--open" : ""}`} style={{ flex: 1, display: 'flex', alignItems: 'center', backgroundColor: '#f2f2f2', borderRadius: '24px', padding: '8px 16px', gap: '8px' }}>
+        {/* Search bar - desktop (ocultar en /profile) */}
+        {location.pathname !== '/profile' && (
+          <div className={`search-bar-desktop${searchOpen ? " search-bar-desktop--open" : ""}`} style={{ flex: '0 1 420px', maxWidth: '520px', display: 'flex', alignItems: 'center', backgroundColor: '#f2f2f2', borderRadius: '24px', padding: '8px 16px', gap: '8px' }}>
           <svg width="16" height="16" fill="none" stroke="#999" strokeWidth="2" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="7"/><path strokeLinecap="round" d="M21 21l-4.35-4.35"/>
           </svg>
@@ -97,36 +106,42 @@ const Navbar = () => {
             placeholder="¿Qué deseas pedir hoy?"
             style={{ background: 'none', border: 'none', outline: 'none', fontSize: '14px', color: '#555', width: '100%' }}
           />
-        </div>
-
-        {/* Location - desktop (solo si autenticado) */}
-        {isAuthenticated && (
-          <div className="location-desktop" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#444', fontSize: '13px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-            <svg width="15" height="15" fill="#e8500a" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5z"/>
-            </svg>
-            <span>Envía a: <strong>{myProfile?.address || "Mi Ubicación"}</strong></span>
           </div>
         )}
 
-        {/* Favorites + Cart - desktop */}
-        <div className="icons-desktop" style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', padding: 0 }}>
-            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364L12 21l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
-            </svg>
-          </button>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
-            <svg width="22" height="22" fill="none" stroke="#e8500a" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 6M7 13l-1.4-6M17 13l1.4 6M9 19a1 1 0 100 2 1 1 0 000-2zM17 19a1 1 0 100 2 1 1 0 000-2z"/>
-            </svg>
-            <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e8500a', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>0</span>
-          </button>
-        </div>
+        {/* Location moved to the right side */}
 
-        {/* Avatar - desktop right (solo si autenticado) */}
-        {isAuthenticated ? (
-          <div className="profile-avatar-wrapper" ref={dropdownRef} style={{ position: 'relative', flexShrink: 0 }}>
+        {/* Right-side: Inicio + Envía a + Cart + Avatar/Login */}
+        <div className="navbar-right" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '14px' }}>
+          {/* Inicio (moved) */}
+          <Link to="/" className="navbar-home-btn" style={{ textDecoration: 'none' }}>
+            <div style={{ padding: '6px 10px', borderRadius: 10, border: '1px solid transparent', background: '#fff', color: '#444', fontWeight: 600 }}>Inicio</div>
+          </Link>
+
+          {/* Location (moved) - desktop only */}
+          {isAuthenticated && (
+            <div className="location-desktop" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#444', fontSize: '13px', flexShrink: 0, whiteSpace: 'nowrap' }}>
+              <svg width="15" height="15" fill="#e8500a" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5z"/>
+              </svg>
+              <span style={{ fontSize: '13px' }}>Envía a: <strong>{myProfile?.address || "Mi Ubicación"}</strong></span>
+            </div>
+          )}
+
+          <div className="icons-desktop" style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
+            <button onClick={() => openCart()} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
+              <svg width="22" height="22" fill="none" stroke="#e8500a" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 6M7 13l-1.4-6M17 13l1.4 6M9 19a1 1 0 100 2 1 1 0 000-2zM17 19a1 1 0 100 2 1 1 0 000-2z"/>
+              </svg>
+              {totalItems > 0 && (
+                <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e8500a', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{totalItems}</span>
+              )}
+            </button>
+          </div>
+
+          {/* Avatar - desktop right (solo si autenticado) */}
+          {isAuthenticated ? (
+            <div className="profile-avatar-wrapper" ref={dropdownRef} style={{ position: 'relative', flexShrink: 0 }}>
             <button
               onClick={() => setDropdownOpen((prev) => !prev)}
               style={{
@@ -209,26 +224,27 @@ const Navbar = () => {
               </div>
             )}
           </div>
-        ) : (
-          <div className="login-btn-wrapper" style={{ flexShrink: 0 }}>
-            <Link
-              to="/login"
-              style={{
-                background: '#e8500a',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '24px',
-                padding: '6px 16px',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                textDecoration: 'none',
-              }}
-            >
-              Iniciar sesión
-            </Link>
-          </div>
-        )}
+          ) : (
+            <div className="login-btn-wrapper" style={{ flexShrink: 0 }}>
+              <Link
+                to="/login"
+                style={{
+                  background: '#e8500a',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '24px',
+                  padding: '6px 16px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                }}
+              >
+                Iniciar sesión
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Icons - mobile (search + cart) */}
         <div className="icons-mobile" style={{ display: 'none', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
@@ -241,11 +257,13 @@ const Navbar = () => {
               <circle cx="11" cy="11" r="7"/><path strokeLinecap="round" d="M21 21l-4.35-4.35"/>
             </svg>
           </button>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
+          <button onClick={() => openCart()} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
             <svg width="20" height="20" fill="none" stroke="#e8500a" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 6M7 13l-1.4-6M17 13l1.4 6M9 19a1 1 0 100 2 1 1 0 000-2zM17 19a1 1 0 100 2 1 1 0 000-2z"/>
             </svg>
-            <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e8500a', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>0</span>
+            {totalItems > 0 && (
+              <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e8500a', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{totalItems}</span>
+            )}
           </button>
         </div>
       </div>
@@ -303,12 +321,7 @@ const Navbar = () => {
                     <span>Envía a: <strong>{myProfile?.address || "Mi Ubicación"}</strong></span>
                   </div>
 
-                  <button style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', fontSize: '14px', color: '#444', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
-                    <svg width="18" height="18" fill="none" stroke="#666" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364L12 21l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
-                    </svg>
-                    Favoritos
-                  </button>
+                  {/* Favoritos eliminado */}
                 </div>
 
                 <div style={{ height: '1px', background: '#eee', margin: '0 16px' }} />
@@ -360,6 +373,8 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      <CartDrawer isOpen={cartOpen} onClose={closeCart} />
 
       <style>{`
         @media (max-width: 768px) {

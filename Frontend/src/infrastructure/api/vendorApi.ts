@@ -8,4 +8,8 @@ export const vendorApi = {
     const response = await axios.post<VendorRegisterResponse>(`${API_URL}/auth/register-vendor`, data);
     return response.data;
   },
+  getAll: async () => {
+    const response = await axios.get(`${API_URL}/vendor/all`);
+    return response.data;
+  },
 };

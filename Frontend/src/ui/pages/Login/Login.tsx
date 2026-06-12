@@ -1,11 +1,3 @@
-/**
- * UI LAYER - PÁGINA LOGIN
- * Usa correctamente la arquitectura hexagonal:
- * - NO crea instancias de casos de uso
- * - NO importa detalles de implementación (axios, localStorage, etc)
- * - Usa useAuth() hook que ya tiene todo inyectado
- */
-
 import "./Login.css";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";

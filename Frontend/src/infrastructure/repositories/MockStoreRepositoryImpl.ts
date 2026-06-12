@@ -1,25 +1,8 @@
 import type { IStoreRepository } from "../../domain/interfaces/IStoreRepository";
 import type { Category, Store, HeroBanner } from "../../domain/types/store.types";
-
-const categories: Category[] = [
-  { id: 1, name: "Comida Rápida", icon: "🍔", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=80&h=80&fit=crop", description: "Hamburguesas, papas y más" },
-  { id: 2, name: "Pizza", icon: "🍕", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=80&h=80&fit=crop", description: "Pizzas artesanales" },
-  { id: 3, name: "Sushi", icon: "🍣", image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=80&h=80&fit=crop", description: "Sushi fresco" },
-  { id: 4, name: "Café", icon: "☕", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=80&h=80&fit=crop", description: "Café de especialidad" },
-];
-
-const recommendedStores: Store[] = [
-  { id: 1, name: "Burger House", description: "Las mejores hamburguesas de la ciudad", rating: 4.8, deliveryTime: "20-30 min", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=280&fit=crop", lat: 1.1481, lng: -76.6475 },
-  { id: 2, name: "Sushi Master", description: "Sushi fresco y delicioso", rating: 4.6, deliveryTime: "20-30 min", image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=280&fit=crop", lat: 1.1502, lng: -76.6491 },
-  { id: 3, name: "Pizzería Bella", description: "Pizza artesanal al horno de leña", rating: 4.7, deliveryTime: "20-30 min", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=280&fit=crop", lat: 1.1465, lng: -76.6458 },
-  { id: 4, name: "Café Central", description: "Café de especialidad y repostería", rating: 4.5, deliveryTime: "20-30 min", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=280&fit=crop", lat: 1.1495, lng: -76.6483 },
-];
-
-const nearbyStores: Store[] = [
-  { id: 5, name: "Taco Express", description: "Tacos y comida mexicana", rating: 4.7, deliveryTime: "15-25 min", image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&h=250&fit=crop", lat: 1.1472, lng: -76.6469 },
-  { id: 6, name: "Green Fresh", description: "Ensaladas y comida saludable", rating: 4.3, deliveryTime: "20-35 min", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=250&fit=crop", lat: 1.1510, lng: -76.6502 },
-  { id: 7, name: "Donut World", description: "Donuts artesanales y café", rating: 4.5, deliveryTime: "10-20 min", image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=250&fit=crop", lat: 1.1450, lng: -76.6445 },
-];
+import type { Product } from "../../domain/types/product.types";
+import { vendorApi } from "../api/vendorApi";
+import { productApi } from "../api/productApi";
 
 const heroBanner: HeroBanner = {
   title: "Entrega Rápida a Tu Puerta",
@@ -27,20 +10,73 @@ const heroBanner: HeroBanner = {
   buttonText: "Explorar Tiendas",
 };
 
+function mapVendorToStore(v: any): Store {
+  return {
+    id: v.vendor_id,
+    name: v.business_name ?? v.name ?? `Tienda ${v.vendor_id}`,
+    description: v.description ?? '',
+    rating: v.rating,
+    deliveryTime: v.delivery_time,
+    image: v.logo_url ?? v.storefront_image_url ?? v.image_url ?? '',
+    lat: v.lat ?? 0,
+    lng: v.lng ?? 0,
+    address: v.address ?? '',
+    products: [],
+    business_type: v.business_type ?? '',
+    logo_url: v.logo_url ?? null,
+    storefront_image_url: v.storefront_image_url ?? null,
+    business_hours: v.business_hours ?? null,
+  };
+}
+
 export class MockStoreRepositoryImpl implements IStoreRepository {
   async getHeroBanner(): Promise<HeroBanner> {
     return heroBanner;
   }
 
   async getCategories(): Promise<Category[]> {
-    return categories;
+    try {
+      const products = await productApi.getAll();
+      const cats = Array.from(new Set(products.map((p) => p.category))).filter(Boolean);
+      return cats.map((c, i) => ({ id: i + 1, name: c, icon: '📦', image: '', description: c }));
+    } catch (e) {
+      return [];
+    }
   }
 
   async getRecommendedStores(): Promise<Store[]> {
-    return recommendedStores;
+    try {
+      const vendors = await vendorApi.getAll();
+      return vendors.slice(0, 6).map(mapVendorToStore);
+    } catch (e) {
+      return [];
+    }
   }
 
   async getNearbyStores(): Promise<Store[]> {
-    return nearbyStores;
+    try {
+      const vendors = await vendorApi.getAll();
+      return vendors.slice(0, 6).map(mapVendorToStore);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async getRecommendedProducts(): Promise<Product[]> {
+    try {
+      const products = await productApi.getAll();
+      return products.slice(0, 8);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async getAllStores(): Promise<Store[]> {
+    try {
+      const vendors = await vendorApi.getAll();
+      return vendors.map(mapVendorToStore);
+    } catch (e) {
+      return [];
+    }
   }
 }

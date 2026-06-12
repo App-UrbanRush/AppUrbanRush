@@ -39,7 +39,6 @@ export class VendorController {
   }
 
   @Get(':vendorId/photos')
-  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Obtener fotos de un negocio por ID' })
   @ApiResponse({ status: 200, description: 'Lista de fotos del negocio.' })
   async getVendorPhotos(@Param('vendorId') vendorId: number) {
