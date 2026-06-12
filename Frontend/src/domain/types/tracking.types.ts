@@ -38,3 +38,11 @@ export type TrackingConnectionState =
   | "connected"
   | "disconnected"
   | "error";
+
+export interface VendorCourierLocation {
+  courier_id: number;
+  name: string;
+  lat: number;
+  lng: number;
+  timestamp: string;
+}

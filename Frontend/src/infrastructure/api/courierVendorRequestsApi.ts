@@ -100,4 +100,14 @@ export const courierVendorRequestsApi = {
     });
     return response.data;
   },
+
+  deleteRequest: async (requestId: number): Promise<{ message: string }> => {
+    const token = authLocalStorage.getToken();
+    const response = await axios.delete(`${API_URL}/courier-vendor-requests/${requestId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  },
 };

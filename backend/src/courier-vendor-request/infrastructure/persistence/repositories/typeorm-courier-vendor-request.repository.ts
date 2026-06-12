@@ -90,4 +90,8 @@ export class TypeOrmCourierVendorRequestRepository implements ICourierVendorRequ
   async updateStatus(id: number, status: string): Promise<void> {
     await this.repository.update(id, { status });
   }
+
+  async delete(id: number): Promise<void> {
+    await this.repository.delete(id);
+  }
 }

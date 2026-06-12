@@ -92,62 +92,100 @@
   margin-bottom: 16px;
 }
 
-.couriers-grid {
+/* Table header */
+.couriers-table-header {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: 70px 1fr 120px 160px;
+  padding: 12px 20px;
+  background: #f9fafb;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid #e5e7eb;
+  border-bottom: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.courier-card {
+/* Table rows */
+.couriers-table {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 0 0 10px 10px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.courier-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 120px 160px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s;
+}
+
+.courier-row:last-child {
+  border-bottom: none;
+}
+
+.courier-row:hover {
+  background: #faf5ff;
+}
+
+/* Columns */
+.couriers-col-photo {
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.2s;
-}
-
-.courier-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  justify-content: center;
 }
 
 .courier-avatar {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6c5ce7, #a29bfe);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   flex-shrink: 0;
   text-transform: uppercase;
+  overflow: hidden;
 }
 
-.courier-info {
+.courier-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.couriers-col-name {
   display: flex;
   flex-direction: column;
-  gap: 6px;
 }
 
-.courier-info h3 {
-  margin: 0;
-  font-size: 16px;
+.courier-name-text {
+  font-size: 15px;
   font-weight: 600;
   color: #1a1a2e;
 }
 
+.couriers-col-status {
+  display: flex;
+  align-items: center;
+}
+
 .courier-status {
   display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
-  width: fit-content;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .courier-status.active {
@@ -165,9 +203,34 @@
   color: #721c24;
 }
 
+.couriers-col-action {
+  display: flex;
+  align-items: center;
+}
+
+.courier-assign-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.courier-assign-btn:hover {
+  background: #6d28d9;
+  transform: translateY(-1px);
+}
+
 /* Dark mode */
 body.dark .vendor-couriers h1,
-body.dark .courier-info h3 {
+body.dark .courier-name-text {
   color: #f0f0f0;
 }
 
@@ -180,8 +243,23 @@ body.dark .couriers-search input {
   color: #f0f0f0;
 }
 
-body.dark .courier-card {
+body.dark .couriers-table-header {
+  background: #252540;
+  border-color: #3d3d5c;
+  color: #9ca3af;
+}
+
+body.dark .couriers-table {
   background: #2d2d44;
+  border-color: #3d3d5c;
+}
+
+body.dark .courier-row {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark .courier-row:hover {
+  background: rgba(124, 58, 237, 0.1);
 }
 
 body.dark .courier-status.active {

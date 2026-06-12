@@ -6,16 +6,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as redisStore from 'cache-manager-ioredis';
 import { JWT_SECRET } from 'src/config/constants';
 import { CourierEntity } from 'src/courier/infrastructure/persistence/entities/courier.entity';
+import { VendorEntity } from 'src/vendor/infrastructure/persistence/entities/vendor.entity';
+import { PeopleEntity } from 'src/people/infrastructure/persistence/entities/people.entity';
 import { OrderModule } from 'src/order/order.module';
 import { RedisGPSRepository } from './infrastructure/repositories/redis-gps.repository';
 import { UpdateLocationUseCase } from './application/use-cases/update-location.use-case';
 import { GetCourierLocationUseCase } from './application/use-cases/get-courier-location.use-case';
+import { GetVendorCourierLocationsUseCase } from './application/use-cases/get-vendor-courier-locations.use-case';
 import { GPSGateway } from './infrastructure/gateways/gps.gateway';
 import { TrackingController } from './infrastructure/controllers/tracking.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CourierEntity]),
+    TypeOrmModule.forFeature([CourierEntity, VendorEntity, PeopleEntity]),
     CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -39,8 +42,9 @@ import { TrackingController } from './infrastructure/controllers/tracking.contro
     { provide: 'IGPSRepository', useClass: RedisGPSRepository },
     UpdateLocationUseCase,
     GetCourierLocationUseCase,
+    GetVendorCourierLocationsUseCase,
     GPSGateway,
   ],
-  exports: [GPSGateway, GetCourierLocationUseCase, 'IGPSRepository'],
+  exports: [GPSGateway, GetCourierLocationUseCase, GetVendorCourierLocationsUseCase, 'IGPSRepository'],
 })
 export class TrackingModule {}

@@ -10,6 +10,7 @@ import { GetOrdersByCourierUseCase } from './application/use-cases/get-orders-by
 import { GetOrderByIdUseCase } from './application/use-cases/get-order-by-id.use-case';
 import { UpdateOrderStatusUseCase } from './application/use-cases/update-order-status.use-case';
 import { ConfirmDeliveryUseCase } from './application/use-cases/confirm-delivery.use-case';
+import { GetAllVendorOrdersUseCase } from './application/use-cases/get-all-vendor-orders.use-case';
 import { OrderController } from './infrastructure/controllers/order.controller';
 import { ProductModule } from 'src/product/product.module';
 import { LiquidationModule } from 'src/liquidation/liquidation.module';
@@ -36,6 +37,7 @@ import { EmailModule } from 'src/email/email.module';
     GetOrderByIdUseCase,
     UpdateOrderStatusUseCase,
     ConfirmDeliveryUseCase,
+    GetAllVendorOrdersUseCase,
   ],
   exports: ['IOrderRepository'],
 })

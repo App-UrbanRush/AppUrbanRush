@@ -5,27 +5,21 @@ import { Order, OrderDocument } from '../../infrastructure/schemas/order.schema'
 import { VendorRecentOrderDTO } from '../dtos/vendor-recent-order.dto';
 
 @Injectable()
-export class GetVendorRecentOrdersUseCase {
+export class GetAllVendorOrdersUseCase {
   constructor(
     @InjectModel(Order.name)
     private readonly orderModel: Model<OrderDocument>,
   ) {}
 
   async execute(vendorId: number): Promise<VendorRecentOrderDTO[]> {
-    const validStatuses = ['PENDING', 'ACCEPTED', 'PREPARING', 'READY'];
-
     const orders = await this.orderModel.aggregate([
       {
         $match: {
           vendor_id: vendorId,
-          status: { $in: validStatuses },
         },
       },
       {
         $sort: { createdAt: -1 },
-      },
-      {
-        $limit: 4,
       },
       {
         $lookup: {
@@ -102,7 +96,7 @@ export class GetVendorRecentOrdersUseCase {
       return {
         order_id: order.order_id.toString(),
         customer_name: order.customer_name,
-        status: order.status as 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY',
+        status: order.status as any,
         courier_name: order.courier_name,
         courier_id: order.courier_id || null,
         total: order.total,

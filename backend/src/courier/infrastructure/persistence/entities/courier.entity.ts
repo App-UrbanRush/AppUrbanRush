@@ -15,6 +15,9 @@ export class CourierEntity {
   @Column({ type: 'varchar', nullable: true })
   soat_number: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  photo_url: string | null;
+
   @Column({ type: 'varchar', default: 'PENDING' })
   status: string;
 

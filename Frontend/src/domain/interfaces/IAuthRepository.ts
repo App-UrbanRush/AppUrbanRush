@@ -40,6 +40,7 @@ export interface CourierProfile {
   vehicle_type: string;
   vehicle_plate: string | null;
   soat_number: string | null;
+  photo_url: string | null;
   status: string;
   user_id: number;
 }

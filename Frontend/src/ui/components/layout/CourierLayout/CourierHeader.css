@@ -91,18 +91,19 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #e5e7eb;
+  background: #ede9fe;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: #7c3aed;
   overflow: hidden;
 }
 
-.profile-icon img {
+.profile-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .profile-info {
@@ -191,8 +192,8 @@
 }
 
 .dark-mode-wrapper.dark-mode .profile-icon {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
 }
 
 .dark-mode-wrapper.dark-mode .profile-name {

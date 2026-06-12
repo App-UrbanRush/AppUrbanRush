@@ -19,11 +19,12 @@ import { UpdateVendorProfileDto } from './application/dts/update-vendor-profile.
 import { Order, OrderSchema } from '../order/infrastructure/schemas/order.schema';
 import { CourierEntity } from '../courier/infrastructure/persistence/entities/courier.entity';
 import { PeopleEntity } from '../people/infrastructure/persistence/entities/people.entity';
+import { CourierVendorRequestEntity } from '../courier-vendor-request/infrastructure/persistence/entities/courier-vendor-request.entity';
 import { ReportsModule } from '../reports/reports.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([VendorEntity, CourierEntity, PeopleEntity]),
+    TypeOrmModule.forFeature([VendorEntity, CourierEntity, PeopleEntity, CourierVendorRequestEntity]),
     MongooseModule.forFeature([
       { name: Order.name, schema: OrderSchema },
       { name: VendorPhoto.name, schema: VendorPhotoSchema },

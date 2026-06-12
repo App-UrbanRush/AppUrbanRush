@@ -4,6 +4,7 @@ import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import DashboardStats from "../../components/vendor/DashboardStats";
 import RecentOrders from "../../components/vendor/RecentOrders";
 import MenuPerformance from "../../components/vendor/MenuPerformance";
+import VendorCourierMap from "../../components/vendor/VendorCourierMap";
 import "./VendorDashboard.css";
 
 const VendorDashboard = () => {
@@ -22,7 +23,10 @@ const VendorDashboard = () => {
       <div className="vendor-dashboard">
         <DashboardStats />
         <RecentOrders />
-        <MenuPerformance />
+        <div className="vendor-dashboard-row">
+          <MenuPerformance />
+          <VendorCourierMap />
+        </div>
       </div>
     </VendorLayout>
   );

@@ -34,4 +34,13 @@ export class TypeOrmCourierRepository implements ICourierRepository {
   async updateStatus(id: number, status: string): Promise<void> {
     await this.repository.update(id, { status });
   }
+
+  async updateProfile(userId: number, data: Partial<Pick<Courier, 'vehicle_type' | 'vehicle_plate' | 'soat_number' | 'photo_url' | 'status'>>): Promise<Courier> {
+    const entity = await this.repository.findOne({ where: { user_id: userId } });
+    if (!entity) throw new Error('Courier not found');
+
+    Object.assign(entity, data);
+    const saved = await this.repository.save(entity);
+    return CourierMapper.toDomain(saved);
+  }
 }

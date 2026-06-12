@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import Login from "../pages/Login/Login";
 import GoogleCallback from "../pages/Login/GoogleCallback";
 import Dashboard from "../pages/Dashboard/Dashboard";
@@ -29,6 +30,22 @@ import OrderTracking from "../pages/Tracking/OrderTracking";
 import CourierBroadcast from "../pages/Tracking/CourierBroadcast";
 import AdminReports from "../pages/AdminDashboard/AdminReports";
 
+const HomeRedirect = () => {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Layout>
+        <Dashboard />
+      </Layout>
+    );
+  }
+
+  if (user.role === "Negocio") return <Navigate to="/vendor/dashboard" replace />;
+  if (user.role === "Domiciliario") return <Navigate to="/courier/dashboard" replace />;
+  return <Navigate to="/dashboard" replace />;
+};
+
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -41,14 +58,7 @@ const AppRouter = () => {
         <Route path="/register-vendor" element={<VendorRegister />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route
-          path="/"
-          element={
-            <Layout>
-              <Dashboard />
-            </Layout>
-          }
-        />
+        <Route path="/" element={<HomeRedirect />} />
         <Route
           path="/dashboard"
           element={

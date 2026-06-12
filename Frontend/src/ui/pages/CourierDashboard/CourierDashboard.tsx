@@ -2,7 +2,20 @@ import { useState, useEffect } from "react";
 import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { vendorsApi, type VendorListItem, type VendorPhotoItem } from "../../../infrastructure/api/vendorsApi";
 import { courierVendorRequestsApi, type CourierVendorRequest } from "../../../infrastructure/api/courierVendorRequestsApi";
-import { Store, MapPin, Phone, Clock, X, Info, Image, CheckCircle, Clock as ClockIcon, XCircle } from "lucide-react";
+import {
+  Store,
+  Navigation,
+  Smartphone,
+  Clock,
+  X,
+  Eye,
+  Image,
+  CheckCircle,
+  Clock as ClockIcon,
+  Truck,
+  Package,
+  ChevronRight,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import "./CourierDashboard.css";
 
@@ -14,6 +27,9 @@ const CourierDashboard = () => {
   const [loadingPhotos, setLoadingPhotos] = useState(false);
   const [myRequests, setMyRequests] = useState<CourierVendorRequest[]>([]);
   const [sendingRequest, setSendingRequest] = useState<number | null>(null);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [welcomeVendorName, setWelcomeVendorName] = useState("");
+  const [activeView, setActiveView] = useState<"browse" | "active">("browse");
 
   useEffect(() => {
     loadVendors();
@@ -43,6 +59,10 @@ const CourierDashboard = () => {
     try {
       const data = await courierVendorRequestsApi.getMyRequests();
       setMyRequests(data);
+      const hasAccepted = data.some((r) => r.status === "accepted");
+      if (hasAccepted) {
+        setActiveView("active");
+      }
     } catch (error) {
       console.error("Error loading requests:", error);
     }
@@ -62,7 +82,9 @@ const CourierDashboard = () => {
 
   const getRequestStatus = (vendorId: number): string | null => {
     const request = myRequests.find((r) => r.vendor_id === vendorId);
-    return request ? request.status : null;
+    if (!request) return null;
+    if (request.status === "rejected") return null;
+    return request.status;
   };
 
   const handleSendRequest = async (vendorId: number) => {
@@ -79,33 +101,75 @@ const CourierDashboard = () => {
     }
   };
 
-  const renderRequestButton = (vendorId: number) => {
-    const status = getRequestStatus(vendorId);
+  const handleStartWorking = () => {
+    setWelcomeOpen(false);
+    setActiveView("active");
+  };
 
+  const getPlaceholderClass = (type: string): string => {
+    const t = type.toLowerCase();
+    if (t.includes("comida") || t.includes("restaurante") || t.includes("hamburguesa") || t.includes("pizza") || t.includes("sushi") || t.includes("tacos") || t.includes("pollo")) return "food";
+    if (t.includes("cafe") || t.includes("café") || t.includes("bebida") || t.includes("bar")) return "drinks";
+    if (t.includes("mercado") || t.includes("fruter") || t.includes("verduler") || t.includes("supermercado")) return "grocery";
+    if (t.includes("farmacia") || t.includes("drogueria") || t.includes("droguería")) return "pharmacy";
+    return "default";
+  };
+
+  const getEmoji = (type: string): string => {
+    const t = type.toLowerCase();
+    if (t.includes("comida") || t.includes("restaurante") || t.includes("hamburguesa")) return "🍔";
+    if (t.includes("pizza")) return "🍕";
+    if (t.includes("sushi")) return "🍣";
+    if (t.includes("tacos") || t.includes("mexicana")) return "🌮";
+    if (t.includes("cafe") || t.includes("café")) return "☕";
+    if (t.includes("pollo")) return "🍗";
+    if (t.includes("pescado") || t.includes("mariscos")) return "🐟";
+    if (t.includes("helado") || t.includes("dulce")) return "🍦";
+    if (t.includes("pan") || t.includes("reposteria") || t.includes("repostería")) return "🥐";
+    if (t.includes("saludable") || t.includes("ensalada")) return "🥗";
+    if (t.includes("mercado") || t.includes("fruter")) return "🛒";
+    if (t.includes("farmacia")) return "💊";
+    return "🏪";
+  };
+
+  const renderRequestTag = (vendorId: number) => {
+    const status = getRequestStatus(vendorId);
+    if (!status) return null;
+    const map: Record<string, { cls: string; label: string; icon: React.ReactNode }> = {
+      pending: { cls: "tag-pending", label: "Pendiente", icon: <ClockIcon size={11} /> },
+    };
+    const cfg = map[status];
+    if (!cfg) return null;
+    return (
+      <span className={`courier-dashboard-card-request-tag ${cfg.cls}`}>
+        {cfg.icon} {cfg.label}
+      </span>
+    );
+  };
+
+  const renderAction = (vendorId: number) => {
+    const status = getRequestStatus(vendorId);
     if (status === "pending") {
       return (
         <button className="courier-dashboard-card-btn-pending" disabled>
-          <ClockIcon size={14} /> Solicitud enviada
+          <ClockIcon size={14} /> Pendiente
         </button>
       );
     }
-
     if (status === "accepted") {
+      const vendorName = vendors.find((v) => v.vendor_id === vendorId)?.business_name || "el negocio";
       return (
-        <button className="courier-dashboard-card-btn-accepted" disabled>
+        <button
+          className="courier-dashboard-card-btn-accepted"
+          onClick={() => {
+            setWelcomeVendorName(vendorName);
+            setWelcomeOpen(true);
+          }}
+        >
           <CheckCircle size={14} /> Aceptado
         </button>
       );
     }
-
-    if (status === "rejected") {
-      return (
-        <button className="courier-dashboard-card-btn-rejected" disabled>
-          <XCircle size={14} /> Rechazado
-        </button>
-      );
-    }
-
     return (
       <button
         className="courier-dashboard-card-btn"
@@ -120,67 +184,182 @@ const CourierDashboard = () => {
   return (
     <CourierLayout>
       <div className="courier-dashboard">
-        <h1>Negocios</h1>
-        <p className="courier-dashboard-subtitle">Todos los negocios registrados</p>
-
-        {loading ? (
-          <div className="courier-dashboard-loading">Cargando negocios...</div>
-        ) : vendors.length === 0 ? (
-          <div className="courier-dashboard-empty">No hay negocios registrados</div>
-        ) : (
-          <div className="courier-dashboard-grid">
-            {vendors.map((vendor) => (
-              <div key={vendor.vendor_id} className="courier-dashboard-card">
-                <div className="courier-dashboard-card-header">
-                  {vendor.logo_url ? (
-                    <img src={vendor.logo_url} alt={vendor.business_name} className="courier-dashboard-card-logo" />
-                  ) : (
-                    <div className="courier-dashboard-card-icon">
-                      <Store size={24} />
-                    </div>
-                  )}
-                  <div className="courier-dashboard-card-title">
-                    <h3>{vendor.business_name}</h3>
-                    <span className="courier-dashboard-card-type">{vendor.business_type}</span>
-                  </div>
-                </div>
-                <div className="courier-dashboard-card-body">
-                  <div className="courier-dashboard-card-info">
-                    <MapPin size={14} />
-                    <span>{vendor.address}</span>
-                  </div>
-                  <div className="courier-dashboard-card-info">
-                    <Phone size={14} />
-                    <span>{vendor.phone}</span>
-                  </div>
-                  {vendor.business_hours && (
-                    <div className="courier-dashboard-card-info">
-                      <Clock size={14} />
-                      <span>{vendor.business_hours}</span>
-                    </div>
-                  )}
-                  {vendor.description && (
-                    <p className="courier-dashboard-card-desc">{vendor.description}</p>
-                  )}
-                  <div className="courier-dashboard-card-actions">
-                    {renderRequestButton(vendor.vendor_id)}
-                    <button className="courier-dashboard-card-btn-outline" onClick={() => setSelectedVendor(vendor)}>
-                      <Info size={14} /> Detalles
-                    </button>
-                  </div>
-                </div>
+        {/* ========== VISTA: ACTIVO (En ruta + Historial) ========== */}
+        {activeView === "active" ? (
+          <>
+            <div className="courier-active-header">
+              <div>
+                <h1>Mis Entregas</h1>
+                <p className="courier-dashboard-subtitle">Gestiona tus entregas activas y pasadas</p>
               </div>
-            ))}
-          </div>
+              <button className="courier-browse-btn" onClick={() => setActiveView("browse")}>
+                <Store size={16} /> Ver Negocios
+              </button>
+            </div>
+
+            {/* Sección: Pedidos Asignados */}
+            <div className="courier-active-section">
+              <div className="courier-section-header">
+                <div className="courier-section-icon assigned">
+                  <Package size={18} />
+                </div>
+                <h2>Pedidos Asignados</h2>
+              </div>
+              <div className="courier-active-empty">
+                <Package size={40} />
+                <p>No tienes pedidos asignados</p>
+                <span>Cuando el negocio te asigne un pedido, aparecerá aquí</span>
+              </div>
+            </div>
+
+            {/* Sección: En Ruta */}
+            <div className="courier-active-section">
+              <div className="courier-section-header">
+                <div className="courier-section-icon active-pulse">
+                  <Truck size={18} />
+                </div>
+                <h2>En Ruta</h2>
+              </div>
+              <div className="courier-active-empty">
+                <Package size={40} />
+                <p>No tienes entregas activas en este momento</p>
+                <span>Los pedidos asignados que aceptes aparecerán aquí</span>
+              </div>
+            </div>
+
+            {/* Sección: Pedidos Pasados */}
+            <div className="courier-active-section">
+              <div className="courier-section-header">
+                <div className="courier-section-icon">
+                  <Clock size={18} />
+                </div>
+                <h2>Pedidos Pasados</h2>
+              </div>
+              <div className="courier-active-empty">
+                <Package size={40} />
+                <p>Aún no tienes pedidos completados</p>
+                <span>Tus entregas finalizadas aparecerán aquí</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* ========== VISTA: NEGOCIOS ========== */}
+            <div className="courier-active-header">
+              <div>
+                <h1>Negocios</h1>
+                <p className="courier-dashboard-subtitle">Encuentra negocios para asociarte</p>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="courier-dashboard-loading">Cargando negocios...</div>
+            ) : vendors.length === 0 ? (
+              <div className="courier-dashboard-empty">No hay negocios registrados</div>
+            ) : (
+              <div className="courier-dashboard-grid">
+                {vendors.map((vendor) => (
+                  <div key={vendor.vendor_id} className="courier-dashboard-card">
+                    <div className="courier-dashboard-card-image">
+                      {vendor.logo_url ? (
+                        <img src={vendor.logo_url} alt={vendor.business_name} />
+                      ) : (
+                        <div className={`courier-dashboard-card-image-placeholder ${getPlaceholderClass(vendor.business_type)}`}>
+                          {getEmoji(vendor.business_type)}
+                        </div>
+                      )}
+                      <span className="courier-dashboard-card-type-overlay">{vendor.business_type}</span>
+                      <div className={`courier-dashboard-card-status-dot ${vendor.status}`} title={vendor.status} />
+                    </div>
+
+                    <div className="courier-dashboard-card-content">
+                      <div className="courier-dashboard-card-top-row">
+                        <div className="courier-dashboard-card-title" style={{ minWidth: 0, flex: 1 }}>
+                          <h3>{vendor.business_name}</h3>
+                        </div>
+                        {renderRequestTag(vendor.vendor_id)}
+                      </div>
+
+                      <div className="courier-dashboard-card-info-row">
+                        <span className="courier-dashboard-card-info-chip">
+                          <Navigation size={12} /> {vendor.address}
+                        </span>
+                        <span className="courier-dashboard-card-info-chip">
+                          <Smartphone size={12} /> {vendor.phone}
+                        </span>
+                        {vendor.business_hours && (
+                          <span className="courier-dashboard-card-info-chip">
+                            <Clock size={12} /> {vendor.business_hours}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="courier-dashboard-card-actions">
+                      {renderAction(vendor.vendor_id)}
+                      <button className="courier-dashboard-card-btn-outline" onClick={() => setSelectedVendor(vendor)}>
+                        <Eye size={14} /> Detalles
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
+      {/* ========== MODAL: BIENVENIDA ========== */}
+      {welcomeOpen && (
+        <div className="courier-welcome-overlay" onClick={() => setWelcomeOpen(false)}>
+          <div className="courier-welcome-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="courier-welcome-icon-wrap">
+              <CheckCircle size={48} />
+            </div>
+            <h2>¡Bienvenido!</h2>
+            <p>Ahora eres parte del equipo de <strong>{welcomeVendorName}</strong></p>
+
+            <div className="courier-welcome-steps">
+              <div className="courier-welcome-step">
+                <div className="courier-welcome-step-icon"><Truck size={18} /></div>
+                <div>
+                  <h4>Entrega pedidos</h4>
+                  <p>Los pedidos del negocio aparecerán en tu panel.</p>
+                </div>
+              </div>
+              <div className="courier-welcome-step">
+                <div className="courier-welcome-step-icon"><Navigation size={18} /></div>
+                <div>
+                  <h4>Sigue la ruta</h4>
+                  <p>Usa el mapa para encontrar al cliente rápido.</p>
+                </div>
+              </div>
+            </div>
+
+            <button className="courier-welcome-start-btn" onClick={handleStartWorking}>
+              Iniciar <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========== MODAL: DETALLES NEGOCIO ========== */}
       {selectedVendor && (
         <div className="courier-modal-overlay" onClick={() => setSelectedVendor(null)}>
           <div className="courier-modal" onClick={(e) => e.stopPropagation()}>
             <button className="courier-modal-close" onClick={() => setSelectedVendor(null)}>
-              <X size={20} />
+              <X size={18} />
             </button>
+
+            {selectedVendor.logo_url ? (
+              <div className="courier-modal-banner">
+                <img src={selectedVendor.logo_url} alt="Local" className="courier-modal-banner-img" />
+              </div>
+            ) : (
+              <div className={`courier-modal-banner-placeholder ${getPlaceholderClass(selectedVendor.business_type)}`}>
+                {getEmoji(selectedVendor.business_type)}
+              </div>
+            )}
 
             <div className="courier-modal-content">
               <div className="courier-modal-header">
@@ -188,27 +367,27 @@ const CourierDashboard = () => {
                   <img src={selectedVendor.logo_url} alt="Logo" className="courier-modal-logo" />
                 ) : (
                   <div className="courier-modal-logo-placeholder">
-                    <Store size={24} />
+                    <Store size={22} />
                   </div>
                 )}
-                <div>
+                <div className="courier-modal-header-text">
                   <h2>{selectedVendor.business_name}</h2>
                   <span className="courier-modal-type">{selectedVendor.business_type}</span>
                 </div>
               </div>
 
               <div className="courier-modal-section">
-                <h3>Información del Negocio</h3>
+                <h3>Información</h3>
                 <div className="courier-modal-fields">
                   <div className="courier-modal-field">
-                    <MapPin size={16} />
+                    <div className="courier-modal-field-icon blue"><Navigation size={16} /></div>
                     <div>
                       <span className="courier-modal-label">Dirección</span>
                       <span className="courier-modal-value">{selectedVendor.address}</span>
                     </div>
                   </div>
                   <div className="courier-modal-field">
-                    <Phone size={16} />
+                    <div className="courier-modal-field-icon green"><Smartphone size={16} /></div>
                     <div>
                       <span className="courier-modal-label">Teléfono</span>
                       <span className="courier-modal-value">{selectedVendor.phone}</span>
@@ -216,7 +395,7 @@ const CourierDashboard = () => {
                   </div>
                   {selectedVendor.business_hours && (
                     <div className="courier-modal-field">
-                      <Clock size={16} />
+                      <div className="courier-modal-field-icon purple"><Clock size={16} /></div>
                       <div>
                         <span className="courier-modal-label">Horario</span>
                         <span className="courier-modal-value">{selectedVendor.business_hours}</span>
@@ -234,10 +413,7 @@ const CourierDashboard = () => {
               )}
 
               <div className="courier-modal-section">
-                <h3>
-                  <Image size={16} style={{ marginRight: 8, verticalAlign: "middle" }} />
-                  Fotos del Local
-                </h3>
+                <h3><Image size={14} /> Fotos</h3>
                 {loadingPhotos ? (
                   <p className="courier-modal-photos-loading">Cargando fotos...</p>
                 ) : vendorPhotos.length === 0 ? (
@@ -254,7 +430,7 @@ const CourierDashboard = () => {
               </div>
 
               <div className="courier-modal-register">
-                {renderRequestButton(selectedVendor.vendor_id)}
+                {renderAction(selectedVendor.vendor_id)}
               </div>
             </div>
           </div>

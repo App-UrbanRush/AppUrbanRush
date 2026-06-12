@@ -12,6 +12,7 @@ import { GetOrdersByCourierUseCase } from '../../application/use-cases/get-order
 import { GetOrderByIdUseCase } from '../../application/use-cases/get-order-by-id.use-case';
 import { UpdateOrderStatusUseCase } from '../../application/use-cases/update-order-status.use-case';
 import { ConfirmDeliveryUseCase } from '../../application/use-cases/confirm-delivery.use-case';
+import { GetAllVendorOrdersUseCase } from '../../application/use-cases/get-all-vendor-orders.use-case';
 import { CreateOrderDto } from '../../application/dtos/create-order.dto';
 import { OrderResponseMapper } from '../mappers/order-response.mapper';
 
@@ -35,6 +36,7 @@ export class OrderController {
     private readonly getById: GetOrderByIdUseCase,
     private readonly updateStatus: UpdateOrderStatusUseCase,
     private readonly confirmDelivery: ConfirmDeliveryUseCase,
+    private readonly getAllVendorOrders: GetAllVendorOrdersUseCase,
   ) {}
 
   // Usuario crea el pedido (el dueño recibe su código de entrega)
@@ -60,8 +62,8 @@ export class OrderController {
   @Roles(UserRole.BUSINESS)
   @ApiOperation({ summary: 'Pedidos recibidos por el vendedor' })
   async getByVendorId(@Param('vendorId') vendorId: string) {
-    const orders = await this.getByVendor.execute(Number(vendorId));
-    return orders.map((o) => OrderResponseMapper.toResponse(o));
+    const orders = await this.getAllVendorOrders.execute(Number(vendorId));
+    return orders;
   }
 
   // Domiciliario ve pedidos disponibles para reclamar (sin código)

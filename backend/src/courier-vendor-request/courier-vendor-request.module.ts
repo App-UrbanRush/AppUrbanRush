@@ -8,6 +8,7 @@ import { GetMyCourierVendorRequestsUseCase } from './application/use-cases/get-m
 import { GetVendorCourierRequestsUseCase } from './application/use-cases/get-vendor-courier-requests.use-case';
 import { UpdateCourierVendorRequestStatusUseCase } from './application/use-cases/update-courier-vendor-request-status.use-case';
 import { GetCourierDetailsUseCase } from './application/use-cases/get-courier-details.use-case';
+import { DeleteCourierVendorRequestUseCase } from './application/use-cases/delete-courier-vendor-request.use-case';
 import { VendorModule } from '../vendor/vendor.module';
 import { PeopleEntity } from '../people/infrastructure/persistence/entities/people.entity';
 import { CourierEntity } from '../courier/infrastructure/persistence/entities/courier.entity';
@@ -29,6 +30,7 @@ import { UserEntity } from '../user/infrastructure/persistence/entities/user.ent
     GetVendorCourierRequestsUseCase,
     UpdateCourierVendorRequestStatusUseCase,
     GetCourierDetailsUseCase,
+    DeleteCourierVendorRequestUseCase,
   ],
   exports: ['ICourierVendorRequestRepository'],
 })
