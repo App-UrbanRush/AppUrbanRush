@@ -7,6 +7,25 @@ const authHeader = () => ({
   headers: { Authorization: `Bearer ${authLocalStorage.getToken()}` },
 });
 
+export interface OrderItemInput {
+  product_id: string;
+  quantity: number;
+}
+
+export interface CreateOrderRequest {
+  user_id: number;
+  vendor_id: number;
+  delivery_address: string;
+  items: OrderItemInput[];
+}
+
+export interface OrderItemDetail {
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+}
+
 export interface OrderDetail {
   order_id: string;
   user_id: number;
@@ -14,14 +33,24 @@ export interface OrderDetail {
   courier_id: number | null;
   status: string;
   delivery_address: string;
+  subtotal: number;
+  delivery_fee: number;
+  platform_commission: number;
   total: number;
-  // El backend solo lo incluye para el dueño / courier asignado / admin
+  items: OrderItemDetail[];
+  created_at: string;
   delivery_code?: string | null;
+  estimated_delivery?: string;
 }
 
 export const ordersApi = {
   getById: async (orderId: string): Promise<OrderDetail> => {
     const response = await axios.get(`${API_URL}/orders/${orderId}`, authHeader());
+    return response.data;
+  },
+
+  create: async (data: CreateOrderRequest): Promise<OrderDetail> => {
+    const response = await axios.post(`${API_URL}/orders`, data, authHeader());
     return response.data;
   },
 };

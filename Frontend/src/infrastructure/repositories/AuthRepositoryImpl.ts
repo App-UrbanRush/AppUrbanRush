@@ -128,6 +128,7 @@ export class AuthRepositoryImpl implements IAuthRepository {
       address: profile.address,
       cellphone: profile.cellphone,
       gender: profile.gender,
+      userId: profile.userId,
       avatarUrl: profile.avatarUrl ?? null,
     };
   }

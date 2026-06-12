@@ -32,6 +32,27 @@ export class CreatePaymentUseCase {
 
     const amountInCents = Math.round(order.total * 100);
 
+    // Si ya viene un transaction_id del WidgetCheckout, saltar Wompi API
+    if (dto.transaction_id) {
+      const reference = dto.reference || `urbanrush-${dto.order_id}-${randomUUID()}`;
+      const payment = new PaymentModel(
+        null,
+        dto.order_id,
+        userId,
+        order.vendor_id,
+        dto.transaction_id,
+        amountInCents,
+        'COP',
+        'PENDING',
+        dto.payment_method.type ?? 'CARD',
+        reference,
+        dto.customer_email,
+        null,
+        null,
+      );
+      return this.paymentRepository.create(payment);
+    }
+
     // Análisis de fraude — bloquea si es sospechoso
     const fraudResult = await this.fastApiService.analyzeFraud({
       user_id: userId,

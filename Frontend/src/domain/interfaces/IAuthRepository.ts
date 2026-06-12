@@ -7,9 +7,10 @@ export interface UserProfile {
   firstName: string;
   firstLastName: string;
   address: string;
-  email?: string;
   cellphone?: string;
   gender?: string;
+  userId?: number;
+  email?: string;
   avatarUrl?: string | null;
 }
 

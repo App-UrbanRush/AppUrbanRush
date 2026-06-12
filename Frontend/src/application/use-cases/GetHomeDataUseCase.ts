@@ -5,13 +5,14 @@ export class GetHomeDataUseCase {
   constructor(private readonly storeRepository: IStoreRepository) {}
 
   async execute(): Promise<HomeData> {
-    const [heroBanner, categories, recommendedStores, nearbyStores] = await Promise.all([
+    const [heroBanner, categories, recommendedStores, nearbyStores, recommendedProducts] = await Promise.all([
       this.storeRepository.getHeroBanner(),
       this.storeRepository.getCategories(),
       this.storeRepository.getRecommendedStores(),
       this.storeRepository.getNearbyStores(),
+      this.storeRepository.getRecommendedProducts(),
     ]);
 
-    return { heroBanner, categories, recommendedStores, nearbyStores };
+    return { heroBanner, categories, recommendedStores, nearbyStores, recommendedProducts };
   }
 }

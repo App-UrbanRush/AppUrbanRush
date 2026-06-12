@@ -37,9 +37,14 @@ const VendorCategories = () => {
   const deleteCategoryUseCase = useMemo(() => new DeleteCategoryUseCase(categoryRepository), [categoryRepository]);
 
   const fetchProducts = useCallback(async () => {
-    if (!vendorProfile) return;
+    if (!vendorProfile) {
+      console.warn("⚠️  vendorProfile is null, cannot fetch products");
+      return;
+    }
     try {
+      console.log(`📡 Fetching products for vendor ${vendorProfile.vendor_id}`);
       const data = await getProductsByVendorUseCase.execute(vendorProfile.vendor_id);
+      console.log(`✅ Products fetched:`, data);
       setProducts(data);
     } catch (error) {
       console.error("Error al cargar productos:", error);
@@ -47,9 +52,14 @@ const VendorCategories = () => {
   }, [getProductsByVendorUseCase, vendorProfile]);
 
   const loadCategories = useCallback(async () => {
-    if (!vendorProfile) return;
+    if (!vendorProfile) {
+      console.warn("⚠️  vendorProfile is null, cannot load categories");
+      return;
+    }
     try {
+      console.log(`📡 Loading categories for vendor ${vendorProfile.vendor_id}`);
       const data = await categoryRepository.getCategoriesByVendor(vendorProfile.vendor_id);
+      console.log(`✅ Categories loaded:`, data);
       setCategories(data);
     } catch (error) {
       console.error("Error al cargar categorías:", error);
@@ -78,6 +88,7 @@ const VendorCategories = () => {
   };
 
   useEffect(() => {
+    console.log("🔄 VendorCategories mounted, vendorProfile:", vendorProfile);
     fetchProducts();
     loadCategories();
   }, [fetchProducts, loadCategories]);

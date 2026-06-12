@@ -66,3 +66,11 @@
 }
 
 /* Search bar mobile animation handled by inline style tag */
+
+.navbar-home-btn div {
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.navbar-home-btn div:hover {
+  background: #f2f4f6;
+  border-color: #e2e8f0;
+}

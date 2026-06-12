@@ -7,6 +7,15 @@ interface PopularCategoriesProps {
 }
 
 const PopularCategories = ({ categories }: PopularCategoriesProps) => {
+  if (!categories.length) {
+    return (
+      <section className="mt-6">
+        <h2 style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px' }}>Categorías Populares</h2>
+        <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>No hay categorías populares</p>
+      </section>
+    );
+  }
+
   return (
     <section className="mt-6">
       <h2 style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px' }}>Categorías Populares</h2>

@@ -16,6 +16,16 @@ export const productApi = {
     return response.data;
   },
 
+  getAll: async (): Promise<Product[]> => {
+    const token = authLocalStorage.getToken();
+    const response = await axios.get<Product[]>(`${API_URL}/products`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  },
+
   createProduct: async (data: CreateProductData): Promise<Product> => {
     const token = authLocalStorage.getToken();
     const response = await axios.post<Product>(`${API_URL}/products`, data, {

@@ -10,11 +10,3 @@ export interface Product {
   stock: number;
 }
 
-export const CATEGORIES = [
-  "Todos",
-  "Hamburguesas",
-  "Pizzas",
-  "Bebidas",
-  "Postres",
-  "Comida Rápida",
-];

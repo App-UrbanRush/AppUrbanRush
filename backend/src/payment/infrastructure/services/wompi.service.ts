@@ -26,19 +26,25 @@ export class WompiService {
   private readonly privateKey: string;
   private readonly eventsSecret: string;
   private readonly baseUrl: string;
-  private readonly integritySecret: string; 
+  private readonly integritySecret: string;
+  private readonly publicKey: string;
 
   constructor(private readonly configService: ConfigService) {
     this.privateKey = this.configService.get<string>(WOMPI_PRIVATE_KEY) ?? '';
     this.eventsSecret = this.configService.get<string>(WOMPI_EVENTS_SECRET) ?? '';
     this.baseUrl = this.configService.get<string>(WOMPI_BASE_URL) ?? '';
-    this.integritySecret = this.configService.get<string>(WOMPI_INTEGRITY_SECRET) ?? ''; 
+    this.integritySecret = this.configService.get<string>(WOMPI_INTEGRITY_SECRET) ?? '';
+    this.publicKey = this.configService.get<string>(WOMPI_PUBLIC_KEY) ?? '';
   }
 
-  // Método para generar la firma de integridad
-  private generateSignature(reference: string, amountInCents: number, currency: string): string {
+  generateSignature(reference: string, amountInCents: number, currency: string): string {
     const concatenated = `${reference}${amountInCents}${currency}${this.integritySecret}`;
     return crypto.createHash('sha256').update(concatenated).digest('hex');
+  }
+
+  async getCheckoutConfig(reference: string, amountInCents: number, currency: string = 'COP') {
+    const signature = this.generateSignature(reference, amountInCents, currency);
+    return { publicKey: this.publicKey, signature };
   }
 
   async createTransaction(
@@ -50,7 +56,7 @@ export class WompiService {
   ): Promise<WompiTransactionResponse> {
     try {
       const { acceptance_token, personal_auth_token } = await this.getAcceptanceTokens();
-      const signature = this.generateSignature(reference, amountInCents, currency); 
+      const signature = this.generateSignature(reference, amountInCents, currency);
 
       const body = {
         amount_in_cents: amountInCents,
@@ -70,18 +76,28 @@ export class WompiService {
       );
 
       return response.data;
-
     } catch (error) {
       if (axios.isAxiosError(error)) {
         this.logger.error(`Wompi error: ${error.response?.data?.error?.reason ?? error.message}`);
         const reason = error.response?.data?.error?.reason
           ?? error.response?.data?.message
           ?? error.message;
-        throw new InternalServerErrorException(
-          `Error al procesar pago con Wompi: ${reason}`
-        );
+        throw new InternalServerErrorException(`Error al procesar pago con Wompi: ${reason}`);
       }
       throw new InternalServerErrorException('Error inesperado al conectar con Wompi');
+    }
+  }
+
+  async getTransactionStatus(transactionId: string): Promise<string> {
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/transactions/${transactionId}`,
+        { headers: { Authorization: `Bearer ${this.privateKey}` } },
+      );
+      return response.data.data.status;
+    } catch {
+      this.logger.warn(`No se pudo consultar transacción ${transactionId} en Wompi`);
+      return 'PENDING';
     }
   }
 

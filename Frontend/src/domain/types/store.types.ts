@@ -6,15 +6,23 @@ export interface Category {
   description: string;
 }
 
+import type { Product } from "./product.types";
+
 export interface Store {
   id: number;
   name: string;
   description: string;
-  rating: number;
-  deliveryTime: string;
+  rating?: number;
+  deliveryTime?: string;
   image: string;
   lat: number;
   lng: number;
+  address?: string;
+  products?: Product[];
+  business_type?: string;
+  logo_url?: string | null;
+  storefront_image_url?: string | null;
+  business_hours?: string | null;
 }
 
 export interface HeroBanner {
@@ -28,4 +36,5 @@ export interface HomeData {
   categories: Category[];
   recommendedStores: Store[];
   nearbyStores: Store[];
+  recommendedProducts: Product[];
 }

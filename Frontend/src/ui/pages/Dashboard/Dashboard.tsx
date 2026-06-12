@@ -1,4 +1,4 @@
-import Home from "../Home/Home";
+import Home from "../Home/HomeNew";
 
 const Dashboard = () => {
   return <Home />;

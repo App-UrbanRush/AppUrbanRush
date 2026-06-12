@@ -26,6 +26,12 @@ import CourierProfile from "../pages/CourierDashboard/CourierProfile";
 import CourierDeliveries from "../pages/CourierDashboard/CourierDeliveries";
 import CourierAvailableOrders from "../pages/CourierDashboard/CourierAvailableOrders";
 import CourierEarnings from "../pages/CourierDashboard/CourierEarnings";
+import Profile from "../pages/Profile/Profile";
+import Stores from "../pages/Stores/Stores";
+import StoreDetail from "../pages/StoreDetail/StoreDetail";
+import AllProducts from "../pages/AllProducts/AllProducts";
+import CheckoutPage from "../pages/Checkout/CheckoutPage";
+import PaymentPage from "../pages/Payment/PaymentPage";
 import OrderTracking from "../pages/Tracking/OrderTracking";
 import CourierBroadcast from "../pages/Tracking/CourierBroadcast";
 import AdminReports from "../pages/AdminDashboard/AdminReports";
@@ -67,6 +73,30 @@ const AppRouter = () => {
                 <Dashboard />
               </Layout>
             </PrivateRoute>
+          }
+        />
+        <Route
+          path="/stores"
+          element={
+            <Layout>
+              <Stores />
+            </Layout>
+          }
+        />
+        <Route
+          path="/store/:storeId"
+          element={
+            <Layout>
+              <StoreDetail />
+            </Layout>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <Layout>
+              <AllProducts />
+            </Layout>
           }
         />
 
@@ -162,6 +192,16 @@ const AppRouter = () => {
           }
         />
         <Route
+          path="/profile"
+          element={
+            <PrivateRoute allowedRoles={[2]}>
+              <Layout>
+                <Profile />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/courier/profile"
           element={
             <PrivateRoute allowedRoles={[3]}>
@@ -209,6 +249,30 @@ const AppRouter = () => {
           element={
             <PrivateRoute allowedRoles={[1]}>
               <AdminReports />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Checkout (solo usuario) */}
+        <Route
+          path="/checkout"
+          element={
+            <PrivateRoute allowedRoles={[2]}>
+              <Layout>
+                <CheckoutPage />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+
+        {/* Pago / factura (cualquier autenticado) */}
+        <Route
+          path="/payment/:orderId"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <PaymentPage />
+              </Layout>
             </PrivateRoute>
           }
         />

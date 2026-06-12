@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import type { HeroBanner as HeroBannerType } from "../../../domain/types/store.types";
 import "./HeroBanner.css";
 
@@ -7,6 +8,7 @@ interface HeroBannerProps {
 
 const HeroBanner = ({ data }: HeroBannerProps) => {
   const { title, subtitle, buttonText } = data;
+  const navigate = useNavigate();
 
   return (
     <div style={{
@@ -46,6 +48,7 @@ const HeroBanner = ({ data }: HeroBannerProps) => {
         </p>
         <button
           className="hero-banner-cta"
+          onClick={() => navigate('/stores')}
           style={{
             backgroundColor: '#e8500a',
             color: '#fff',

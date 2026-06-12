@@ -1,5 +1,5 @@
-import { IsString, IsEmail, IsObject } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsEmail, IsObject, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreatePaymentDto {
   @ApiProperty({ description: 'ID del pedido en MongoDB' })
@@ -16,4 +16,14 @@ export class CreatePaymentDto {
   @ApiProperty({ description: 'Email del cliente', example: 'user@example.com' })
   @IsEmail()
   customer_email: string;
+
+  @ApiPropertyOptional({ description: 'ID de transacción ya creada por WidgetCheckout' })
+  @IsOptional()
+  @IsString()
+  transaction_id?: string;
+
+  @ApiPropertyOptional({ description: 'Referencia única (generada en frontend si viene del widget)' })
+  @IsOptional()
+  @IsString()
+  reference?: string;
 }

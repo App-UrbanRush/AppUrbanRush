@@ -8,6 +8,7 @@ import { ConfirmPaymentUseCase } from '../../application/use-cases/confirm-payme
 import { GetPaymentByOrderUseCase } from '../../application/use-cases/get-payment-by-order.use-case';
 import { GetPaymentsByUserUseCase } from '../../application/use-cases/get-payments-by-user.use-case';
 import { GetPaymentsByVendorUseCase } from '../../application/use-cases/get-payments-by-vendor.use-case';
+import { WompiService } from '../services/wompi.service';
 import { CreatePaymentDto } from '../../application/dtos/create-payment.dto';
 import { WompiWebhookDto } from '../../application/dtos/wompi-webhook.dto';
 
@@ -20,7 +21,20 @@ export class PaymentController {
     private readonly getPaymentByOrder: GetPaymentByOrderUseCase,
     private readonly getPaymentsByUser: GetPaymentsByUserUseCase,
     private readonly getPaymentsByVendor: GetPaymentsByVendorUseCase,
+    private readonly wompiService: WompiService,
   ) {}
+
+  @Get('checkout-config/:reference/:amount')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener configuración para Wompi Checkout Widget' })
+  getCheckoutConfig(
+    @Param('reference') reference: string,
+    @Param('amount') amount: string,
+  ) {
+    return this.wompiService.getCheckoutConfig(reference, Number(amount));
+  }
 
   @Post('create')
   @UseGuards(JwtAuthGuard, RolesGuard)
