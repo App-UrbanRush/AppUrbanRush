@@ -31,6 +31,7 @@ const VendorReports = () => {
   const [to, setTo] = useState("");
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingSummary, setExportingSummary] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -70,6 +71,17 @@ const VendorReports = () => {
     }
   };
 
+  const handleExportSummary = async () => {
+    setExportingSummary(true);
+    try {
+      await vendorReportsApi.downloadSummaryPdf();
+    } catch (error) {
+      console.error("Error exporting summary PDF:", error);
+    } finally {
+      setExportingSummary(false);
+    }
+  };
+
   const clearFilters = () => {
     setFrom("");
     setTo("");
@@ -86,12 +98,20 @@ const VendorReports = () => {
           </div>
           <div className="reports-actions">
             <button
+              className="export-btn summary"
+              onClick={handleExportSummary}
+              disabled={exportingSummary || loading}
+            >
+              {exportingSummary ? <Loader2 size={18} className="spinner" /> : <Download size={18} />}
+              Resumen PDF
+            </button>
+            <button
               className="export-btn pdf"
               onClick={handleExportPdf}
               disabled={exportingPdf || loading}
             >
               {exportingPdf ? <Loader2 size={18} className="spinner" /> : <Download size={18} />}
-              PDF
+              Pedidos PDF
             </button>
             <button
               className="export-btn excel"
@@ -99,7 +119,7 @@ const VendorReports = () => {
               disabled={exportingExcel || loading}
             >
               {exportingExcel ? <Loader2 size={18} className="spinner" /> : <Download size={18} />}
-              Excel
+              Pedidos Excel
             </button>
           </div>
         </div>

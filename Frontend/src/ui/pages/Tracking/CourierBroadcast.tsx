@@ -2,11 +2,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Navigation, MapPin, Clock, Radio, Wifi, Play, Square, Info } from "lucide-react";
 import { useCourierBroadcast } from "../../hooks/useCourierBroadcast";
 import LiveTrackingMap from "../../components/DeliveryMap/LiveTrackingMap";
+import ChatWindow from "../../components/chat/ChatWindow";
+import { useAuth } from "../../context/useAuth";
 import "./Tracking.css";
 
 const CourierBroadcast = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { broadcasting, connectionState, lastSent, error, start, stop } = useCourierBroadcast(orderId);
 
   const lastTime = lastSent ? new Date(lastSent.timestamp).toLocaleTimeString() : null;
@@ -85,6 +88,10 @@ const CourierBroadcast = () => {
         <Info size={16} />
         <span>Mantén esta pantalla abierta mientras realizas la entrega. Tu ubicación se comparte con el cliente en tiempo real.</span>
       </div>
+
+      {orderId && user?.id && (
+        <ChatWindow orderId={orderId} enabled currentUserId={Number(user.id)} />
+      )}
     </div>
   );
 };

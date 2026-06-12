@@ -40,4 +40,12 @@ export class MongoMessageRepository implements IMessageRepository {
       { $set: { read: true } },
     ).exec();
   }
+
+  async countUnread(orderId: string, readerId: number): Promise<number> {
+    return this.messageModel.countDocuments({
+      order_id: orderId,
+      sender_id: { $ne: readerId },
+      read: false,
+    }).exec();
+  }
 }

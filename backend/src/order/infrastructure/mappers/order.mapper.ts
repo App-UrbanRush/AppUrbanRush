@@ -19,6 +19,9 @@ export class OrderMapper {
       doc.total,
       items,
       (doc as any).createdAt ?? null,
+      doc.delivery_code ?? null,
+      doc.delivery_attempts ?? 0,
+      doc.delivery_blocked ?? false,
     );
   }
 }

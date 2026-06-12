@@ -1,5 +1,7 @@
 // src/auth/infrastructure/controllers/auth.controller.ts
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from 'src/auth/application/dtos/login/login.dto';
 import { RegisterUseCase } from 'src/auth/application/use-cases/register.use-case';
@@ -32,6 +34,7 @@ export class AuthController {
     private readonly googleLoginUseCase: GoogleLoginUseCase,
     @Inject('ISessionRepository')
     private readonly sessionRepository: ISessionRepository,
+    private readonly configService: ConfigService,
   ) {}
 
   @Post('login')
@@ -99,7 +102,18 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Callback de Google OAuth' })
-  async googleCallback(@Request() req) {
-    return this.googleLoginUseCase.execute(req.user);
+  async googleCallback(@Request() req, @Res() res: Response) {
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
+    try {
+      const { access_token } = await this.googleLoginUseCase.execute(req.user);
+      return res.redirect(`${frontendUrl}/auth/google/callback?token=${access_token}`);
+    } catch (error) {
+      const message =
+        error instanceof UnauthorizedException
+          ? error.message
+          : 'No se pudo iniciar sesión con Google';
+      return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(message)}`);
+    }
   }
 }

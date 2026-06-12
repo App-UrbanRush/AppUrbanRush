@@ -21,6 +21,9 @@ export class PeopleEntity {
   @Column({ type: 'varchar', length: 255 })
   gender: string;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  avatar_url: string;
+
   @Column({ type: 'varchar', length: 20, nullable: true })
   document_number: string;
 

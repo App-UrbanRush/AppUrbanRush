@@ -1,9 +1,12 @@
 // src/auth/application/use-cases/google-login.use-case.ts
-import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IUserRepository } from 'src/user/domain/repositories/user.repository.interface';
 import { IUserRolesRepository } from 'src/user_rol/domain/repositories/user-roles.repository.interface';
 import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
+
+// Rol por defecto para cuentas creadas vía Google: USER (cliente)
+const DEFAULT_GOOGLE_ROLE = 2;
 
 @Injectable()
 export class GoogleLoginUseCase {
@@ -25,15 +28,36 @@ export class GoogleLoginUseCase {
     picture?: string;
   }): Promise<{ access_token: string }> {
 
-    const user = await this.userRepository.findOneByEmail(googleUser.email);
+    let user = await this.userRepository.findOneByEmail(googleUser.email);
 
+    // Primer inicio con Google: se crea la cuenta automáticamente
     if (!user || user.user_id === null) {
-      throw new UnauthorizedException(
-        'No tienes una cuenta registrada. Por favor regístrate primero.',
-      );
+      const newUser = await this.userRepository.createFromGoogle({
+        user_email: googleUser.email,
+        google_id: googleUser.google_id,
+      });
+
+      // Rol por defecto (cliente)
+      await this.userRolesRepository.assignRole({
+        user_id: newUser.user_id!,
+        rol_id: DEFAULT_GOOGLE_ROLE,
+      });
+
+      // Persona asociada con el nombre y la foto de Google
+      await this.userRepository.savePeople({
+        firstName: googleUser.firstName ?? '',
+        firstLastName: googleUser.firstLastName ?? '',
+        cellphone: '',
+        address: '',
+        gender: '',
+        avatar_url: googleUser.picture ?? null,
+        user: { user_id: newUser.user_id },
+      });
+
+      user = newUser;
     }
 
-    const roles = await this.userRolesRepository.findByUser(user.user_id);
+    const roles = await this.userRolesRepository.findByUser(user.user_id!);
     const rolIds = roles.map((r) => r.rol_id);
 
     const payload = {
@@ -44,7 +68,7 @@ export class GoogleLoginUseCase {
 
     const access_token = this.jwtService.sign(payload);
 
-    await this.sessionRepository.save(user.user_id, access_token, 1800); // 30 min
+    await this.sessionRepository.save(user.user_id!, access_token, 1800); // 30 min
 
     return { access_token };
   }

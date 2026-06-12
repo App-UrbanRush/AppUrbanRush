@@ -145,4 +145,21 @@ export class EmailService {
       ],
     });
   }
+
+  async sendDeliveryFailureAlert(to: string, ctx: {
+    order_id: string;
+    courier_id: number | null;
+    attempts: number;
+  }): Promise<void> {
+    const logoPath = path.join(__dirname, 'templates', 'assets', 'logo-urbanrush.png');
+    await this.sendMail({
+      to,
+      subject: 'Entrega bloqueada por código fallido — UrbanRush',
+      template: 'delivery-failure-alert',
+      context: ctx,
+      attachments: [
+        { filename: 'logo-urbanrush.png', path: logoPath, cid: 'logo-urbanrush' },
+      ],
+    });
+  }
 }

@@ -308,3 +308,174 @@
 .dark-mode-wrapper.dark-mode .courier-profile-request-vendor {
   color: #f3f4f6;
 }
+
+/* ===== Avatar con subida de foto ===== */
+.courier-profile-avatar-wrap {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.courier-profile-avatar {
+  overflow: hidden;
+}
+.courier-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.courier-profile-avatar-btn {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #1f232b;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.courier-profile-avatar-btn:hover {
+  transform: scale(1.08);
+}
+.courier-profile-avatar-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Botón Editar perfil (en el banner) ===== */
+.courier-profile-edit-btn {
+  margin-left: auto;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #ff6a00;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.courier-profile-edit-btn:hover {
+  background: #fff;
+}
+
+/* ===== Modal de edición ===== */
+.profile-edit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.profile-edit-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+.profile-edit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #eee;
+}
+.profile-edit-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.profile-edit-close {
+  background: transparent;
+  border: none;
+  color: #8a909c;
+  cursor: pointer;
+}
+.profile-edit-body {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.profile-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+.profile-edit-field input,
+.profile-edit-field select {
+  padding: 10px 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  outline: none;
+}
+.profile-edit-field input:focus,
+.profile-edit-field select:focus {
+  border-color: #ff6a00;
+}
+.profile-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 22px 22px;
+}
+.profile-edit-cancel,
+.profile-edit-save {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.profile-edit-cancel {
+  background: #f1f1f1;
+  color: #555;
+}
+.profile-edit-save {
+  background: #ff6a00;
+  color: #fff;
+}
+.profile-edit-save:disabled,
+.profile-edit-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.dark-mode-wrapper.dark-mode .profile-edit-modal {
+  background: #1f232b;
+  color: #e7e9ee;
+}
+.dark-mode-wrapper.dark-mode .profile-edit-head {
+  border-color: #333;
+}
+.dark-mode-wrapper.dark-mode .profile-edit-field {
+  color: #c7ccd5;
+}
+.dark-mode-wrapper.dark-mode .profile-edit-field input,
+.dark-mode-wrapper.dark-mode .profile-edit-field select {
+  background: #2a2f38;
+  border-color: #3a3f4a;
+  color: #fff;
+}
+.dark-mode-wrapper.dark-mode .profile-edit-cancel {
+  background: #2a2f38;
+  color: #c7ccd5;
+}

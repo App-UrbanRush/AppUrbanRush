@@ -11,6 +11,7 @@ import type { UserProfile, VendorProfile, CourierProfile } from "../../domain/in
 
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<AuthResponse>;
+  googleLogin: (token: string) => Promise<AuthResponse>;
   register: (data: RegisterRequest) => Promise<void>;
   registerDelivery: (data: RegisterDeliveryRequest) => Promise<void>;
   registerVendor: (data: RegisterVendorRequest) => Promise<VendorRegisterResponse>;

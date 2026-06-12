@@ -4,4 +4,5 @@ export interface IMessageRepository {
   save(message: MessageModel): Promise<MessageModel>;
   findByOrder(orderId: string): Promise<MessageModel[]>;
   markAsRead(orderId: string, readerId: number): Promise<void>;
+  countUnread(orderId: string, readerId: number): Promise<number>;
 }

@@ -1,4 +1,4 @@
-import type { Review } from "../../domain/types/review.types";
+import type { Review } from "../../../domain/types/review.types";
 import "./ReviewCard.css";
 
 interface ReviewCardProps {

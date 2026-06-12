@@ -8,6 +8,7 @@ import { GenerateOrdersReportUseCase } from '../../application/use-cases/generat
 import { GeneratePaymentsReportUseCase } from '../../application/use-cases/generate-payments-report.use-case';
 import { GenerateUsersReportUseCase } from '../../application/use-cases/generate-users-report.use-case';
 import { GenerateVendorReportUseCase } from '../../application/use-cases/generate-vendor-report.use-case';
+import { GenerateCouriersReportUseCase } from '../../application/use-cases/generate-couriers-report.use-case';
 import { ReportFiltersDto } from '../../application/dtos/report-filters.dto';
 
 @ApiTags('Reports')
@@ -21,6 +22,7 @@ export class ReportsController {
     private readonly paymentsReport: GeneratePaymentsReportUseCase,
     private readonly usersReport: GenerateUsersReportUseCase,
     private readonly vendorReport: GenerateVendorReportUseCase,
+    private readonly couriersReport: GenerateCouriersReportUseCase,
   ) {}
 
   // ─── Pedidos ───
@@ -64,6 +66,15 @@ export class ReportsController {
     this.sendExcel(res, buffer, 'reporte-usuarios.xlsx');
   }
 
+  // ─── Domiciliarios ───
+
+  @Get('couriers/excel')
+  @ApiOperation({ summary: 'Reporte de domiciliarios en Excel' })
+  async couriersExcel(@Res() res: Response) {
+    const buffer = await this.couriersReport.excel();
+    this.sendExcel(res, buffer, 'reporte-domiciliarios.xlsx');
+  }
+
   // ─── Vendor ───
 
   @Get('vendor/:id/pdf')
@@ -71,6 +82,13 @@ export class ReportsController {
   async vendorPdf(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     const buffer = await this.vendorReport.pdf(id);
     this.sendPdf(res, buffer, `reporte-vendor-${id}.pdf`);
+  }
+
+  @Get('vendor/:id/excel')
+  @ApiOperation({ summary: 'Reporte completo de un vendor en Excel' })
+  async vendorExcel(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    const buffer = await this.vendorReport.excel(id);
+    this.sendExcel(res, buffer, `reporte-vendor-${id}.xlsx`);
   }
 
   // ─── Helpers ───

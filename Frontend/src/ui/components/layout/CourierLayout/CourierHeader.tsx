@@ -7,7 +7,7 @@ import "./CourierHeader.css";
 
 const CourierHeader = () => {
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout, user, myProfile } = useAuth();
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -47,7 +47,11 @@ const CourierHeader = () => {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
           >
             <div className="profile-icon">
-              <User size={20} />
+              {myProfile?.avatarUrl ? (
+                <img src={myProfile.avatarUrl} alt="Perfil" />
+              ) : (
+                <User size={20} />
+              )}
             </div>
             <div className="profile-info">
               <span className="profile-name">{displayName}</span>

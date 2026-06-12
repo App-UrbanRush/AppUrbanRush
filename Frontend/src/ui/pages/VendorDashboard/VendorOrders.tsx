@@ -4,8 +4,12 @@ import { Clock, User, Package, MapPin } from "lucide-react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import { useAuth } from "../../context/useAuth";
 import type { RecentOrder } from "../../../domain/types/recent-orders.types";
+import { GetAllVendorOrdersUseCase } from "../../../application/use-cases/GetAllVendorOrdersUseCase";
+import { RecentOrdersRepositoryImpl } from "../../../infrastructure/repositories/RecentOrdersRepositoryImpl";
 import OrderDetailModal from "../../components/vendor/OrderDetailModal";
 import "./VendorOrders.css";
+
+const getAllVendorOrders = new GetAllVendorOrdersUseCase(new RecentOrdersRepositoryImpl());
 
 const STATUS_CONFIG: Record<string, { color: string; label: string; icon: string }> = {
   PENDING: { color: 'yellow', label: 'Pendiente', icon: '⏳' },
@@ -19,7 +23,7 @@ const STATUS_CONFIG: Record<string, { color: string; label: string; icon: string
 
 const VendorOrders = () => {
   const navigate = useNavigate();
-  const { vendorProfile, getAllVendorOrders } = useAuth();
+  const { vendorProfile } = useAuth();
   const [orders, setOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<RecentOrder | null>(null);
@@ -28,14 +32,14 @@ const VendorOrders = () => {
   const fetchOrders = useCallback(async () => {
     if (!vendorProfile) return;
     try {
-      const data = await getAllVendorOrders(vendorProfile.vendor_id);
+      const data = await getAllVendorOrders.execute(vendorProfile.vendor_id);
       setOrders(data);
     } catch (error) {
       console.error("Error al cargar pedidos:", error);
     } finally {
       setLoading(false);
     }
-  }, [vendorProfile, getAllVendorOrders]);
+  }, [vendorProfile]);
 
   useEffect(() => {
     fetchOrders();

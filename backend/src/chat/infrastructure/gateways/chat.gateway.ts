@@ -119,6 +119,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Emitir a todos en la sala (incluido el sender)
       this.server.to(room).emit('chat:message', message);
 
+      // Avisar a los demás en la sala para que actualicen su badge de no leídos
+      client.to(room).emit('chat:unread', {
+        order_id: data.order_id,
+        sender_id: client.user.user_id,
+      });
+
       this.logger.log(`Mensaje en ${room} de ${client.user.user_email}`);
     } catch (error: any) {
       client.emit('error', { message: error.message });
@@ -144,6 +150,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (error: any) {
       client.emit('error', { message: error.message });
     }
+  }
+
+  // ─── Indicador "escribiendo…" ───
+  @SubscribeMessage('chat:typing')
+  handleTyping(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { order_id: string },
+  ) {
+    if (!client.user) return;
+    const room = `order_${data.order_id}`;
+    client.to(room).emit('chat:typing', {
+      order_id: data.order_id,
+      sender_id: client.user.user_id,
+    });
   }
 
   // ─── Cerrar sala cuando pedido pasa a DELIVERED ───

@@ -15,5 +15,6 @@ import { PeopleController } from './infrastructure/controllers/people.controller
       useClass: TypeOrmPeopleRepository,
     },
   ],
+  exports: ['IPeopleRepository'],
 })
 export class PeopleModule {}

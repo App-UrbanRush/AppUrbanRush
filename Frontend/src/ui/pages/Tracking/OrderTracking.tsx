@@ -1,13 +1,27 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Clock, Gauge, PackageCheck, Bike } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Gauge, PackageCheck, Bike, KeyRound } from "lucide-react";
 import { useOrderTracking } from "../../hooks/useOrderTracking";
 import LiveTrackingMap from "../../components/DeliveryMap/LiveTrackingMap";
+import ChatWindow from "../../components/chat/ChatWindow";
+import { useAuth } from "../../context/useAuth";
+import { ordersApi } from "../../../infrastructure/api/ordersApi";
 import "./Tracking.css";
 
 const OrderTracking = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { location, status, connectionState, closed, error } = useOrderTracking(orderId);
+  const [deliveryCode, setDeliveryCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!orderId) return;
+    ordersApi
+      .getById(orderId)
+      .then((order) => setDeliveryCode(order.delivery_code ?? null))
+      .catch(() => setDeliveryCode(null));
+  }, [orderId]);
 
   const connLabel: Record<string, string> = {
     idle: "Inactivo",
@@ -44,6 +58,18 @@ const OrderTracking = () => {
           <PackageCheck size={16} /> ¡Pedido entregado! Seguimiento finalizado.
         </div>
       )}
+
+      {deliveryCode && !closed && (
+        <div className="tracking-code-card">
+          <div className="tracking-code-head">
+            <KeyRound size={16} /> Código de entrega
+          </div>
+          <div className="tracking-code-value">{deliveryCode}</div>
+          <p className="tracking-code-hint">
+            Dale este código al domiciliario para confirmar la entrega.
+          </p>
+        </div>
+      )}
       {error && !closed && <div className="tracking-banner error">⚠ {error}</div>}
 
       <div className="tracking-map-wrap">
@@ -76,6 +102,14 @@ const OrderTracking = () => {
           <MapPin size={16} />
           <span>Aún no recibimos la ubicación del domiciliario. Aparecerá aquí en cuanto inicie la entrega.</span>
         </div>
+      )}
+
+      {orderId && user?.id && (
+        <ChatWindow
+          orderId={orderId}
+          enabled={status === "IN_DELIVERY" && !closed}
+          currentUserId={Number(user.id)}
+        />
       )}
     </div>
   );

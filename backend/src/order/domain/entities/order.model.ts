@@ -21,5 +21,8 @@ export class OrderModel {
     public total: number,
     public items: OrderItemModel[],
     public created_at: Date | null,
+    public delivery_code: string | null = null,
+    public delivery_attempts: number = 0,
+    public delivery_blocked: boolean = false,
   ) {}
 }

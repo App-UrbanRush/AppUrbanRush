@@ -7,5 +7,6 @@ export class People {
       public address: string,
       public gender: string,
       public userId: number | null,
+      public avatarUrl: string | null = null,
     ) {}
   }

@@ -13,9 +13,17 @@ export class CourierOrdersRepositoryImpl implements ICourierOrdersRepository {
 
   async updateStatus(
     orderId: string,
-    status: "IN_DELIVERY" | "DELIVERED",
+    status: "IN_DELIVERY",
     courierId: number,
   ): Promise<CourierOrder> {
     return courierOrdersApi.updateStatus(orderId, status, courierId);
+  }
+
+  async confirmDelivery(
+    orderId: string,
+    deliveryCode: string,
+    courierId: number,
+  ): Promise<CourierOrder> {
+    return courierOrdersApi.confirmDelivery(orderId, deliveryCode, courierId);
   }
 }
