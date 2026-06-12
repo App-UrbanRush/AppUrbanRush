@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { HeroBanner as HeroBannerType } from "../../../domain/types/store.types";
 import "./HeroBanner.css";
 
@@ -5,63 +7,62 @@ interface HeroBannerProps {
   data: HeroBannerType;
 }
 
+// Carrusel de comidas y accesorios de delivery
+const SLIDES = [
+  "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1400&h=560&fit=crop&q=80", // hamburguesa
+  "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1400&h=560&fit=crop&q=80", // pizza
+  "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=1400&h=560&fit=crop&q=80", // sushi
+  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1400&h=560&fit=crop&q=80", // platos
+  "https://images.unsplash.com/photo-1526367790999-0150786686a2?w=1400&h=560&fit=crop&q=80", // delivery
+  "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1400&h=560&fit=crop&q=80", // café
+];
+
+const ROTATE_MS = 4500;
+
 const HeroBanner = ({ data }: HeroBannerProps) => {
   const { title, subtitle, buttonText } = data;
+  const [active, setActive] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const id = setInterval(() => setActive((i) => (i + 1) % SLIDES.length), ROTATE_MS);
+    return () => clearInterval(id);
+  }, []);
 
   return (
-    <div style={{
-      position: 'relative',
-      borderRadius: '16px',
-      overflow: 'hidden',
-      minHeight: '200px',
-      background: '#3a1a06',
-      display: 'flex',
-      alignItems: 'center',
-      marginBottom: '28px',
-    }}>
-      <img
-        src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=700&h=350&fit=crop"
-        alt="Comida"
-        style={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          height: '100%',
-          width: '60%',
-          objectFit: 'cover',
-          objectPosition: 'center',
-        }}
-      />
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(90deg, #3a1a06 0%, #3a1a06 38%, rgba(58,26,6,0.7) 60%, rgba(58,26,6,0) 100%)',
-      }} />
-      <div style={{ position: 'relative', zIndex: 2, padding: '36px 32px', maxWidth: '55%' }}>
-        <h1 style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(20px,4vw,36px)', lineHeight: 1.2, margin: '0 0 10px' }}>
-          {title}
-        </h1>
-        <p style={{ color: 'rgba(255,220,180,0.9)', fontSize: 'clamp(13px,2vw,16px)', margin: '0 0 22px' }}>
-          {subtitle}
-        </p>
-        <button
-          className="hero-banner-cta"
-          style={{
-            backgroundColor: '#e8500a',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: '15px',
-            padding: '10px 24px',
-            borderRadius: '24px',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 3px 10px rgba(232,80,10,0.4)',
-          }}
-        >
-          {buttonText}
-        </button>
+    <section className="hero-banner">
+      {/* Carrusel de imágenes */}
+      {SLIDES.map((src, i) => (
+        <div
+          key={src}
+          className={`hero-slide ${i === active ? "active" : ""}`}
+          style={{ backgroundImage: `url(${src})` }}
+          aria-hidden={i !== active}
+        />
+      ))}
+
+      {/* Degradado para legibilidad del texto */}
+      <div className="hero-overlay" />
+
+      {/* Contenido (texto original intacto) */}
+      <div className="hero-content">
+        <h1 className="hero-title">{title}</h1>
+        <p className="hero-subtitle">{subtitle}</p>
+        <button className="hero-banner-cta" onClick={() => navigate("/tiendas")}>{buttonText}</button>
       </div>
-    </div>
+
+      {/* Indicadores */}
+      <div className="hero-dots">
+        {SLIDES.map((src, i) => (
+          <button
+            key={src}
+            className={`hero-dot ${i === active ? "active" : ""}`}
+            onClick={() => setActive(i)}
+            aria-label={`Ir a la imagen ${i + 1}`}
+          />
+        ))}
+      </div>
+    </section>
   );
 };
 

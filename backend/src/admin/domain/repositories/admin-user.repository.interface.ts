@@ -17,4 +17,5 @@ export interface IAdminUserRepository {
   findFiltered(filters: UserFilters): Promise<AdminUserView[]>;
   findCommonUsers(): Promise<AdminUserView[]>;
   findAdmins(): Promise<AdminUserView[]>;
+  findById(id: number): Promise<AdminUserView | null>;
 }

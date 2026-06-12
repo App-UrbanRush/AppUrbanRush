@@ -191,6 +191,18 @@ export class TypeOrmUserRepository implements IUserRepository {
     });
   }
 
+  async updateAdminFields(
+    userId: number,
+    data: { user_email?: string; status?: boolean },
+  ): Promise<void> {
+    const update: Partial<UserEntity> = {};
+    if (data.user_email !== undefined) update.user_email = data.user_email;
+    if (data.status !== undefined) update.status = data.status;
+    if (Object.keys(update).length > 0) {
+      await this.repo.update(userId, update);
+    }
+  }
+
   async clearResetCode(user_id: number): Promise<void> {
     await this.repo.update(user_id, {
       resetPasswordCode: null,

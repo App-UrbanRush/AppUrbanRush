@@ -158,6 +158,7 @@ button:active {
   left: 14px;
   color: #999;
   pointer-events: none;
+  z-index: 2;
 }
 
 .login-input-wrapper input {
@@ -181,6 +182,12 @@ button:active {
   border: 1px solid #ddd;
   outline: none;
   transition: 0.3s;
+}
+
+/* Mayor especificidad: si el input tiene ícono, conserva el espacio a la
+   izquierda para que el texto no se monte sobre el ícono */
+.login-input-group .login-input-wrapper input {
+  padding-left: 42px;
 }
 
 .login-input-group input:focus {

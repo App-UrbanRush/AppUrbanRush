@@ -8,9 +8,9 @@ interface PopularCategoriesProps {
 
 const PopularCategories = ({ categories }: PopularCategoriesProps) => {
   return (
-    <section className="mt-6">
-      <h2 style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px' }}>Categorías Populares</h2>
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+    <section className="home-section">
+      <h2 className="home-section-title">Categorías Populares</h2>
+      <div className="categories-grid">
         {categories.map((cat) => (
           <CategoryCard key={cat.id} category={cat} />
         ))}

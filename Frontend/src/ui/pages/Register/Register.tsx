@@ -1,4 +1,5 @@
 import "./Register.css";
+import PasswordInput from "../../components/ui/PasswordInput";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -58,6 +59,13 @@ const Register = () => {
 
   return (
     <div className="register-container">
+      <button
+        type="button"
+        onClick={() => navigate("/register-select")}
+        style={{ position: 'absolute', top: 20, left: 20, zIndex: 20, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.92)', color: '#e8500a', border: 'none', borderRadius: 22, padding: '9px 18px', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.18)' }}
+      >
+        ← Regresar
+      </button>
       {showSuccess && (
         <div className="register-success-overlay">
           <div className="register-success-modal">
@@ -78,11 +86,8 @@ const Register = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <button className="back-btn" onClick={() => navigate("/register-select")}>
-            ← Volver
-          </button>
-
           <h2>Crear cuenta</h2>
+          <p style={{ marginTop: -6, marginBottom: 18, color: '#888', fontSize: 14, fontWeight: 600 }}>Registro de usuario</p>
 
           {(apiError || contextError) && (
             <div style={{ color: "red", marginBottom: "15px" }}>
@@ -101,9 +106,8 @@ const Register = () => {
             </div>
 
             <div className="input-group">
-              <input
+              <PasswordInput
                 {...register("user_password")}
-                type="password"
                 placeholder="Contraseña"
               />
               {errors.user_password && <span className="error">{errors.user_password.message}</span>}

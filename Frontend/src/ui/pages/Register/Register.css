@@ -100,6 +100,7 @@
 .register-right {
   flex: 1;
   position: relative;
+  overflow: hidden;
 }
 
 .register-right img {
@@ -107,6 +108,36 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transform-origin: center;
+  will-change: transform;
+  animation: reg-kenburns 22s ease-in-out infinite alternate;
+}
+
+/* Fade en el borde izquierdo: funde la imagen con el formulario */
+.register-right::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 22%;
+  background: linear-gradient(to left, rgba(248, 249, 251, 0) 0%, #f8f9fb 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes reg-kenburns {
+  0%   { transform: scale(1) translate(0, 0); }
+  50%  { transform: scale(1.12) translate(2%, 1.5%); }
+  100% { transform: scale(1.18) translate(-2%, -1.5%); }
+}
+@keyframes reg-logo-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-14px) scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .register-right img,
+  .register-overlay .register-logo-img { animation: none; }
 }
 
 /* OVERLAY CORRECTO */
@@ -114,8 +145,8 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    rgba(4, 0, 255, 0.336),
-    rgba(255, 0, 0, 0.349)
+    rgba(255, 106, 0, 0.32),
+    rgba(255, 140, 0, 0.48)
   );
   display: flex;
   flex-direction: column;
@@ -131,6 +162,7 @@
   object-fit: contain;
   margin-bottom: 20px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: reg-logo-float 4.5s ease-in-out infinite;
 }
 
 

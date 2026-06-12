@@ -1,7 +1,13 @@
 .home {
-  max-width: 1024px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 16px 16px 0;
+  padding: 24px 28px 0;
+}
+
+@media (max-width: 768px) {
+  .home {
+    padding: 16px 16px 0;
+  }
 }
 
 .home-loading {

@@ -1,0 +1,35 @@
+.fav-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 28px 28px 48px;
+}
+.fav-page-head { margin-bottom: 20px; }
+.fav-page-head h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+.fav-page-head p { margin: 6px 0 0; color: #8a909c; font-size: 0.95rem; }
+
+.fav-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.fav-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: #b0b4bd;
+}
+.fav-empty h3 { color: #555; margin: 12px 0 4px; }
+.fav-empty p { margin: 0; font-size: 0.9rem; }
+
+@media (max-width: 768px) {
+  .fav-page { padding: 18px 16px 36px; }
+  .fav-grid { justify-content: center; }
+}

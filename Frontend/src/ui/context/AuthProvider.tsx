@@ -222,6 +222,22 @@ const [state, setState] = useState<AuthState>({
           isLoading: false,
           error: null,
         }));
+
+        // Cargar el perfil para que el avatar/nombre aparezcan de inmediato
+        try {
+          const profile = await getMyProfileUseCase.execute();
+          setMyProfile(profile);
+          if (profile.firstName) {
+            setState((prev) => ({
+              ...prev,
+              user: prev.user
+                ? { ...prev.user, name: `${profile.firstName} ${profile.firstLastName}` }
+                : null,
+            }));
+          }
+        } catch {
+          /* el perfil es best-effort */
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Error en registro";
@@ -235,7 +251,7 @@ const [state, setState] = useState<AuthState>({
         throw error;
       }
     },
-    [registerUseCase]
+    [registerUseCase, getMyProfileUseCase]
   );
 
   // ✅ REGISTER DELIVERY (ARREGLADO)
@@ -306,6 +322,10 @@ const [state, setState] = useState<AuthState>({
   );
 
   // LOGOUT
+  const clearError = useCallback(() => {
+    setState((prev) => (prev.error ? { ...prev, error: null } : prev));
+  }, []);
+
   const logout = useCallback(async () => {
     setState((prev) => ({ ...prev, isLoading: true }));
 
@@ -454,6 +474,7 @@ const value: AuthContextType = {
   googleLogin,
   register,
   logout,
+  clearError,
   registerDelivery,
   registerVendor,
   forgotPassword,

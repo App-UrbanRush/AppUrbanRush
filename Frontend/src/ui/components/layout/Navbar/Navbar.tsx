@@ -1,14 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/useAuth";
+import { useCart } from "../../../context/useCart";
+import { useFavorites } from "../../../context/useFavorites";
 import "./Navbar.css";
 
 const Navbar = () => {
   const { user, myProfile, fetchMyProfile, logout, isAuthenticated } = useAuth();
+  const { openCart, count } = useCart();
+  const { count: favCount } = useFavorites();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = () => {
+    const q = searchQuery.trim();
+    navigate(q ? `/tiendas?q=${encodeURIComponent(q)}` : "/tiendas");
+    setSearchOpen(false);
+  };
   const dropdownRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +60,6 @@ const Navbar = () => {
     : user?.name || "Usuario";
 
   const userRole = user?.role || "";
-  const avatarLetter = displayName.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     await logout();
@@ -58,7 +68,7 @@ const Navbar = () => {
 
   return (
     <nav style={{ backgroundColor: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', position: 'sticky', top: 0, zIndex: 100 }}>
-      <div className="navbar-row" style={{ maxWidth: '960px', margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', height: '60px', gap: '12px', position: 'relative' }}>
+      <div className="navbar-row" style={{ maxWidth: '1500px', margin: '0 auto', padding: '0 28px', display: 'flex', alignItems: 'center', height: '64px', gap: '14px', position: 'relative' }}>
 
         {/* Hamburger - mobile (solo si autenticado) */}
         {isAuthenticated && (
@@ -75,13 +85,9 @@ const Navbar = () => {
         )}
 
         {/* Logo */}
-        <Link to="/dashboard" className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', flexShrink: 0 }}>
-          <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-            <circle cx="17" cy="17" r="17" fill="#e8500a"/>
-            <path d="M9 21 Q17 11 25 21" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            <circle cx="17" cy="21" r="3.5" fill="white"/>
-          </svg>
-          <span style={{ color: '#e8500a', fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px' }}>UrbanRush</span>
+        <Link to="/dashboard" className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
+          <img src="/Logo-png.png" alt="UrbanRush" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+          <span style={{ color: '#e8500a', fontWeight: 800, fontSize: '22px', letterSpacing: '-0.5px' }}>UrbanRush</span>
         </Link>
 
         {/* Spacer for mobile */}
@@ -95,6 +101,9 @@ const Navbar = () => {
           <input
             type="text"
             placeholder="¿Qué deseas pedir hoy?"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
             style={{ background: 'none', border: 'none', outline: 'none', fontSize: '14px', color: '#555', width: '100%' }}
           />
         </div>
@@ -111,16 +120,19 @@ const Navbar = () => {
 
         {/* Favorites + Cart - desktop */}
         <div className="icons-desktop" style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', padding: 0 }}>
-            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <button onClick={() => navigate('/favoritos')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: favCount > 0 ? '#ff3d6e' : '#666', position: 'relative', padding: 0 }} title="Favoritos">
+            <svg width="22" height="22" fill={favCount > 0 ? '#ff3d6e' : 'none'} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364L12 21l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
             </svg>
+            {favCount > 0 && (
+              <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ff3d6e', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{favCount}</span>
+            )}
           </button>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
+          <button onClick={openCart} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
             <svg width="22" height="22" fill="none" stroke="#e8500a" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 6M7 13l-1.4-6M17 13l1.4 6M9 19a1 1 0 100 2 1 1 0 000-2zM17 19a1 1 0 100 2 1 1 0 000-2z"/>
             </svg>
-            <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e8500a', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>0</span>
+            <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e8500a', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{count}</span>
           </button>
         </div>
 
@@ -142,9 +154,13 @@ const Navbar = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                overflow: 'hidden',
+                padding: 0,
               }}
             >
-              {avatarLetter}
+              {myProfile?.avatarUrl
+                ? <img src={myProfile.avatarUrl} alt="Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-5 0-9 2.6-9 6v1a1 1 0 001 1h16a1 1 0 001-1v-1c0-3.4-4-6-9-6z"/></svg>}
             </button>
 
             {dropdownOpen && (
@@ -210,7 +226,24 @@ const Navbar = () => {
             )}
           </div>
         ) : (
-          <div className="login-btn-wrapper" style={{ flexShrink: 0 }}>
+          <div className="login-btn-wrapper" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Link
+              to="/register-select"
+              style={{
+                background: '#fff',
+                color: '#e8500a',
+                border: '1.5px solid #e8500a',
+                borderRadius: '24px',
+                padding: '5px 15px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Registrarme
+            </Link>
             <Link
               to="/login"
               style={{
@@ -223,6 +256,7 @@ const Navbar = () => {
                 fontWeight: 600,
                 cursor: 'pointer',
                 textDecoration: 'none',
+                whiteSpace: 'nowrap',
               }}
             >
               Iniciar sesión
@@ -241,11 +275,11 @@ const Navbar = () => {
               <circle cx="11" cy="11" r="7"/><path strokeLinecap="round" d="M21 21l-4.35-4.35"/>
             </svg>
           </button>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
+          <button onClick={openCart} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
             <svg width="20" height="20" fill="none" stroke="#e8500a" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 6M7 13l-1.4-6M17 13l1.4 6M9 19a1 1 0 100 2 1 1 0 000-2zM17 19a1 1 0 100 2 1 1 0 000-2z"/>
             </svg>
-            <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e8500a', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>0</span>
+            <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e8500a', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{count}</span>
           </button>
         </div>
       </div>
@@ -282,8 +316,11 @@ const Navbar = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
+                    overflow: 'hidden',
                   }}>
-                    {avatarLetter}
+                    {myProfile?.avatarUrl
+                      ? <img src={myProfile.avatarUrl} alt="Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-5 0-9 2.6-9 6v1a1 1 0 001 1h16a1 1 0 001-1v-1c0-3.4-4-6-9-6z"/></svg>}
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: '14px', color: '#222', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
@@ -333,7 +370,7 @@ const Navbar = () => {
                 </div>
               </>
             ) : (
-              <div style={{ padding: '20px 16px' }}>
+              <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
@@ -354,6 +391,27 @@ const Navbar = () => {
                   }}
                 >
                   Iniciar sesión
+                </Link>
+                <Link
+                  to="/register-select"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#fff',
+                    color: '#e8500a',
+                    border: '1.5px solid #e8500a',
+                    borderRadius: '24px',
+                    padding: '10px 24px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textDecoration: 'none',
+                    width: '100%',
+                  }}
+                >
+                  Registrarme
                 </Link>
               </div>
             )}

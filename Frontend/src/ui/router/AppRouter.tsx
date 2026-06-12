@@ -1,6 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import Login from "../pages/Login/Login";
 import GoogleCallback from "../pages/Login/GoogleCallback";
+import StoresPage from "../pages/Stores/StoresPage";
+import UserProfile from "../pages/UserProfile/UserProfile";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Register from "../pages/Register/Register";
 import DeliveryRegister from "../pages/DeliveryRegister/DeliveryRegister";
@@ -28,13 +32,45 @@ import CourierEarnings from "../pages/CourierDashboard/CourierEarnings";
 import OrderTracking from "../pages/Tracking/OrderTracking";
 import CourierBroadcast from "../pages/Tracking/CourierBroadcast";
 import AdminReports from "../pages/AdminDashboard/AdminReports";
+import AdminOverview from "../pages/AdminDashboard/AdminOverview";
+import AdminUsers from "../pages/AdminDashboard/AdminUsers";
+import AdminAdmins from "../pages/AdminDashboard/AdminAdmins";
+import AdminAuditLogs from "../pages/AdminDashboard/AdminAuditLogs";
+import AdminLiquidations from "../pages/AdminDashboard/AdminLiquidations";
+import AdminBackups from "../pages/AdminDashboard/AdminBackups";
+import CheckoutPage from "../pages/Checkout/CheckoutPage";
+import CartProvider from "../context/CartProvider";
+import FavoritesProvider from "../context/FavoritesProvider";
+import FavoritesPage from "../pages/Favorites/FavoritesPage";
+
+// Limpia el error global de auth al cambiar de pantalla (no se queda "pegado")
+function AuthErrorReset() {
+  const { pathname } = useLocation();
+  const { clearError } = useAuth();
+  useEffect(() => { clearError(); }, [pathname, clearError]);
+  return null;
+}
 
 const AppRouter = () => {
   return (
     <BrowserRouter>
+      <CartProvider>
+      <FavoritesProvider>
+      <AuthErrorReset />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
+        <Route path="/tiendas" element={<StoresPage />} />
+        <Route path="/favoritos" element={<FavoritesPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <UserProfile />
+            </PrivateRoute>
+          }
+        />
         <Route path="/register" element={<Register />} />
         <Route path="/register-delivery" element={<DeliveryRegister />} />
         <Route path="/register-select" element={<RegisterSelect />} />
@@ -193,15 +229,65 @@ const AppRouter = () => {
           }
         />
 
-        {/* Panel de administración — reportes */}
+        {/* ════════ Panel de administración (ADMIN=1, SUPERADMIN=5) ════════ */}
         <Route
-          path="/admin/reports"
+          path="/admin/dashboard"
           element={
-            <PrivateRoute allowedRoles={[1]}>
+            <PrivateRoute allowedRoles={[1, 5]}>
+              <AdminOverview />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard/usuarios"
+          element={
+            <PrivateRoute allowedRoles={[1, 5]}>
+              <AdminUsers />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard/admins"
+          element={
+            <PrivateRoute allowedRoles={[5]}>
+              <AdminAdmins />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard/auditoria"
+          element={
+            <PrivateRoute allowedRoles={[5]}>
+              <AdminAuditLogs />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard/liquidaciones"
+          element={
+            <PrivateRoute allowedRoles={[1, 5]}>
+              <AdminLiquidations />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard/reportes"
+          element={
+            <PrivateRoute allowedRoles={[1, 5]}>
               <AdminReports />
             </PrivateRoute>
           }
         />
+        <Route
+          path="/admin/dashboard/backups"
+          element={
+            <PrivateRoute allowedRoles={[1, 5]}>
+              <AdminBackups />
+            </PrivateRoute>
+          }
+        />
+        {/* Compatibilidad: ruta antigua redirige a la nueva */}
+        <Route path="/admin/reports" element={<Navigate to="/admin/dashboard/reportes" replace />} />
 
         {/* Seguimiento en vivo del pedido (usuario/negocio/admin autenticado) */}
         <Route
@@ -213,6 +299,8 @@ const AppRouter = () => {
           }
         />
       </Routes>
+      </FavoritesProvider>
+      </CartProvider>
     </BrowserRouter>
   );
 };

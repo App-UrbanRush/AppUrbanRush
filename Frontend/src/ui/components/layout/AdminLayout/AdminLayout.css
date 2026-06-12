@@ -1,0 +1,67 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f9;
+}
+
+.admin-layout-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-topbar {
+  height: 62px;
+  background: #fff;
+  border-bottom: 1px solid #e8eaed;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+.admin-topbar-role {
+  font-weight: 700;
+  color: #ff6a00;
+}
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.admin-topbar-email {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+.admin-topbar-logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 7px 13px;
+  font-weight: 600;
+  color: #dc3545;
+  cursor: pointer;
+}
+.admin-topbar-logout:hover {
+  background: #fff5f5;
+}
+
+.admin-layout-main {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.dark-mode-wrapper.dark-mode .admin-layout {
+  background: #14171c;
+}
+.dark-mode-wrapper.dark-mode .admin-topbar {
+  background: #1f232b;
+  border-color: #2a2f38;
+}
+.dark-mode-wrapper.dark-mode .admin-topbar-email {
+  color: #9aa0ab;
+}

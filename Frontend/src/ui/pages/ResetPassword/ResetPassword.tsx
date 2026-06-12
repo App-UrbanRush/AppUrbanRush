@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./ResetPassword.css";
+import PasswordInput from "../../components/ui/PasswordInput";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -104,11 +105,9 @@ const ResetPassword = () => {
             <div className="reset-password-input-group">
               <div className="reset-password-input-wrapper">
                 <Lock className="reset-password-input-icon" size={18} />
-                <motion.input
-                  whileFocus={{ scale: 1.02 }}
+                <PasswordInput
                   {...register("new_password")}
-                  type="password"
-                  placeholder="     Nueva contraseña"
+                  placeholder="Nueva contraseña"
                 />
               </div>
               {errors.new_password && <span>{errors.new_password.message}</span>}

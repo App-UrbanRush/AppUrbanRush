@@ -1,4 +1,5 @@
 import "./VendorRegister.css";
+import PasswordInput from "../../components/ui/PasswordInput";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -191,6 +192,13 @@ const VendorRegister = () => {
 
   return (
     <div className="vendorregister-container">
+      <button
+        type="button"
+        onClick={() => navigate("/register-select")}
+        style={{ position: 'absolute', top: 20, left: 20, zIndex: 20, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.92)', color: '#e8500a', border: 'none', borderRadius: 22, padding: '9px 18px', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.18)' }}
+      >
+        ← Regresar
+      </button>
       {showSuccess && (
         <div className="success-overlay">
           <div className="success-modal">
@@ -206,9 +214,11 @@ const VendorRegister = () => {
 
       <div className="vendorregister-left">
         <div className="vendorregister-card" key={step}>
-          <button className="back-btn" onClick={() => step === 1 ? navigate("/register-select") : setStep(step - 1)}>
-            ← Volver
-          </button>
+          {step > 1 && (
+            <button className="back-btn" onClick={() => setStep(step - 1)}>
+              ← Volver
+            </button>
+          )}
 
           <h2>Registro de Negocio</h2>
 
@@ -235,12 +245,12 @@ const VendorRegister = () => {
                 </div>
 
                 <div className="input-group">
-                  <input {...register("user_password")} type="password" placeholder="Contraseña" />
+                  <PasswordInput {...register("user_password")} placeholder="Contraseña" />
                   {errors.user_password && <span className="error">{errors.user_password.message}</span>}
                 </div>
 
                 <div className="input-group">
-                  <input {...register("confirm_password")} type="password" placeholder="Confirmar contraseña" />
+                  <PasswordInput {...register("confirm_password")} placeholder="Confirmar contraseña" />
                   {errors.confirm_password && <span className="error">{errors.confirm_password.message}</span>}
                 </div>
 

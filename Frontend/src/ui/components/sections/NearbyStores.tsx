@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Store } from "../../../domain/types/store.types";
 import StoreCard from "../ui/StoreCard/StoreCard";
+import StoreDetailModal from "../store/StoreDetailModal";
 import DeliveryMap from "../DeliveryMap/DeliveryMap";
 import MapModal from "../DeliveryMap/MapModal";
 import "./NearbyStores.css";
@@ -11,6 +12,7 @@ interface NearbyStoresProps {
 
 const NearbyStores = ({ stores }: NearbyStoresProps) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [selected, setSelected] = useState<Store | null>(null);
 
   const mapLocations = stores.map((s) => ({
     id: String(s.id),
@@ -22,7 +24,7 @@ const NearbyStores = ({ stores }: NearbyStoresProps) => {
 
   return (
     <section style={{ marginTop: '28px', marginBottom: '32px' }}>
-      <h2 style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px' }}>Tiendas Cerca de Ti</h2>
+      <h2 className="home-section-title" style={{ marginBottom: '16px' }}>Tiendas Cerca de Ti</h2>
       <div className="nearby-container" style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
         <div className="map-wrapper" style={{ flexShrink: 0, width: '220px' }}>
           <DeliveryMap
@@ -59,10 +61,11 @@ const NearbyStores = ({ stores }: NearbyStoresProps) => {
           style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'auto', maxHeight: '230px' }}
         >
           {stores.map((store) => (
-            <StoreCard key={store.id} store={store} variant="nearby" />
+            <StoreCard key={store.id} store={store} variant="nearby" onClick={() => setSelected(store)} />
           ))}
         </div>
       </div>
+      {selected && <StoreDetailModal store={selected} onClose={() => setSelected(null)} />}
       <MapModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

@@ -6,6 +6,13 @@ export interface Category {
   description: string;
 }
 
+export interface Product {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+}
+
 export interface Store {
   id: number;
   name: string;
@@ -15,6 +22,9 @@ export interface Store {
   image: string;
   lat: number;
   lng: number;
+  address: string;
+  photos: string[];
+  products: Product[];
 }
 
 export interface HeroBanner {

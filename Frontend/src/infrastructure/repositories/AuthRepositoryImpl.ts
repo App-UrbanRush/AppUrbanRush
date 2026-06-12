@@ -40,7 +40,14 @@ export class AuthRepositoryImpl implements IAuthRepository {
 
       return authResponse;
     } catch (error) {
-      throw new Error("Error en login: " + (error instanceof Error ? error.message : "Unknown error"));
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 401 || status === 400) {
+        throw new Error("Correo o contraseña incorrectos");
+      }
+      if (!(error as { response?: unknown })?.response) {
+        throw new Error("No se pudo conectar con el servidor. Intenta de nuevo");
+      }
+      throw new Error("No se pudo iniciar sesión. Intenta más tarde");
     }
   }
 
@@ -62,14 +69,26 @@ export class AuthRepositoryImpl implements IAuthRepository {
     try {
       const apiResponse = await registerApi(data);
       // Backend returns { message, token }
+      const token = apiResponse.token || apiResponse.access_token || "";
+
+      // Decodificar el JWT para obtener user_id y rol reales
+      let userId = "";
+      let role = "Usuario";
+      if (token) {
+        const payload = decodeJwt(token);
+        if (payload) {
+          userId = payload.user_id.toString();
+          role = ROLE_MAP[payload.rolIds?.[0] ?? 2] ?? "Usuario";
+        }
+      }
 
       const response: AuthResponse = {
-        access_token: apiResponse.token || apiResponse.access_token || "",
+        access_token: token,
         user: {
-          id: "",
+          id: userId,
           email: data.user_email,
           name: data.firstName,
-          role: "user"
+          role,
         }
       };
 
