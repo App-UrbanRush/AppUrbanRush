@@ -1,4 +1,4 @@
-import type { ReviewStats } from "../../domain/types/review.types";
+import type { ReviewStats } from "../../../domain/types/review.types";
 import "./ReviewSummary.css";
 
 interface ReviewSummaryProps {
@@ -6,7 +6,7 @@ interface ReviewSummaryProps {
 }
 
 const ReviewSummary = ({ stats }: ReviewSummaryProps) => {
-  const renderStars = (rating: number) => {
+  const renderStars = () => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
@@ -25,7 +25,7 @@ const ReviewSummary = ({ stats }: ReviewSummaryProps) => {
       <div className="review-summary-header">
         <div className="review-summary-main">
           <div className="review-average">
-            <span className="average-stars">{renderStars(Math.round(stats.average_rating))}</span>
+            <span className="average-stars">{renderStars()}</span>
             <span className="average-number">{stats.average_rating.toFixed(1)}</span>
             <span className="average-out-of">/5</span>
           </div>

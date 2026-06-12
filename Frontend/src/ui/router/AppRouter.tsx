@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/Login/Login";
+import GoogleCallback from "../pages/Login/GoogleCallback";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Register from "../pages/Register/Register";
 import DeliveryRegister from "../pages/DeliveryRegister/DeliveryRegister";
@@ -26,12 +27,14 @@ import CourierAvailableOrders from "../pages/CourierDashboard/CourierAvailableOr
 import CourierEarnings from "../pages/CourierDashboard/CourierEarnings";
 import OrderTracking from "../pages/Tracking/OrderTracking";
 import CourierBroadcast from "../pages/Tracking/CourierBroadcast";
+import AdminReports from "../pages/AdminDashboard/AdminReports";
 
 const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register-delivery" element={<DeliveryRegister />} />
         <Route path="/register-select" element={<RegisterSelect />} />
@@ -186,6 +189,16 @@ const AppRouter = () => {
           element={
             <PrivateRoute allowedRoles={[3]}>
               <CourierBroadcast />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Panel de administración — reportes */}
+        <Route
+          path="/admin/reports"
+          element={
+            <PrivateRoute allowedRoles={[1]}>
+              <AdminReports />
             </PrivateRoute>
           }
         />

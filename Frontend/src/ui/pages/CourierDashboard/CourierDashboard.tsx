@@ -4,7 +4,6 @@ import { vendorsApi, type VendorListItem, type VendorPhotoItem } from "../../../
 import { courierVendorRequestsApi, type CourierVendorRequest } from "../../../infrastructure/api/courierVendorRequestsApi";
 import { Store, MapPin, Phone, Clock, X, Info, Image, CheckCircle, Clock as ClockIcon, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import ActiveDeliveryBanner from "../../components/courier/ActiveDeliveryBanner";
 import "./CourierDashboard.css";
 
 const CourierDashboard = () => {
@@ -121,8 +120,6 @@ const CourierDashboard = () => {
   return (
     <CourierLayout>
       <div className="courier-dashboard">
-        <ActiveDeliveryBanner />
-
         <h1>Negocios</h1>
         <p className="courier-dashboard-subtitle">Todos los negocios registrados</p>
 

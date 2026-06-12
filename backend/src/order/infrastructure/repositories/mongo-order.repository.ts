@@ -25,6 +25,9 @@ export class MongoOrderRepository implements IOrderRepository {
       platform_commission: order.platform_commission,
       total: order.total,
       items: order.items,
+      delivery_code: order.delivery_code,
+      delivery_attempts: order.delivery_attempts,
+      delivery_blocked: order.delivery_blocked,
     });
     const saved = await created.save();
     return OrderMapper.toDomain(saved);
@@ -72,8 +75,19 @@ async updateStatus(id: string, status: string, courierId?: number): Promise<Orde
     const update: any = { status };
     if (courierId) update.courier_id = courierId;
     const updated = await this.orderModel
-      .findByIdAndUpdate(id, update, { returnDocument: 'after' }) 
+      .findByIdAndUpdate(id, update, { returnDocument: 'after' })
       .exec();
     return updated ? OrderMapper.toDomain(updated) : null;
+  }
+
+  async incrementDeliveryAttempts(id: string): Promise<OrderModel | null> {
+    const updated = await this.orderModel
+      .findByIdAndUpdate(id, { $inc: { delivery_attempts: 1 } }, { returnDocument: 'after' })
+      .exec();
+    return updated ? OrderMapper.toDomain(updated) : null;
+  }
+
+  async block(id: string): Promise<void> {
+    await this.orderModel.findByIdAndUpdate(id, { delivery_blocked: true }).exec();
   }
 }

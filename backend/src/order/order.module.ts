@@ -7,11 +7,14 @@ import { GetOrdersByUserUseCase } from './application/use-cases/get-orders-by-us
 import { GetOrdersByVendorUseCase } from './application/use-cases/get-orders-by-vendor.use-case';
 import { GetAvailableOrdersUseCase } from './application/use-cases/get-available-orders.use-case';
 import { GetOrdersByCourierUseCase } from './application/use-cases/get-orders-by-courier.use-case';
+import { GetOrderByIdUseCase } from './application/use-cases/get-order-by-id.use-case';
 import { UpdateOrderStatusUseCase } from './application/use-cases/update-order-status.use-case';
+import { ConfirmDeliveryUseCase } from './application/use-cases/confirm-delivery.use-case';
 import { OrderController } from './infrastructure/controllers/order.controller';
 import { ProductModule } from 'src/product/product.module';
 import { LiquidationModule } from 'src/liquidation/liquidation.module';
 import { TrackingModule } from 'src/tracking/tracking.module';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   imports: [
@@ -19,6 +22,7 @@ import { TrackingModule } from 'src/tracking/tracking.module';
     ProductModule,
     forwardRef(() => LiquidationModule),
     forwardRef(() => TrackingModule),
+    EmailModule,
   ],
   controllers: [OrderController],
   providers: [
@@ -29,7 +33,9 @@ import { TrackingModule } from 'src/tracking/tracking.module';
     GetOrdersByVendorUseCase,
     GetAvailableOrdersUseCase,
     GetOrdersByCourierUseCase,
+    GetOrderByIdUseCase,
     UpdateOrderStatusUseCase,
+    ConfirmDeliveryUseCase,
   ],
   exports: ['IOrderRepository'],
 })

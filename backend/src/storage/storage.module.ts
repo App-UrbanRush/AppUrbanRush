@@ -4,13 +4,15 @@ import { UploadImageUseCase } from './application/use-cases/upload-image.use-cas
 import { DeleteImageUseCase } from './application/use-cases/delete-image.use-case';
 import { UploadProductImageUseCase } from './application/use-cases/upload-product-image.use-case';
 import { UploadVendorImageUseCase } from './application/use-cases/upload-vendor-image.use-case';
+import { UploadAvatarImageUseCase } from './application/use-cases/upload-avatar-image.use-case';
 import { StorageController } from './infrastructure/controllers/storage.controller';
 import { ProductModule } from 'src/product/product.module';
 import { VendorModule } from 'src/vendor/vendor.module';
+import { PeopleModule } from 'src/people/people.module';
 
 @Global()
 @Module({
-  imports: [ProductModule, VendorModule],
+  imports: [ProductModule, VendorModule, PeopleModule],
   controllers: [StorageController],
   providers: [
     CloudinaryStorageRepository,
@@ -19,6 +21,7 @@ import { VendorModule } from 'src/vendor/vendor.module';
     DeleteImageUseCase,
     UploadProductImageUseCase,
     UploadVendorImageUseCase,
+    UploadAvatarImageUseCase,
   ],
   exports: ['IStorageRepository', UploadImageUseCase, DeleteImageUseCase],
 })

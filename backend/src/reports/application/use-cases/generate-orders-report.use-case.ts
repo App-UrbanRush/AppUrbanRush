@@ -13,13 +13,14 @@ export class GenerateOrdersReportUseCase {
     private readonly excelService: ExcelGeneratorService,
   ) {}
 
+  private readonly headers = ['ID', 'Cliente', 'Negocio', 'Courier', 'Estado', 'Dirección', 'Total', 'Items', 'Fecha'];
+
   async pdf(filters: ReportFilters): Promise<Buffer> {
     const orders = await this.reportsRepo.getOrders(filters);
-    const headers = ['ID', 'Usuario', 'Vendor', 'Courier', 'Estado', 'Dirección', 'Total', 'Items', 'Fecha'];
     const rows = orders.map((o) => [
       o.order_id,
-      o.user_id,
-      o.vendor_id,
+      o.customer_name,
+      o.vendor_name,
       o.courier_id ?? 'N/A',
       o.status,
       o.delivery_address,
@@ -27,16 +28,15 @@ export class GenerateOrdersReportUseCase {
       o.items_count,
       o.created_at ? new Date(o.created_at).toLocaleDateString('es-CO') : '',
     ]);
-    return this.pdfService.generateTable('Reporte de Pedidos — UrbanRush', headers, rows);
+    return this.pdfService.generateTable('Reporte de Pedidos — UrbanRush', this.headers, rows);
   }
 
   async excel(filters: ReportFilters): Promise<Buffer> {
     const orders = await this.reportsRepo.getOrders(filters);
-    const headers = ['ID', 'Usuario', 'Vendor', 'Courier', 'Estado', 'Dirección', 'Total', 'Items', 'Fecha'];
     const rows = orders.map((o) => [
       o.order_id,
-      o.user_id,
-      o.vendor_id,
+      o.customer_name,
+      o.vendor_name,
       o.courier_id ?? 'N/A',
       o.status,
       o.delivery_address,
@@ -44,6 +44,6 @@ export class GenerateOrdersReportUseCase {
       o.items_count,
       o.created_at ? new Date(o.created_at).toLocaleDateString('es-CO') : '',
     ]);
-    return this.excelService.generateTable('Pedidos', headers, rows);
+    return this.excelService.generateTable('Pedidos', this.headers, rows);
   }
 }

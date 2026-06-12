@@ -25,12 +25,15 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
       return <Navigate to="/" replace />;
     }
 
-    const userRole = user.role;
-    
-    const isAllowed =
-      (allowedRoles.includes(4) && userRole === "Negocio") ||
-      (allowedRoles.includes(3) && userRole === "Domiciliario");
-    
+    const ROLE_NAME_TO_ID: Record<string, number> = {
+      Administrador: 1,
+      Usuario: 2,
+      Domiciliario: 3,
+      Negocio: 4,
+    };
+    const userRoleId = ROLE_NAME_TO_ID[user.role];
+    const isAllowed = userRoleId != null && allowedRoles.includes(userRoleId);
+
     if (!isAllowed) {
       return <Navigate to="/dashboard" replace />;
     }

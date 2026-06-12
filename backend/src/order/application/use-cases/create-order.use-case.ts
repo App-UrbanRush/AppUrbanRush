@@ -1,4 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { randomInt } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { IProductRepository } from 'src/product/domain/repositories/product.repository.interface';
@@ -34,6 +35,9 @@ export class CreateOrderUseCase {
     const platformCommission = Math.round(subtotal * commissionRate);
     const total = subtotal + deliveryFee + platformCommission;
 
+    // Código de entrega: 4 dígitos criptográficamente seguros (1000–9999)
+    const deliveryCode = randomInt(1000, 10000).toString();
+
     const order = new OrderModel(
       null,
       dto.user_id,
@@ -47,6 +51,9 @@ export class CreateOrderUseCase {
       total,
       items,
       null,
+      deliveryCode,
+      0,
+      false,
     );
 
     const savedOrder = await this.orderRepository.create(order);

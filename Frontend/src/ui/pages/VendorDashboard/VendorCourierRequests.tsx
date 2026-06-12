@@ -5,7 +5,7 @@ import {
   type CourierVendorRequest,
   type CourierDetails,
 } from "../../../infrastructure/api/courierVendorRequestsApi";
-import { Send, Clock, CheckCircle, XCircle, Eye, X, User, Truck, Mail, Phone, MapPin, CreditCard } from "lucide-react";
+import { Send, Clock, CheckCircle, XCircle, Eye, X, User, Truck, Mail, Phone } from "lucide-react";
 import toast from "react-hot-toast";
 import "./VendorCourierRequests.css";
 

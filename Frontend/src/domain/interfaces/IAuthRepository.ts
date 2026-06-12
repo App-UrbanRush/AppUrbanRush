@@ -8,6 +8,17 @@ export interface UserProfile {
   firstLastName: string;
   address: string;
   email?: string;
+  cellphone?: string;
+  gender?: string;
+  avatarUrl?: string | null;
+}
+
+export interface UpdateProfileData {
+  firstName?: string;
+  firstLastName?: string;
+  cellphone?: string;
+  address?: string;
+  gender?: string;
 }
 
 export interface VendorProfile {
@@ -38,7 +49,10 @@ export interface IAuthRepository {
   register(data: RegisterRequest): Promise<AuthResponse>;
   registerDelivery(data: RegisterDeliveryRequest): Promise<AuthResponse>;
   registerVendor(data: RegisterVendorRequest): Promise<VendorRegisterResponse>;
+  loginWithToken(token: string): Promise<AuthResponse>;
   getMyProfile(): Promise<UserProfile>;
+  updateMyProfile(userId: number, data: UpdateProfileData): Promise<void>;
+  uploadAvatar(file: File): Promise<{ avatar_url: string }>;
   logout(): Promise<void>;
   forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse>;
   resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse>;

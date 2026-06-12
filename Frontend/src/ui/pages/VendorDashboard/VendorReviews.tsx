@@ -1,13 +1,18 @@
 import { useEffect, useState, useCallback } from "react";
-import { useAuth } from "../../context/useAuth";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import ReviewSummary from "../../components/vendor/ReviewSummary";
 import ReviewCard from "../../components/vendor/ReviewCard";
-import type { Review, ReviewStats } from "../../domain/types/review.types";
+import type { Review, ReviewStats } from "../../../domain/types/review.types";
+import { GetVendorReviewsUseCase } from "../../../application/use-cases/GetVendorReviewsUseCase";
+import { GetVendorReviewStatsUseCase } from "../../../application/use-cases/GetVendorReviewStatsUseCase";
+import { ReviewRepositoryImpl } from "../../../infrastructure/repositories/ReviewRepositoryImpl";
 import "./VendorReviews.css";
 
+const reviewRepo = new ReviewRepositoryImpl();
+const getVendorReviews = new GetVendorReviewsUseCase(reviewRepo);
+const getVendorReviewStats = new GetVendorReviewStatsUseCase(reviewRepo);
+
 const VendorReviews = () => {
-  const { getVendorReviews, getVendorReviewStats } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -15,8 +20,8 @@ const VendorReviews = () => {
   const fetchData = useCallback(async () => {
     try {
       const [reviewsData, statsData] = await Promise.all([
-        getVendorReviews(),
-        getVendorReviewStats(),
+        getVendorReviews.execute(),
+        getVendorReviewStats.execute(),
       ]);
       setReviews(reviewsData);
       setStats(statsData);
@@ -25,7 +30,7 @@ const VendorReviews = () => {
     } finally {
       setLoading(false);
     }
-  }, [getVendorReviews, getVendorReviewStats]);
+  }, []);
 
   useEffect(() => {
     fetchData();

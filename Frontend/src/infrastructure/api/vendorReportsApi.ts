@@ -44,6 +44,21 @@ export const vendorReportsApi = {
     link.remove();
   },
 
+  downloadSummaryPdf: async () => {
+    const token = authLocalStorage.getToken();
+    const response = await axios.get(`${API_URL}/vendor/reports/summary/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: "blob",
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "resumen-negocio.pdf");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
   downloadExcel: async (from?: string, to?: string) => {
     const token = authLocalStorage.getToken();
     const params = new URLSearchParams();

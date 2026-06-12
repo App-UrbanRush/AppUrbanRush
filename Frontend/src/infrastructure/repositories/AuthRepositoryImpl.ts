@@ -1,8 +1,9 @@
-import type { IAuthRepository, UserProfile } from "../../domain/interfaces/IAuthRepository";
+import type { IAuthRepository, UserProfile, UpdateProfileData } from "../../domain/interfaces/IAuthRepository";
 import { ROLE_MAP } from "../../domain/types/auth.types";
 import type { AuthResponse, LoginRequest, RegisterRequest, RegisterDeliveryRequest, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from "../../domain/types/auth.types";
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
 import { loginApi, registerApi, registerDeliveryApi, registerVendorApi, getMyProfileApi, forgotPasswordApi, resetPasswordApi } from "../api/authApi";
+import { peopleApi } from "../api/peopleApi";
 import { authLocalStorage } from "../persistence/authLocalStorage";
 import { decodeJwt } from "../utils/jwtDecoder";
 
@@ -97,6 +98,27 @@ export class AuthRepositoryImpl implements IAuthRepository {
     return response;
   }
 
+  async loginWithToken(token: string): Promise<AuthResponse> {
+    const payload = decodeJwt(token);
+    if (!payload) throw new Error("Token de Google inválido");
+
+    const roleId = payload.rolIds?.[0] ?? 2;
+    const roleName = ROLE_MAP[roleId] ?? "Usuario";
+
+    const authResponse: AuthResponse = {
+      access_token: token,
+      user: {
+        id: payload.user_id.toString(),
+        email: payload.user_email,
+        name: payload.user_email,
+        role: roleName,
+      },
+    };
+
+    authLocalStorage.saveAuthResponse(authResponse);
+    return authResponse;
+  }
+
   async getMyProfile(): Promise<UserProfile> {
     const profile = await getMyProfileApi();
     return {
@@ -104,7 +126,19 @@ export class AuthRepositoryImpl implements IAuthRepository {
       firstName: profile.firstName,
       firstLastName: profile.firstLastName,
       address: profile.address,
+      cellphone: profile.cellphone,
+      gender: profile.gender,
+      avatarUrl: profile.avatarUrl ?? null,
     };
+  }
+
+  async updateMyProfile(userId: number, data: UpdateProfileData): Promise<void> {
+    await peopleApi.updateMyProfile(userId, data);
+  }
+
+  async uploadAvatar(file: File): Promise<{ avatar_url: string }> {
+    const result = await peopleApi.uploadAvatar(file);
+    return { avatar_url: result.avatar_url };
   }
 
   async logout(): Promise<void> {

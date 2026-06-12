@@ -1,18 +1,18 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Package, Navigation, Clock, CheckCircle, RefreshCw } from "lucide-react";
+import { MapPin, Package, Navigation, Clock, CheckCircle, RefreshCw, X, KeyRound } from "lucide-react";
 import toast from "react-hot-toast";
 import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { useAuth } from "../../context/useAuth";
 import { GetCourierOrdersUseCase } from "../../../application/use-cases/GetCourierOrdersUseCase";
-import { MarkOrderDeliveredUseCase } from "../../../application/use-cases/MarkOrderDeliveredUseCase";
+import { ConfirmDeliveryUseCase } from "../../../application/use-cases/ConfirmDeliveryUseCase";
 import { CourierOrdersRepositoryImpl } from "../../../infrastructure/repositories/CourierOrdersRepositoryImpl";
 import type { CourierOrder } from "../../../domain/types/courier-orders.types";
 import "./CourierDeliveries.css";
 
 const repo = new CourierOrdersRepositoryImpl();
 const getCourierOrders = new GetCourierOrdersUseCase(repo);
-const markDelivered = new MarkOrderDeliveredUseCase(repo);
+const confirmDelivery = new ConfirmDeliveryUseCase(repo);
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   READY: { label: "Listo para recoger", color: "blue" },
@@ -25,7 +25,11 @@ const CourierDeliveries = () => {
   const { courierProfile, fetchCourierProfile } = useAuth();
   const [orders, setOrders] = useState<CourierOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [delivering, setDelivering] = useState<string | null>(null);
+
+  // Modal de confirmación con código
+  const [codeOrderId, setCodeOrderId] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     if (!courierProfile) fetchCourierProfile();
@@ -48,18 +52,35 @@ const CourierDeliveries = () => {
     load();
   }, [load]);
 
-  const handleDelivered = async (orderId: string) => {
-    if (!courierProfile?.couriers_id) return;
-    setDelivering(orderId);
+  const openCodeModal = (orderId: string) => {
+    setCodeOrderId(orderId);
+    setCode("");
+  };
+
+  const closeCodeModal = () => {
+    if (confirming) return;
+    setCodeOrderId(null);
+    setCode("");
+  };
+
+  const handleConfirm = async () => {
+    if (!courierProfile?.couriers_id || !codeOrderId) return;
+    if (code.length !== 4) {
+      toast.error("El código debe tener 4 dígitos");
+      return;
+    }
+    setConfirming(true);
     try {
-      await markDelivered.execute(orderId, courierProfile.couriers_id);
-      toast.success("Pedido marcado como entregado 🎉");
+      await confirmDelivery.execute(codeOrderId, code, courierProfile.couriers_id);
+      toast.success("¡Entrega confirmada! 🎉");
+      setCodeOrderId(null);
+      setCode("");
       await load();
     } catch (error: any) {
-      const msg = error.response?.data?.message || "No se pudo marcar como entregado";
+      const msg = error.response?.data?.message || "No se pudo confirmar la entrega";
       toast.error(msg);
     } finally {
-      setDelivering(null);
+      setConfirming(false);
     }
   };
 
@@ -125,11 +146,9 @@ const CourierDeliveries = () => {
                       </button>
                       <button
                         className="delivery-done-btn"
-                        onClick={() => handleDelivered(order.order_id)}
-                        disabled={delivering === order.order_id}
+                        onClick={() => openCodeModal(order.order_id)}
                       >
-                        <CheckCircle size={16} />
-                        {delivering === order.order_id ? "Confirmando..." : "Marcar entregado"}
+                        <CheckCircle size={16} /> Confirmar entrega
                       </button>
                     </div>
                   )}
@@ -139,6 +158,40 @@ const CourierDeliveries = () => {
           </div>
         )}
       </div>
+
+      {codeOrderId && (
+        <div className="delivery-code-overlay" onClick={closeCodeModal}>
+          <div className="delivery-code-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="delivery-code-close" onClick={closeCodeModal} disabled={confirming}>
+              <X size={18} />
+            </button>
+            <div className="delivery-code-icon">
+              <KeyRound size={28} />
+            </div>
+            <h2>Confirmar entrega</h2>
+            <p className="delivery-code-hint">
+              Pídele al cliente su <strong>código de 4 dígitos</strong> e ingrésalo aquí.
+            </p>
+            <input
+              className="delivery-code-input"
+              inputMode="numeric"
+              autoFocus
+              maxLength={4}
+              placeholder="0000"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              onKeyDown={(e) => e.key === "Enter" && handleConfirm()}
+            />
+            <button
+              className="delivery-code-submit"
+              onClick={handleConfirm}
+              disabled={confirming || code.length !== 4}
+            >
+              {confirming ? "Confirmando..." : "Confirmar entrega"}
+            </button>
+          </div>
+        </div>
+      )}
     </CourierLayout>
   );
 };

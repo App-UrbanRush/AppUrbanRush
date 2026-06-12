@@ -9,6 +9,7 @@ import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
 import { Roles, UserRole } from 'src/auth/infrastructure/decorators/roles.decorator';
 import { UploadProductImageUseCase } from '../../application/use-cases/upload-product-image.use-case';
 import { UploadVendorImageUseCase } from '../../application/use-cases/upload-vendor-image.use-case';
+import { UploadAvatarImageUseCase } from '../../application/use-cases/upload-avatar-image.use-case';
 import { UploadImageUseCase } from '../../application/use-cases/upload-image.use-case';
 
 const imageInterceptor = FileInterceptor('image', {
@@ -47,6 +48,7 @@ export class StorageController {
   constructor(
     private readonly uploadProductImage: UploadProductImageUseCase,
     private readonly uploadVendorImage: UploadVendorImageUseCase,
+    private readonly uploadAvatarImage: UploadAvatarImageUseCase,
     private readonly uploadImage: UploadImageUseCase,
   ) {}
 
@@ -105,5 +107,19 @@ export class StorageController {
   ) {
     if (!image) throw new BadRequestException('La imagen es requerida');
     return this.uploadVendorImage.executeStorefront(req.user.user_id, image);
+  }
+
+  @Post('people/avatar')
+  @Roles(UserRole.USER, UserRole.DOMICILIARIO, UserRole.BUSINESS)
+  @UseInterceptors(imageInterceptor)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody(imageApiBody)
+  @ApiOperation({ summary: 'Subir foto de perfil del usuario' })
+  async peopleAvatar(
+    @UploadedFile() image: Express.Multer.File,
+    @Request() req,
+  ) {
+    if (!image) throw new BadRequestException('La imagen es requerida');
+    return this.uploadAvatarImage.execute(req.user.user_id, image);
   }
 }

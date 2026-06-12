@@ -1,7 +1,9 @@
 export interface OrderReportRow {
   order_id: string;
   user_id: number;
+  customer_name: string;
   vendor_id: number;
+  vendor_name: string;
   courier_id: number | null;
   status: string;
   delivery_address: string;
@@ -14,7 +16,9 @@ export interface PaymentReportRow {
   payment_id: string;
   order_id: string;
   user_id: number;
+  customer_name: string;
   vendor_id: number;
+  vendor_name: string;
   amount: number;
   currency: string;
   status: string;
@@ -22,6 +26,15 @@ export interface PaymentReportRow {
   reference: string;
   customer_email: string;
   created_at: Date;
+}
+
+export interface CourierReportRow {
+  couriers_id: number;
+  name: string;
+  vehicle_plate: string;
+  vehicle_type: string;
+  completed_orders: number;
+  status: string;
 }
 
 export interface UserReportRow {

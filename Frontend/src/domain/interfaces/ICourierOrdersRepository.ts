@@ -5,7 +5,12 @@ export interface ICourierOrdersRepository {
   getAvailable(): Promise<CourierOrder[]>;
   updateStatus(
     orderId: string,
-    status: "IN_DELIVERY" | "DELIVERED",
+    status: "IN_DELIVERY",
+    courierId: number,
+  ): Promise<CourierOrder>;
+  confirmDelivery(
+    orderId: string,
+    deliveryCode: string,
     courierId: number,
   ): Promise<CourierOrder>;
 }

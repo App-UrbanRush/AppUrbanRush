@@ -18,4 +18,8 @@ export interface CourierOrder {
   total: number;
   items: CourierOrderItem[];
   created_at: string | null;
+  // Solo presente cuando el pedido está IN_DELIVERY y asignado a este courier
+  delivery_code?: string | null;
+  delivery_attempts?: number;
+  delivery_blocked?: boolean;
 }

@@ -11,6 +11,7 @@ import { GenerateVendorOrdersExcelUseCase } from '../../application/use-cases/ge
 import { GetVendorPendingOrdersUseCase } from '../../application/use-cases/get-vendor-pending-orders.use-case';
 import { GetAllVendorsUseCase } from '../../application/use-cases/get-all-vendors.use-case';
 import { GetVendorPhotosByIdUseCase } from '../../../vendor-photos/application/use-cases/get-vendor-photos-by-id.use-case';
+import { GenerateVendorReportUseCase } from '../../../reports/application/use-cases/generate-vendor-report.use-case';
 import { UpdateVendorProfileDto } from '../../application/dts/update-vendor-profile.dto';
 
 @ApiTags('Vendor')
@@ -27,6 +28,7 @@ export class VendorController {
     private readonly getVendorPendingOrdersUseCase: GetVendorPendingOrdersUseCase,
     private readonly getAllVendorsUseCase: GetAllVendorsUseCase,
     private readonly getVendorPhotosByIdUseCase: GetVendorPhotosByIdUseCase,
+    private readonly generateVendorReportUseCase: GenerateVendorReportUseCase,
   ) {}
 
   @Get('all')
@@ -102,6 +104,20 @@ export class VendorController {
     res?.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="reporte-pedidos-${vendor.vendor_id}.xlsx"`,
+      'Content-Length': buffer.length,
+    });
+    res?.end(buffer);
+  }
+
+  @Get('reports/summary/pdf')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Reporte resumen del negocio en PDF (datos + totales)' })
+  async summaryPdf(@Request() req, @Res() res?: Response) {
+    const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
+    const buffer = await this.generateVendorReportUseCase.pdf(vendor.vendor_id!);
+    res?.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="resumen-negocio-${vendor.vendor_id}.pdf"`,
       'Content-Length': buffer.length,
     });
     res?.end(buffer);

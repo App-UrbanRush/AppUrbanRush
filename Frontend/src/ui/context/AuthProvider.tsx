@@ -4,6 +4,7 @@ import { AuthContext, type AuthContextType } from "./AuthContext";
 import type { AuthState } from "../../domain/types/auth.types";
 import type { UserProfile, VendorProfile } from "../../domain/interfaces/IAuthRepository";
 import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
+import { LoginWithTokenUseCase } from "../../application/use-cases/LoginWithTokenUseCase";
 import { RegisterUseCase } from "../../application/use-cases/RegisterUseCase";
 import { LogoutUseCase } from "../../application/use-cases/LogoutUseCase";
 import { ForgotPasswordUseCase } from "../../application/use-cases/ForgotPasswordUseCase";
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 const authRepository = useMemo(() => new AuthRepositoryImpl(), []);
 
 const loginUseCase = useMemo(() => new LoginUseCase(authRepository), [authRepository]);
+const loginWithTokenUseCase = useMemo(() => new LoginWithTokenUseCase(authRepository), [authRepository]);
 const registerUseCase = useMemo(() => new RegisterUseCase(authRepository), [authRepository]);
 const logoutUseCase = useMemo(() => new LogoutUseCase(authRepository), [authRepository]);
 const registerDeliveryUseCase = useMemo(
@@ -165,6 +167,44 @@ const [state, setState] = useState<AuthState>({
       throw error;
     }
   }, [loginUseCase, getMyProfileUseCase]);
+
+  // GOOGLE LOGIN (procesa el token devuelto por el callback de Google)
+  const googleLogin = useCallback(async (token: string) => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    try {
+      const response = await loginWithTokenUseCase.execute(token);
+
+      setState((prev) => ({
+        ...prev,
+        token: response.access_token,
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      }));
+
+      try {
+        const profile = await getMyProfileUseCase.execute();
+        setMyProfile(profile);
+        if (profile.firstName) {
+          setState((prev) => ({
+            ...prev,
+            user: prev.user
+              ? { ...prev.user, name: `${profile.firstName} ${profile.firstLastName}` }
+              : null,
+          }));
+        }
+      } catch {
+        // Profile fetch is best-effort
+      }
+
+      return response;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error con Google";
+      setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
+      throw error;
+    }
+  }, [loginWithTokenUseCase, getMyProfileUseCase]);
 
   // REGISTER
   const register = useCallback(
@@ -411,6 +451,7 @@ const [state, setState] = useState<AuthState>({
 const value: AuthContextType = {
   ...state,
   login,
+  googleLogin,
   register,
   logout,
   registerDelivery,

@@ -54,6 +54,11 @@
   color: white;
 }
 
+.export-btn.summary {
+  background: #ff6a00;
+  color: white;
+}
+
 .export-btn .spinner {
   animation: spin 1s linear infinite;
 }

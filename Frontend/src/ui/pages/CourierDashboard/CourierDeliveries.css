@@ -297,3 +297,95 @@
 .dark-mode-wrapper.dark-mode .courier-deliveries-loading {
   color: #8a909c;
 }
+
+/* ===== Modal de código de entrega ===== */
+.delivery-code-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.delivery-code-modal {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+.delivery-code-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #8a909c;
+  cursor: pointer;
+}
+.delivery-code-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f0e9ff;
+  color: #7c3aed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+.delivery-code-modal h2 {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+}
+.delivery-code-hint {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0 0 18px;
+}
+.delivery-code-input {
+  width: 100%;
+  text-align: center;
+  font-size: 2rem;
+  letter-spacing: 0.5rem;
+  font-weight: 700;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  outline: none;
+  margin-bottom: 18px;
+}
+.delivery-code-input:focus {
+  border-color: #7c3aed;
+}
+.delivery-code-submit {
+  width: 100%;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.delivery-code-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.dark-mode-wrapper.dark-mode .delivery-code-modal {
+  background: #1f232b;
+  color: #e7e9ee;
+}
+.dark-mode-wrapper.dark-mode .delivery-code-input {
+  background: #2a2f38;
+  border-color: #3a3f4a;
+  color: #fff;
+}
+.dark-mode-wrapper.dark-mode .delivery-code-hint {
+  color: #9aa0ab;
+}

@@ -15,12 +15,12 @@ export class GeneratePaymentsReportUseCase {
 
   async pdf(filters: ReportFilters): Promise<Buffer> {
     const payments = await this.reportsRepo.getPayments(filters);
-    const headers = ['ID', 'Orden', 'Usuario', 'Vendor', 'Monto', 'Moneda', 'Estado', 'Método', 'Email', 'Fecha'];
+    const headers = ['ID', 'Orden', 'Cliente', 'Negocio', 'Monto', 'Moneda', 'Estado', 'Método', 'Email', 'Fecha'];
     const rows = payments.map((p) => [
       p.payment_id,
       p.order_id,
-      p.user_id,
-      p.vendor_id,
+      p.customer_name,
+      p.vendor_name,
       `$${(p.amount / 100).toLocaleString('es-CO')}`,
       p.currency,
       p.status,
@@ -33,12 +33,12 @@ export class GeneratePaymentsReportUseCase {
 
   async excel(filters: ReportFilters): Promise<Buffer> {
     const payments = await this.reportsRepo.getPayments(filters);
-    const headers = ['ID', 'Orden', 'Usuario', 'Vendor', 'Monto (centavos)', 'Moneda', 'Estado', 'Método', 'Referencia', 'Email', 'Fecha'];
+    const headers = ['ID', 'Orden', 'Cliente', 'Negocio', 'Monto (centavos)', 'Moneda', 'Estado', 'Método', 'Referencia', 'Email', 'Fecha'];
     const rows = payments.map((p) => [
       p.payment_id,
       p.order_id,
-      p.user_id,
-      p.vendor_id,
+      p.customer_name,
+      p.vendor_name,
       p.amount,
       p.currency,
       p.status,

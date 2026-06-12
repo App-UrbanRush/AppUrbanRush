@@ -314,3 +314,36 @@
     gap: 10px;
   }
 }
+
+/* ===== Tarjeta de código de entrega (usuario) ===== */
+.tracking-code-card {
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  color: #fff;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 12px 0;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.25);
+}
+.tracking-code-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+}
+.tracking-code-value {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: 0.6rem;
+  margin: 6px 0 4px;
+}
+.tracking-code-hint {
+  font-size: 0.82rem;
+  margin: 0;
+  opacity: 0.9;
+}

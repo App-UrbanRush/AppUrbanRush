@@ -22,6 +22,11 @@ export class Order {
   @Prop({ required: true }) platform_commission: number;
   @Prop({ required: true }) total: number;
   @Prop({ type: [OrderItemSchema], default: [] }) items: OrderItemSchema[];
+
+  // Código de confirmación de entrega (4 dígitos)
+  @Prop({ type: String, default: null }) delivery_code: string | null;
+  @Prop({ default: 0 }) delivery_attempts: number;
+  @Prop({ default: false }) delivery_blocked: boolean;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

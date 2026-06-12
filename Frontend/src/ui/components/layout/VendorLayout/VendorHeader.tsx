@@ -49,7 +49,7 @@ const VendorHeader = () => {
     setShowNotifications(!showNotifications);
   };
 
-  const handleOrderClick = (orderId: string) => {
+  const handleOrderClick = (_orderId: string) => {
     setShowNotifications(false);
     navigate("/vendor/dashboard/pedidos");
   };

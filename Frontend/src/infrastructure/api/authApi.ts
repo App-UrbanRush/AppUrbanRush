@@ -71,6 +71,7 @@ export interface MyProfileApiResponse {
   address: string;
   gender: string;
   userId: number;
+  avatarUrl?: string | null;
 }
 
 export const getMyProfileApi = async (): Promise<MyProfileApiResponse> => {

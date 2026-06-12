@@ -14,3 +14,6 @@ export class Message {
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
+
+// Índice para consultas eficientes del historial por pedido en orden cronológico
+MessageSchema.index({ order_id: 1, createdAt: 1 });

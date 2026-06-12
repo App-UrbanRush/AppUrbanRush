@@ -14,6 +14,7 @@ export class PeopleMapper {
       entity.address,
       entity.gender,
       entity.user?.user_id || null,
+      entity.avatar_url ?? null,
     );
   }
 
@@ -25,6 +26,9 @@ export class PeopleMapper {
     entity.cellphone = domain.cellphone;
     entity.address = domain.address;
     entity.gender = domain.gender;
+    if (domain.avatarUrl !== undefined && domain.avatarUrl !== null) {
+      entity.avatar_url = domain.avatarUrl;
+    }
     if (domain.userId) {
       entity.user = { user_id: domain.userId } as UserEntity;
     }
