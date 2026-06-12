@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { SendCourierVendorRequestUseCase } from '../../application/use-cases/send-courier-vendor-request.use-case';
@@ -6,6 +6,7 @@ import { GetMyCourierVendorRequestsUseCase } from '../../application/use-cases/g
 import { GetVendorCourierRequestsUseCase } from '../../application/use-cases/get-vendor-courier-requests.use-case';
 import { UpdateCourierVendorRequestStatusUseCase } from '../../application/use-cases/update-courier-vendor-request-status.use-case';
 import { GetCourierDetailsUseCase } from '../../application/use-cases/get-courier-details.use-case';
+import { DeleteCourierVendorRequestUseCase } from '../../application/use-cases/delete-courier-vendor-request.use-case';
 import { Inject } from '@nestjs/common';
 import { IVendorRepository } from '../../../vendor/domain/repositories/vendor.repository';
 
@@ -20,6 +21,7 @@ export class CourierVendorRequestController {
     private readonly getVendorRequests: GetVendorCourierRequestsUseCase,
     private readonly updateStatus: UpdateCourierVendorRequestStatusUseCase,
     private readonly getCourierDetails: GetCourierDetailsUseCase,
+    private readonly deleteRequestUseCase: DeleteCourierVendorRequestUseCase,
     @Inject('IVendorRepository')
     private readonly vendorRepo: IVendorRepository,
   ) {}
@@ -59,5 +61,11 @@ export class CourierVendorRequestController {
     @Body() body: { status: string },
   ) {
     return this.updateStatus.execute(parseInt(id), body.status);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar solicitud' })
+  async delete(@Param('id') id: string) {
+    return this.deleteRequestUseCase.execute(parseInt(id));
   }
 }

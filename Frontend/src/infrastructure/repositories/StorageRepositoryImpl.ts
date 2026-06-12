@@ -10,10 +10,10 @@ export class StorageRepositoryImpl implements IStorageRepository {
     };
   }
 
-  async uploadProductImage(_productId: string, file: File): Promise<{ image_url: string; public_id: string }> {
-    const result = await storageApi.uploadVendorLogo(file);
+  async uploadProductImage(productId: string, file: File): Promise<{ image_url: string; public_id: string }> {
+    const result = await storageApi.uploadProductImage(productId, file);
     return {
-      image_url: result.logo_url,
+      image_url: result.image_url,
       public_id: result.public_id,
     };
   }

@@ -7,4 +7,5 @@ export interface ICourierVendorRequestRepository {
   findByCourierUserId(courierUserId: number): Promise<CourierVendorRequest[]>;
   findByVendorId(vendorId: number): Promise<CourierVendorRequest[]>;
   updateStatus(id: number, status: string): Promise<void>;
+  delete(id: number): Promise<void>;
 }

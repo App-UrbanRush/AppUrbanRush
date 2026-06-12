@@ -8,6 +8,7 @@ export class CourierMapper {
       entity.vehicle_type,
       entity.vehicle_plate,
       entity.soat_number,
+      entity.photo_url,
       entity.status,
       entity.user_id,
     );
@@ -19,6 +20,7 @@ export class CourierMapper {
     entity.vehicle_type = domain.vehicle_type;
     entity.vehicle_plate = domain.vehicle_plate;
     entity.soat_number = domain.soat_number;
+    entity.photo_url = domain.photo_url;
     entity.status = domain.status;
     entity.user_id = domain.user_id;
     return entity;

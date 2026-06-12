@@ -6,13 +6,13 @@ import { courierVendorRequestsApi, type CourierVendorRequest } from "../../../in
 import { vendorsApi, type VendorListItem } from "../../../infrastructure/api/vendorsApi";
 import { AuthRepositoryImpl } from "../../../infrastructure/repositories/AuthRepositoryImpl";
 import { UpdateMyProfileUseCase } from "../../../application/use-cases/UpdateMyProfileUseCase";
-import { UploadAvatarUseCase } from "../../../application/use-cases/UploadAvatarUseCase";
-import { User, Mail, Phone, MapPin, Car, CreditCard, Shield, FileText, Clock, CheckCircle, XCircle, Send, Bike, Camera, Pencil, X } from "lucide-react";
+import { courierProfileApi } from "../../../infrastructure/api/courierProfileApi";
+import { storageApi } from "../../../infrastructure/api/storageApi";
+import { User, Mail, Phone, MapPin, Car, CreditCard, Shield, FileText, Clock, CheckCircle, XCircle, Send, Camera, Loader2, Power, Pencil, X } from "lucide-react";
 import "./CourierProfile.css";
 
 const authRepo = new AuthRepositoryImpl();
 const updateMyProfile = new UpdateMyProfileUseCase(authRepo);
-const uploadAvatar = new UploadAvatarUseCase(authRepo);
 
 interface ProfileForm {
   firstName: string;
@@ -26,9 +26,10 @@ const CourierProfile = () => {
   const { myProfile, courierProfile, fetchMyProfile, fetchCourierProfile, user } = useAuth();
   const [myRequests, setMyRequests] = useState<CourierVendorRequest[]>([]);
   const [vendors, setVendors] = useState<VendorListItem[]>([]);
-
+  const [uploading, setUploading] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<ProfileForm>({
@@ -69,22 +70,6 @@ const CourierProfile = () => {
       toast.error(error.response?.data?.message || "No se pudo actualizar el perfil");
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingAvatar(true);
-    try {
-      await uploadAvatar.execute(file);
-      await fetchMyProfile();
-      toast.success("Foto de perfil actualizada");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "No se pudo subir la foto");
-    } finally {
-      setUploadingAvatar(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -137,46 +122,122 @@ const CourierProfile = () => {
     }
   };
 
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+      alert("Solo se permiten imágenes JPG, PNG o WEBP");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const result = await storageApi.uploadCourierPhoto(file);
+      if (user?.id) {
+        await courierProfileApi.updateProfile(Number(user.id), { photo_url: result.photo_url });
+        await fetchCourierProfile();
+      }
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      alert("Error al subir la foto. Intenta de nuevo.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleToggleStatus = async () => {
+    if (!user?.id) return;
+
+    const currentStatus = courierProfile?.status || "PENDING";
+    const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    setUpdatingStatus(true);
+    try {
+      await courierProfileApi.updateProfile(Number(user.id), { status: newStatus });
+      await fetchCourierProfile();
+    } catch (error) {
+      console.error("Error updating status:", error);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const isOnline = courierProfile?.status === "ACTIVE";
+
+  const displayName = `${myProfile?.firstName || "Domiciliario"} ${myProfile?.firstLastName || ""}`.trim();
+
   return (
     <CourierLayout>
       <div className="courier-profile">
-        {/* Banner de perfil */}
-        <div className="courier-profile-banner">
-          <div className="courier-profile-avatar-wrap">
-            <div className="courier-profile-avatar">
-              {myProfile?.avatarUrl ? (
-                <img src={myProfile.avatarUrl} alt="Foto de perfil" />
-              ) : (
-                (myProfile?.firstName?.[0] || "D").toUpperCase()
-              )}
+
+        {/* Photo + Welcome + Status Section */}
+        <div className="courier-profile-top-section">
+          <div className="courier-profile-photo-card">
+            <div className="courier-profile-welcome-row">
+              <div className="courier-profile-photo-wrapper" onClick={handlePhotoClick}>
+                {courierProfile?.photo_url ? (
+                  <img src={courierProfile.photo_url} alt="Foto de perfil" className="courier-profile-photo" />
+                ) : (
+                  <div className="courier-profile-photo-placeholder">
+                    <User size={40} />
+                  </div>
+                )}
+                <div className="courier-photo-overlay">
+                  {uploading ? (
+                    <Loader2 size={20} className="courier-photo-spinner" />
+                  ) : (
+                    <Camera size={20} />
+                  )}
+                </div>
+              </div>
+              <div className="courier-profile-welcome-text">
+                <span className="courier-profile-welcome-label">Bienvenido</span>
+                <span className="courier-profile-welcome-name">{displayName}</span>
+              </div>
             </div>
-            <button
-              type="button"
-              className="courier-profile-avatar-btn"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingAvatar}
-              title="Cambiar foto de perfil"
-            >
-              <Camera size={15} />
-            </button>
             <input
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              hidden
-              onChange={handleAvatarChange}
+              onChange={handlePhotoChange}
+              style={{ display: "none" }}
             />
+            <p className="courier-photo-hint">Toca para cambiar foto</p>
+            <button type="button" className="courier-profile-edit-btn" onClick={openEdit} style={{ marginTop: '10px' }}>
+              <Pencil size={15} /> Editar perfil
+            </button>
           </div>
-          <div className="courier-profile-banner-info">
-            <h1>{myProfile?.firstName || "Domiciliario"} {myProfile?.firstLastName || ""}</h1>
-            <p className="courier-profile-subtitle">{user?.email || "Información personal y datos del vehículo"}</p>
-            <span className="courier-profile-role-chip">
-              <Bike size={13} /> Domiciliario
-            </span>
+
+          <div className="courier-profile-status-card">
+            <div className={`courier-profile-status-toggle ${isOnline ? "online" : "offline"}`}>
+              <div className="courier-status-indicator">
+                <Power size={20} />
+                <div className="courier-status-info">
+                  <span className="courier-status-label">Estado</span>
+                  <span className="courier-status-value">{isOnline ? "En línea" : "Desconectado"}</span>
+                </div>
+              </div>
+              <button
+                className={`courier-toggle-btn ${isOnline ? "active" : "inactive"}`}
+                onClick={handleToggleStatus}
+                disabled={updatingStatus}
+              >
+                {updatingStatus ? (
+                  <Loader2 size={18} className="courier-photo-spinner" />
+                ) : (
+                  <div className={`courier-toggle-knob ${isOnline ? "active" : ""}`} />
+                )}
+              </button>
+            </div>
+            <p className="courier-status-hint">
+              {isOnline ? "Estás recibiendo pedidos" : "Actívate para recibir pedidos"}
+            </p>
           </div>
-          <button type="button" className="courier-profile-edit-btn" onClick={openEdit}>
-            <Pencil size={15} /> Editar perfil
-          </button>
         </div>
 
         <div className="courier-profile-grid">
@@ -249,34 +310,36 @@ const CourierProfile = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Mis Solicitudes */}
-        <div className="courier-profile-requests">
-          <div className="courier-profile-requests-header">
-            <Send size={20} />
-            <h2>Mis Solicitudes</h2>
-          </div>
-          {myRequests.length === 0 ? (
-            <p className="courier-profile-requests-empty">No has enviado ninguna solicitud todavía</p>
-          ) : (
-            <div className="courier-profile-requests-list">
-              {myRequests.map((request) => (
-                <div key={request.id} className="courier-profile-request-item">
-                  <div className="courier-profile-request-info">
-                    <span className="courier-profile-request-vendor">{getVendorName(request.vendor_id)}</span>
-                    <span className="courier-profile-request-date">
-                      {new Date(request.created_at).toLocaleDateString("es-CO")}
-                    </span>
-                  </div>
-                  <span className={`courier-profile-request-status ${request.status}`}>
-                    {getStatusIcon(request.status)}
-                    {getStatusLabel(request.status)}
-                  </span>
-                </div>
-              ))}
+          {/* Mis Solicitudes */}
+          <div className="courier-profile-card">
+            <div className="courier-profile-card-header">
+              <Send size={20} />
+              <h2>Mis Solicitudes</h2>
             </div>
-          )}
+            <div className="courier-profile-card-body">
+              {myRequests.length === 0 ? (
+                <p className="courier-profile-requests-empty">No has enviado ninguna solicitud todavía</p>
+              ) : (
+                <div className="courier-profile-requests-list">
+                  {myRequests.map((request) => (
+                    <div key={request.id} className="courier-profile-request-item">
+                      <div className="courier-profile-request-info">
+                        <span className="courier-profile-request-vendor">{getVendorName(request.vendor_id)}</span>
+                        <span className="courier-profile-request-date">
+                          {new Date(request.created_at).toLocaleDateString("es-CO")}
+                        </span>
+                      </div>
+                      <span className={`courier-profile-request-status ${request.status}`}>
+                        {getStatusIcon(request.status)}
+                        {getStatusLabel(request.status)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

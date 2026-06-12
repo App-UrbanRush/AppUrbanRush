@@ -43,8 +43,8 @@ const VendorCourierRequests = () => {
 
   const handleReject = async (requestId: number) => {
     try {
-      await courierVendorRequestsApi.rejectRequest(requestId);
-      toast.error("Solicitud rechazada");
+      await courierVendorRequestsApi.deleteRequest(requestId);
+      toast.success("Solicitud rechazada y eliminada");
       await loadRequests();
     } catch (error) {
       toast.error("Error al rechazar solicitud");
@@ -64,6 +64,8 @@ const VendorCourierRequests = () => {
       setLoadingDetails(false);
     }
   };
+
+  const pendingRequests = requests.filter((r) => r.status === "pending");
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -86,18 +88,18 @@ const VendorCourierRequests = () => {
 
         {loading ? (
           <div className="vendor-requests-loading">Cargando solicitudes...</div>
-        ) : requests.length === 0 ? (
+        ) : pendingRequests.length === 0 ? (
           <div className="vendor-requests-empty">
             <Send size={48} />
             <p>No hay solicitudes pendientes</p>
           </div>
         ) : (
           <div className="vendor-requests-list">
-            {requests.map((request) => (
-              <div key={request.id} className={`vendor-requests-card ${request.status}`}>
+            {pendingRequests.map((request) => (
+              <div key={request.id} className="vendor-requests-card pending">
                 <div className="vendor-requests-card-info">
                   <div className="vendor-requests-card-icon">
-                    {getStatusIcon(request.status)}
+                    <Clock size={14} />
                   </div>
                   <div>
                     <span className="vendor-requests-card-title">
@@ -113,10 +115,8 @@ const VendorCourierRequests = () => {
                   </div>
                 </div>
                 <div className="vendor-requests-card-actions">
-                  <span className={`vendor-requests-card-status ${request.status}`}>
-                    {request.status === "pending" && "Pendiente"}
-                    {request.status === "accepted" && "Aceptada"}
-                    {request.status === "rejected" && "Rechazada"}
+                  <span className="vendor-requests-card-status pending">
+                    Pendiente
                   </span>
                   <div className="vendor-requests-card-buttons">
                     <button

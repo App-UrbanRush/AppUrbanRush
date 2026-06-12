@@ -10,6 +10,7 @@ import { Roles, UserRole } from 'src/auth/infrastructure/decorators/roles.decora
 import { UploadProductImageUseCase } from '../../application/use-cases/upload-product-image.use-case';
 import { UploadVendorImageUseCase } from '../../application/use-cases/upload-vendor-image.use-case';
 import { UploadAvatarImageUseCase } from '../../application/use-cases/upload-avatar-image.use-case';
+import { UploadCourierImageUseCase } from '../../application/use-cases/upload-courier-image.use-case';
 import { UploadImageUseCase } from '../../application/use-cases/upload-image.use-case';
 
 const imageInterceptor = FileInterceptor('image', {
@@ -49,6 +50,7 @@ export class StorageController {
     private readonly uploadProductImage: UploadProductImageUseCase,
     private readonly uploadVendorImage: UploadVendorImageUseCase,
     private readonly uploadAvatarImage: UploadAvatarImageUseCase,
+    private readonly uploadCourierImage: UploadCourierImageUseCase,
     private readonly uploadImage: UploadImageUseCase,
   ) {}
 
@@ -121,5 +123,19 @@ export class StorageController {
   ) {
     if (!image) throw new BadRequestException('La imagen es requerida');
     return this.uploadAvatarImage.execute(req.user.user_id, image);
+  }
+
+  @Post('courier/photo')
+  @Roles(UserRole.DOMICILIARIO)
+  @UseInterceptors(imageInterceptor)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody(imageApiBody)
+  @ApiOperation({ summary: 'Subir foto de perfil del repartidor (DOMICILIARIO)' })
+  async courierPhoto(
+    @UploadedFile() image: Express.Multer.File,
+    @Request() req,
+  ) {
+    if (!image) throw new BadRequestException('La imagen es requerida');
+    return this.uploadCourierImage.executePhoto(req.user.user_id, image);
   }
 }

@@ -150,18 +150,9 @@
 }
 
 .courier-sidebar-menu-link.active {
-  background: linear-gradient(90deg, #ff6a00, #ff8c00);
+  background: #7c3aed;
   color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-  box-shadow: 0 8px 20px rgba(255, 106, 0, 0.45);
-}
-
-.courier-sidebar-menu-link.active::before {
-  height: 60%;
-}
-
-.courier-sidebar-menu-link.active .courier-sidebar-icon {
-  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.5);
 }
 
 .courier-sidebar-icon {

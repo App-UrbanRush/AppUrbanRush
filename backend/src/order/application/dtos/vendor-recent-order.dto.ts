@@ -7,8 +7,9 @@ export interface OrderItemDTO {
 export interface VendorRecentOrderDTO {
   order_id: string;
   customer_name: string;
-  status: 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY';
+  status: 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY' | 'IN_DELIVERY' | 'DELIVERED' | 'CANCELLED';
   courier_name: string | null;
+  courier_id: number | null;
   total: number;
   time_elapsed: string;
   items: OrderItemDTO[];

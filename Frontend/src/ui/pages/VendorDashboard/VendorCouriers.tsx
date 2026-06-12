@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
-import { Users, Loader2, Search } from "lucide-react";
+import { Users, Loader2, Search, Package } from "lucide-react";
 import { vendorCouriersApi, type VendorCourier } from "../../../infrastructure/api/vendorCouriersApi";
 import "./VendorCouriers.css";
 
@@ -11,6 +11,8 @@ const VendorCouriers = () => {
 
   useEffect(() => {
     loadCouriers();
+    const interval = setInterval(loadCouriers, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadCouriers = async () => {
@@ -58,21 +60,42 @@ const VendorCouriers = () => {
             <p>No hay domiciliarios asociados a tu restaurante</p>
           </div>
         ) : (
-          <div className="couriers-grid">
-            {filtered.map((courier) => (
-              <div key={courier.courier_id} className="courier-card">
-                <div className="courier-avatar">
-                  {courier.name.charAt(0)}
+          <>
+            <div className="couriers-table-header">
+              <span className="couriers-col-photo">Foto</span>
+              <span className="couriers-col-name">Nombre</span>
+              <span className="couriers-col-status">Estado Actual</span>
+              <span className="couriers-col-action">Acción</span>
+            </div>
+            <div className="couriers-table">
+              {filtered.map((courier) => (
+                <div key={courier.courier_id} className="courier-row">
+                  <div className="couriers-col-photo">
+                    <div className="courier-avatar">
+                      {courier.photo_url ? (
+                        <img src={courier.photo_url} alt={courier.name} className="courier-avatar-img" />
+                      ) : (
+                        courier.name.charAt(0)
+                      )}
+                    </div>
+                  </div>
+                  <div className="couriers-col-name">
+                    <span className="courier-name-text">{courier.name}</span>
+                  </div>
+                  <div className="couriers-col-status">
+                    <span className={`courier-status ${courier.status.toLowerCase()}`}>
+                      {courier.status}
+                    </span>
+                  </div>
+                  <div className="couriers-col-action">
+                    <button className="courier-assign-btn">
+                      <Package size={14} /> Asignar Pedido
+                    </button>
+                  </div>
                 </div>
-                <div className="courier-info">
-                  <h3>{courier.name}</h3>
-                  <span className={`courier-status ${courier.status.toLowerCase()}`}>
-                    {courier.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </VendorLayout>

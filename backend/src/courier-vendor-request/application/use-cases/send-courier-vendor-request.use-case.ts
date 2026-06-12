@@ -11,7 +11,11 @@ export class SendCourierVendorRequestUseCase {
   async execute(courierUserId: number, vendorId: number) {
     const existing = await this.requestRepo.findByCourierAndVendor(courierUserId, vendorId);
     if (existing) {
-      throw new BadRequestException('Ya enviaste una solicitud a este negocio');
+      if (existing.status === 'rejected') {
+        await this.requestRepo.delete(existing.id!);
+      } else {
+        throw new BadRequestException('Ya enviaste una solicitud a este negocio');
+      }
     }
     return this.requestRepo.create(courierUserId, vendorId);
   }

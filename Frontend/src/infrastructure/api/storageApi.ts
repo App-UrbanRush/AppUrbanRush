@@ -31,4 +31,32 @@ export const storageApi = {
     });
     return response.data;
   },
+
+  uploadProductImage: async (productId: string, file: File): Promise<{ image_url: string; public_id: string }> => {
+    const token = authLocalStorage.getToken();
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await axios.post(`${API_URL}/products/${productId}/image`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+
+  uploadCourierPhoto: async (file: File): Promise<{ photo_url: string; public_id: string }> => {
+    const token = authLocalStorage.getToken();
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await axios.post(`${API_URL}/courier/photo`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
 };

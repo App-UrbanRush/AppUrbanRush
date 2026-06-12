@@ -47,4 +47,29 @@ export class RedisGPSRepository implements IGPSRepository {
   async deleteLocation(courierId: number): Promise<void> {
     await this.cacheManager.del(this.buildKey(courierId));
   }
+
+  async getLocationsByCourierIds(courierIds: number[]): Promise<CourierLocationModel[]> {
+    if (!courierIds.length) return [];
+
+    const keys = courierIds.map(id => this.buildKey(id));
+    const results = await Promise.all(keys.map(key => this.cacheManager.get<string>(key)));
+
+    const locations: CourierLocationModel[] = [];
+    for (let i = 0; i < results.length; i++) {
+      const raw = results[i];
+      if (!raw) continue;
+      const data = typeof raw === 'string' ? JSON.parse(raw) : (raw as any);
+      locations.push(new CourierLocationModel(
+        data.courier_id,
+        data.order_id,
+        data.lat,
+        data.lng,
+        data.accuracy ?? null,
+        data.speed ?? null,
+        data.heading ?? null,
+        new Date(data.timestamp),
+      ));
+    }
+    return locations;
+  }
 }
