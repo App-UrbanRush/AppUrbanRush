@@ -5,14 +5,25 @@ import type { Category } from "../../domain/interfaces/ICategoryRepository";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export const categoryApi = {
+  getMyCategories: async (): Promise<Category[]> => {
+    const token = authLocalStorage.getToken();
+    try {
+      const response = await axios.get<Category[]>(`${API_URL}/categories/vendor`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`❌ Error fetching categories:`, error);
+      throw error;
+    }
+  },
+
   getCategoriesByVendor: async (vendorId: number): Promise<Category[]> => {
     const token = authLocalStorage.getToken();
-    console.log(`📡 Fetching categories for vendor ${vendorId}`);
     try {
       const response = await axios.get<Category[]>(`${API_URL}/categories/vendor/${vendorId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(`✅ Categories loaded:`, response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error fetching categories:`, error);
@@ -22,16 +33,13 @@ export const categoryApi = {
 
   createCategory: async (vendorId: number, name: string, imageUrl: string): Promise<Category> => {
     const token = authLocalStorage.getToken();
-    console.log(`📡 Creating category: ${name} for vendor ${vendorId}`);
     try {
       const response = await axios.post<Category>(`${API_URL}/categories`, {
-        vendor_id: vendorId,
         name,
         image_url: imageUrl,
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(`✅ Category created:`, response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error creating category:`, error);

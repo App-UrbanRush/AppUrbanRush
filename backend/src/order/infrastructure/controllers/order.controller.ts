@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Req, UseGuards, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Request } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/infrastructure/guards/jwt-auth.guard';
@@ -13,6 +13,9 @@ import { GetOrderByIdUseCase } from '../../application/use-cases/get-order-by-id
 import { UpdateOrderStatusUseCase } from '../../application/use-cases/update-order-status.use-case';
 import { ConfirmDeliveryUseCase } from '../../application/use-cases/confirm-delivery.use-case';
 import { GetAllVendorOrdersUseCase } from '../../application/use-cases/get-all-vendor-orders.use-case';
+import { GetCourierActiveOrdersUseCase } from '../../application/use-cases/get-courier-active-orders.use-case';
+import { GetVendorRecentOrdersUseCase } from '../../application/use-cases/get-vendor-recent-orders.use-case';
+import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { CreateOrderDto } from '../../application/dtos/create-order.dto';
 import { OrderResponseMapper } from '../mappers/order-response.mapper';
 
@@ -37,6 +40,9 @@ export class OrderController {
     private readonly updateStatus: UpdateOrderStatusUseCase,
     private readonly confirmDelivery: ConfirmDeliveryUseCase,
     private readonly getAllVendorOrders: GetAllVendorOrdersUseCase,
+    private readonly getCourierActiveOrders: GetCourierActiveOrdersUseCase,
+    private readonly getVendorRecentOrders: GetVendorRecentOrdersUseCase,
+    @Inject('IOrderRepository') private readonly orderRepository: IOrderRepository,
   ) {}
 
   // Usuario crea el pedido (el dueño recibe su código de entrega)
@@ -75,14 +81,32 @@ export class OrderController {
     return orders.map((o) => OrderResponseMapper.toResponse(o));
   }
 
+  // Domiciliario ve pedidos activos para mapa de rutas
+  @Get('courier/active')
+  @Roles(UserRole.DOMICILIARIO)
+  @ApiOperation({ summary: 'Pedidos activos del domiciliario para mapa de rutas' })
+  async getActiveOrders(@Req() req: Request) {
+    const user = req.user as AuthUser;
+    return this.getCourierActiveOrders.execute(user.user_id);
+  }
+
   // Domiciliario ve sus entregas (el código solo aparece en las que están IN_DELIVERY)
   @Get('courier/:courierId')
   @Roles(UserRole.DOMICILIARIO)
   @ApiOperation({ summary: 'Pedidos asignados al domiciliario (sus entregas)' })
   async getByCourierId(@Param('courierId') courierId: string) {
     const id = Number(courierId);
+    if (isNaN(id)) {
+      throw new BadRequestException('ID de domiciliario inválido');
+    }
     const orders = await this.getByCourier.execute(id);
-    return orders.map((o) => OrderResponseMapper.toCourierResponse(o, id));
+    return orders.map((o: any) => {
+      const includeCode = o.courier_id === id && o.status === 'IN_DELIVERY';
+      return {
+        ...o,
+        delivery_code: includeCode ? o.delivery_code : undefined,
+      };
+    });
   }
 
   // Detalle de un pedido. El código solo se expone al dueño, al courier
@@ -115,6 +139,74 @@ export class OrderController {
     return order ? OrderResponseMapper.toResponse(order) : null;
   }
 
+  // Vendor asigna un domiciliario a un pedido READY (mantiene estado READY para que el courier lo acepte)
+  @Put(':id/assign-courier')
+  @Roles(UserRole.BUSINESS)
+  @ApiOperation({ summary: 'Vendor asigna un domiciliario al pedido (mantiene READY)' })
+  async assignCourier(
+    @Param('id') id: string,
+    @Body() body: { courier_id: number },
+  ) {
+    // Actualizar solo el courier_id sin cambiar el estado
+    const order = await this.orderRepository.updateCourier(id, body.courier_id);
+    return order ? OrderResponseMapper.toCourierResponse(order, body.courier_id) : null;
+  }
+
+  // Domiciliario acepta el pedido disponible: READY→IN_DELIVERY
+  @Put(':id/accept')
+  @Roles(UserRole.DOMICILIARIO)
+  @ApiOperation({ summary: 'Domiciliario acepta el pedido disponible (READY→IN_DELIVERY)' })
+  async acceptOrder(
+    @Param('id') id: string,
+    @Body() body: { courier_id: number },
+    @Req() req: Request,
+  ) {
+    const user = req.user as AuthUser;
+    
+    // Validar que el pedido esté READY
+    const order = await this.orderRepository.findById(id);
+    if (!order) {
+      throw new NotFoundException('Pedido no encontrado');
+    }
+    if (order.status !== 'READY') {
+      throw new BadRequestException('El pedido no está disponible para aceptar');
+    }
+    // Validar que no esté ya asignado a otro courier (race condition)
+    if (order.courier_id !== null && order.courier_id !== user.user_id) {
+      throw new BadRequestException('El pedido ya fue aceptado por otro domiciliario');
+    }
+    
+    const updated = await this.updateStatus.execute(id, 'IN_DELIVERY', user.user_id);
+    return updated ? OrderResponseMapper.toCourierResponse(updated, user.user_id) : null;
+  }
+
+  // Domiciliario cancela el pedido aceptado: IN_DELIVERY→READY
+  @Put(':id/cancel')
+  @Roles(UserRole.DOMICILIARIO)
+  @ApiOperation({ summary: 'Domiciliario cancela el pedido (IN_DELIVERY→READY)' })
+  async cancelOrder(
+    @Param('id') id: string,
+    @Req() req: Request,
+  ) {
+    const user = req.user as AuthUser;
+    
+    // Validar que el pedido esté IN_DELIVERY y asignado a este courier
+    const order = await this.orderRepository.findById(id);
+    if (!order) {
+      throw new NotFoundException('Pedido no encontrado');
+    }
+    if (order.status !== 'IN_DELIVERY') {
+      throw new BadRequestException('El pedido no está en entrega');
+    }
+    if (order.courier_id !== user.user_id) {
+      throw new BadRequestException('No tienes permiso para cancelar este pedido');
+    }
+    
+    // Devolver a READY sin courier_id
+    const updated = await this.updateStatus.execute(id, 'READY', undefined);
+    return updated ? OrderResponseMapper.toResponse(updated) : null;
+  }
+
   // Domiciliario reclama el pedido: READY→IN_DELIVERY
   // (DELIVERED ya NO se acepta por aquí; se confirma con código en /deliver)
   @Put(':id/status/courier')
@@ -138,5 +230,14 @@ export class OrderController {
   ) {
     const order = await this.confirmDelivery.execute(id, body.delivery_code, body.courier_id);
     return order ? OrderResponseMapper.toResponse(order) : null;
+  }
+
+  // Vendor obtiene pedidos recientes para el dashboard
+  @Get('vendor-dashboard/recent')
+  @Roles(UserRole.BUSINESS)
+  @ApiOperation({ summary: 'Pedidos recientes para el dashboard del vendor' })
+  async fetchVendorRecentOrders(@Req() req: Request) {
+    const user = req.user as AuthUser;
+    return this.getVendorRecentOrders.execute(user.user_id);
   }
 }

@@ -1,16 +1,41 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Navigation, MapPin, Clock, Radio, Wifi, Play, Square, Info } from "lucide-react";
+import { ArrowLeft, Navigation, MapPin, Clock, Radio, Wifi, Play, Square, Info, User } from "lucide-react";
 import { useCourierBroadcast } from "../../hooks/useCourierBroadcast";
 import LiveTrackingMap from "../../components/DeliveryMap/LiveTrackingMap";
 import ChatWindow from "../../components/chat/ChatWindow";
 import { useAuth } from "../../context/useAuth";
+import { ordersApi } from "../../../infrastructure/api/ordersApi";
+import { useEffect, useState } from "react";
 import "./Tracking.css";
+
+interface OrderLocation {
+  customer_lat: number | null;
+  customer_lng: number | null;
+  delivery_address: string;
+}
 
 const CourierBroadcast = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { broadcasting, connectionState, lastSent, error, start, stop } = useCourierBroadcast(orderId);
+  const [orderLocation, setOrderLocation] = useState<OrderLocation | null>(null);
+
+  useEffect(() => {
+    if (!orderId) return;
+    // Obtener las coordenadas del cliente
+    ordersApi.getById(orderId)
+      .then((order) => {
+        setOrderLocation({
+          customer_lat: (order as any).customer_lat || null,
+          customer_lng: (order as any).customer_lng || null,
+          delivery_address: order.delivery_address,
+        });
+      })
+      .catch((err) => {
+        console.error("Error al obtener ubicación del cliente:", err);
+      });
+  }, [orderId]);
 
   const lastTime = lastSent ? new Date(lastSent.timestamp).toLocaleTimeString() : null;
   const connected = connectionState === "connected";
@@ -56,6 +81,10 @@ const CourierBroadcast = () => {
           lat={lastSent?.lat ?? null}
           lng={lastSent?.lng ?? null}
           popupText="Tu posición actual"
+          customerLat={orderLocation?.customer_lat ?? null}
+          customerLng={orderLocation?.customer_lng ?? null}
+          customerAddress={orderLocation?.delivery_address ?? null}
+          showRoute={broadcasting}
         />
       </div>
 

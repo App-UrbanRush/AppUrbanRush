@@ -1,109 +1,69 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
 import { Order, OrderDocument } from '../../infrastructure/schemas/order.schema';
 import { VendorRecentOrderDTO } from '../dtos/vendor-recent-order.dto';
+import { PeopleEntity } from '../../../people/infrastructure/persistence/entities/people.entity';
+import { CourierEntity } from '../../../courier/infrastructure/persistence/entities/courier.entity';
 
 @Injectable()
 export class GetVendorRecentOrdersUseCase {
   constructor(
     @InjectModel(Order.name)
     private readonly orderModel: Model<OrderDocument>,
+    @InjectRepository(PeopleEntity)
+    private readonly peopleRepo: Repository<PeopleEntity>,
+    @InjectRepository(CourierEntity)
+    private readonly courierRepo: Repository<CourierEntity>,
   ) {}
 
   async execute(vendorId: number): Promise<VendorRecentOrderDTO[]> {
-    const validStatuses = ['PENDING', 'ACCEPTED', 'PREPARING', 'READY'];
+    const validStatuses = ['PENDING', 'ACCEPTED', 'PREPARING', 'READY', 'IN_DELIVERY'];
 
-    const orders = await this.orderModel.aggregate([
-      {
-        $match: {
-          vendor_id: vendorId,
-          status: { $in: validStatuses },
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-      {
-        $limit: 4,
-      },
-      {
-        $lookup: {
-          from: 'people',
-          localField: 'user_id',
-          foreignField: 'userId',
-          as: 'customer',
-        },
-      },
-      {
-        $unwind: {
-          path: '$customer',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: 'couriers',
-          localField: 'courier_id',
-          foreignField: 'user_id',
-          as: 'courier',
-        },
-      },
-      {
-        $unwind: {
-          path: '$courier',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: 'people',
-          localField: 'courier.user_id',
-          foreignField: 'userId',
-          as: 'courierPeople',
-        },
-      },
-      {
-        $unwind: {
-          path: '$courierPeople',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          order_id: '$_id',
-          customer_name: {
-            $cond: [
-              { $ifNull: ['$customer', false] },
-              { $concat: ['$customer.firstName', ' ', '$customer.firstLastName'] },
-              'Cliente',
-            ],
-          },
-          status: 1,
-          courier_name: {
-            $cond: [
-              { $ifNull: ['$courierPeople', false] },
-              { $concat: ['$courierPeople.firstName', ' ', '$courierPeople.firstLastName'] },
-              'Sin asignar',
-            ],
-          },
-          courier_id: 1,
-          total: 1,
-          items: 1,
-          delivery_address: 1,
-          createdAt: 1,
-        },
-      },
-    ]);
+    // 1. Get orders from MongoDB
+    const orders = await this.orderModel.find({
+      vendor_id: vendorId,
+      status: { $in: validStatuses },
+    })
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .lean();
 
+    if (!orders.length) return [];
+
+    // 2. Get unique customer and courier IDs
+    const customerIds = [...new Set(orders.map(o => o.user_id).filter(id => id != null))];
+    const courierIds = [...new Set(orders.map(o => o.courier_id).filter(id => id != null))];
+
+    // 3. Get people data from PostgreSQL
+    const people = await this.peopleRepo.find({
+      where: { user_id: In([...customerIds, ...courierIds]) },
+    });
+
+    const peopleMap = new Map(people.map(p => [p.user_id, p]));
+
+    // 4. Get courier data from PostgreSQL
+    const couriers = courierIds.length > 0 ? await this.courierRepo.find({
+      where: { user_id: In(courierIds) },
+    }) : [];
+
+    const courierMap = new Map(couriers.map(c => [c.user_id, c]));
+
+    // 5. Combine data
     return orders.map((order: any) => {
+      const customer = peopleMap.get(Number(order.user_id));
+      const courier = courierMap.get(Number(order.courier_id));
+      const courierPerson = courier ? peopleMap.get(Number(courier.user_id)) : null;
+
       const timeElapsed = this.calculateTimeElapsed(order.createdAt);
 
       return {
-        order_id: order.order_id.toString(),
-        customer_name: order.customer_name,
+        order_id: order._id.toString(),
+        customer_name: customer ? `${customer.firstName} ${customer.firstLastName}` : 'Cliente',
         status: order.status as 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY',
-        courier_name: order.courier_name,
+        courier_name: courierPerson ? `${courierPerson.firstName} ${courierPerson.firstLastName}` : 'Sin asignar',
         courier_id: order.courier_id || null,
         total: order.total,
         time_elapsed: timeElapsed,

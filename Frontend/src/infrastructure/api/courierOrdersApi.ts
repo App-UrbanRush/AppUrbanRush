@@ -19,6 +19,15 @@ export const courierOrdersApi = {
     return response.data;
   },
 
+  acceptOrder: async (orderId: string, courierId: number): Promise<CourierOrder> => {
+    const response = await axios.put(
+      `${API_URL}/orders/${orderId}/accept`,
+      { courier_id: courierId },
+      authHeader(),
+    );
+    return response.data;
+  },
+
   updateStatus: async (
     orderId: string,
     status: "IN_DELIVERY",

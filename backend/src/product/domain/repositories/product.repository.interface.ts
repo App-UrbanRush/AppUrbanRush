@@ -5,6 +5,7 @@ export interface IProductRepository {
   findById(id: string): Promise<ProductModel | null>;
   findByVendor(vendorId: number): Promise<ProductModel[]>;
   findAll(): Promise<ProductModel[]>;
+  findAllIncludingUnavailable(): Promise<ProductModel[]>;
   update(id: string, product: Partial<ProductModel>): Promise<ProductModel | null>;
   delete(id: string): Promise<void>;
 }

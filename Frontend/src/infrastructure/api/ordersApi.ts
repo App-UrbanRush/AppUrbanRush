@@ -59,4 +59,27 @@ export const ordersApi = {
     const response = await axios.post(`${API_URL}/orders`, data, authHeader());
     return response.data;
   },
+
+  updateStatus: async (orderId: string, status: string, courierId?: number): Promise<OrderDetail> => {
+    const body: any = { status };
+    if (courierId !== undefined) {
+      body.courier_id = courierId;
+    }
+    
+    // Determinar el endpoint según el contexto
+    let endpoint: string;
+    if (courierId !== undefined && status === 'IN_DELIVERY') {
+      // Si es IN_DELIVERY con courier_id, usar el endpoint de asignar courier (vendor)
+      endpoint = `${API_URL}/orders/${orderId}/assign-courier`;
+    } else if (courierId !== undefined && status === 'IN_DELIVERY') {
+      // Endpoint para courier (no usado por vendor)
+      endpoint = `${API_URL}/orders/${orderId}/status/courier`;
+    } else {
+      // Endpoint para vendor actualizando estado (sin courier)
+      endpoint = `${API_URL}/orders/${orderId}/status/vendor`;
+    }
+    
+    const response = await axios.put(endpoint, body, authHeader());
+    return response.data;
+  },
 };

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "../../context/useAuth";
 import type { RegisterVendorRequest } from "../../../domain/types/vendor.types";
+import LocationInput from "../../components/ui/LocationInput";
 
 const schema = z.object({
   user_email: z.string().email("Email inválido"),
@@ -51,18 +52,25 @@ const VendorRegister = () => {
   const [docVerified, setDocVerified] = useState(false);
   const [docMessage, setDocMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [businessLocation, setBusinessLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const {
     register,
     handleSubmit,
     trigger,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     mode: "onSubmit",
     reValidateMode: "onSubmit",
   });
+
+  const handleBusinessLocationFound = (address: string, lat: number, lng: number) => {
+    setValue("business_address", address);
+    setBusinessLocation({ lat, lng });
+  };
 
   const nextStep1 = async () => {
     const ok = await trigger(["user_email", "user_password", "confirm_password"]);
@@ -144,7 +152,7 @@ const VendorRegister = () => {
     setIsLoading(true);
     setApiError("");
     try {
-      const payload: RegisterVendorRequest = {
+      const payload: RegisterVendorRequest & { latitude?: number; longitude?: number } = {
         user_email: data.user_email,
         user_password: data.user_password,
         firstName: data.firstName,
@@ -161,6 +169,7 @@ const VendorRegister = () => {
         description: data.description,
         nit: data.nit,
         document_url: data.document_url,
+        ...(businessLocation && { latitude: businessLocation.lat, longitude: businessLocation.lng }),
       };
       await registerVendor(payload as RegisterVendorRequest);
       setShowSuccess(true);
@@ -304,7 +313,7 @@ const VendorRegister = () => {
 
             {step === 3 && (
               <div key="step3">
-                <div className="input-group doc-upload-section">
+                <div className="doc-upload-section">
                   <label className="doc-label">📷 Foto de tu cédula (ambas caras)</label>
                   <input
                     ref={fileInputRef}
@@ -365,6 +374,7 @@ const VendorRegister = () => {
                 <div className="input-group">
                   <input {...register("business_address")} placeholder="Dirección del negocio" />
                   {errors.business_address && <span className="error">{errors.business_address.message}</span>}
+                  <LocationInput onAddressFound={handleBusinessLocationFound} />
                 </div>
 
                 <div className="register-row">

@@ -22,4 +22,9 @@ export interface CourierOrder {
   delivery_code?: string | null;
   delivery_attempts?: number;
   delivery_blocked?: boolean;
+  // Coordenadas y datos del cliente
+  customer_lat?: number | null;
+  customer_lng?: number | null;
+  customer_name?: string;
+  customer_phone?: string;
 }

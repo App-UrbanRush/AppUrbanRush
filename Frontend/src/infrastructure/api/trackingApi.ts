@@ -1,6 +1,6 @@
 import axios from "axios";
 import { authLocalStorage } from "../persistence/authLocalStorage";
-import type { OrderTracking, CourierLocation } from "../../domain/types/tracking.types";
+import type { OrderTracking, VendorCourierLocation } from "../../domain/types/tracking.types";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -13,7 +13,7 @@ export const trackingApi = {
     return response.data;
   },
 
-  getVendorCourierLocations: async (): Promise<CourierLocation[]> => {
+  getVendorCourierLocations: async (): Promise<VendorCourierLocation[]> => {
     const token = authLocalStorage.getToken();
     const response = await axios.get(`${API_URL}/tracking/vendor-couriers`, {
       headers: { Authorization: `Bearer ${token}` },

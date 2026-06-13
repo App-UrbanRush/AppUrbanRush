@@ -12,6 +12,7 @@ import { GetVendorPendingOrdersUseCase } from '../../application/use-cases/get-v
 import { GetAllVendorsUseCase } from '../../application/use-cases/get-all-vendors.use-case';
 import { GetVendorPhotosByIdUseCase } from '../../../vendor-photos/application/use-cases/get-vendor-photos-by-id.use-case';
 import { GenerateVendorReportUseCase } from '../../../reports/application/use-cases/generate-vendor-report.use-case';
+import { GetVendorDashboardStatsUseCase } from '../../application/use-cases/get-vendor-dashboard-stats.use-case';
 import { UpdateVendorProfileDto } from '../../application/dts/update-vendor-profile.dto';
 
 @ApiTags('Vendor')
@@ -29,6 +30,7 @@ export class VendorController {
     private readonly getAllVendorsUseCase: GetAllVendorsUseCase,
     private readonly getVendorPhotosByIdUseCase: GetVendorPhotosByIdUseCase,
     private readonly generateVendorReportUseCase: GenerateVendorReportUseCase,
+    private readonly getVendorDashboardStatsUseCase: GetVendorDashboardStatsUseCase,
   ) {}
 
   @Get('all')
@@ -128,5 +130,31 @@ export class VendorController {
   async getPendingOrders(@Request() req) {
     const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
     return this.getVendorPendingOrdersUseCase.execute(vendor.vendor_id!);
+  }
+
+  @Get('dashboard/stats')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Estadísticas del dashboard del vendedor' })
+  @ApiResponse({ status: 200, description: 'Estadísticas del dashboard.' })
+  async getDashboardStats(@Request() req) {
+    try {
+      const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
+      if (!vendor || !vendor.vendor_id) {
+        return {
+          ventasHoy: 0,
+          pedidosTotales: 0,
+          calificacionPromedio: 0,
+          domiciliariosActivos: 0,
+        };
+      }
+      return this.getVendorDashboardStatsUseCase.execute(vendor.vendor_id);
+    } catch {
+      return {
+        ventasHoy: 0,
+        pedidosTotales: 0,
+        calificacionPromedio: 0,
+        domiciliariosActivos: 0,
+      };
+    }
   }
 }

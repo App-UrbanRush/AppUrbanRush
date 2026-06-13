@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { RegisterRequest } from "../../../domain/types/auth.types";
+import LocationInput from "../../components/ui/LocationInput";
 
 // Validación con zod adaptada al nuevo DTO
 const registerSchema = z.object({
@@ -26,28 +27,36 @@ const Register = () => {
   const navigate = useNavigate();
   const [apiError, setApiError] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
+
+  const handleLocationSelect = (address: string, lat: number, lng: number) => {
+    setValue("address", address);
+    setLocation({ lat, lng });
+  };
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setApiError("");
       
-      const payload: RegisterRequest = {
+      const payload: RegisterRequest & { latitude?: number; longitude?: number } = {
         ...data,
+        ...(location && { latitude: location.lat, longitude: location.lng }),
       };
 
       await registerUser(payload);
       setShowSuccess(true);
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Error en registro";
-      setApiError(errorMsg);
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.message || error?.message || "Error en registro";
+      setApiError(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg);
     }
   };
 
@@ -151,6 +160,7 @@ const Register = () => {
                 placeholder="Dirección"
               />
               {errors.address && <span className="error">{errors.address.message}</span>}
+              <LocationInput onAddressFound={handleLocationSelect} />
             </div>
 
             <button type="submit" disabled={isLoading}>

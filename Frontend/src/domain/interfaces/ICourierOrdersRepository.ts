@@ -3,6 +3,7 @@ import type { CourierOrder } from "../types/courier-orders.types";
 export interface ICourierOrdersRepository {
   getByCourier(courierId: number): Promise<CourierOrder[]>;
   getAvailable(): Promise<CourierOrder[]>;
+  acceptOrder(orderId: string, courierId: number): Promise<CourierOrder>;
   updateStatus(
     orderId: string,
     status: "IN_DELIVERY",

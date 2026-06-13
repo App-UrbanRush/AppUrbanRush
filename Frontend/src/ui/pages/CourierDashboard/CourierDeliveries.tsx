@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Package, Navigation, Clock, CheckCircle, RefreshCw, X, KeyRound } from "lucide-react";
+import { MapPin, Package, Navigation, Clock, CheckCircle, RefreshCw, X, KeyRound, Play } from "lucide-react";
 import toast from "react-hot-toast";
 import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { useAuth } from "../../context/useAuth";
 import { GetCourierOrdersUseCase } from "../../../application/use-cases/GetCourierOrdersUseCase";
 import { ConfirmDeliveryUseCase } from "../../../application/use-cases/ConfirmDeliveryUseCase";
+import { AcceptOrderUseCase } from "../../../application/use-cases/AcceptOrderUseCase";
 import { CourierOrdersRepositoryImpl } from "../../../infrastructure/repositories/CourierOrdersRepositoryImpl";
 import type { CourierOrder } from "../../../domain/types/courier-orders.types";
 import "./CourierDeliveries.css";
@@ -13,6 +14,7 @@ import "./CourierDeliveries.css";
 const repo = new CourierOrdersRepositoryImpl();
 const getCourierOrders = new GetCourierOrdersUseCase(repo);
 const confirmDelivery = new ConfirmDeliveryUseCase(repo);
+const acceptOrder = new AcceptOrderUseCase(repo);
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   READY: { label: "Listo para recoger", color: "blue" },
@@ -36,10 +38,13 @@ const CourierDeliveries = () => {
   }, [courierProfile, fetchCourierProfile]);
 
   const load = useCallback(async () => {
-    if (!courierProfile?.couriers_id) return;
+    if (!courierProfile?.user_id) {
+      console.warn("Courier profile or user_id not available");
+      return;
+    }
     setLoading(true);
     try {
-      const data = await getCourierOrders.execute(courierProfile.couriers_id);
+      const data = await getCourierOrders.execute(courierProfile.user_id);
       setOrders(data);
     } catch (error) {
       console.error("Error cargando entregas:", error);
@@ -64,14 +69,14 @@ const CourierDeliveries = () => {
   };
 
   const handleConfirm = async () => {
-    if (!courierProfile?.couriers_id || !codeOrderId) return;
+    if (!courierProfile?.user_id || !codeOrderId) return;
     if (code.length !== 4) {
       toast.error("El código debe tener 4 dígitos");
       return;
     }
     setConfirming(true);
     try {
-      await confirmDelivery.execute(codeOrderId, code, courierProfile.couriers_id);
+      await confirmDelivery.execute(codeOrderId, code, courierProfile.user_id);
       toast.success("¡Entrega confirmada! 🎉");
       setCodeOrderId(null);
       setCode("");
@@ -81,6 +86,19 @@ const CourierDeliveries = () => {
       toast.error(msg);
     } finally {
       setConfirming(false);
+    }
+  };
+
+  const handleAcceptOrder = async (orderId: string) => {
+    if (!courierProfile?.user_id) return;
+    
+    try {
+      await acceptOrder.execute(orderId, courierProfile.user_id);
+      toast.success("¡Pedido aceptado! Inicia la ruta hacia el cliente");
+      await load();
+    } catch (error: any) {
+      const msg = error.response?.data?.message || "No se pudo aceptar el pedido";
+      toast.error(msg);
     }
   };
 
@@ -115,6 +133,7 @@ const CourierDeliveries = () => {
             {sorted.map((order) => {
               const st = STATUS_LABEL[order.status] || { label: order.status, color: "gray" };
               const isInDelivery = order.status === "IN_DELIVERY";
+              const isReady = order.status === "READY";
 
               return (
                 <div key={order.order_id} className={`delivery-card ${isInDelivery ? "active" : ""}`}>
@@ -136,13 +155,24 @@ const CourierDeliveries = () => {
                     <span>Domicilio: ${order.delivery_fee.toLocaleString()}</span>
                   </div>
 
+                  {isReady && (
+                    <div className="delivery-actions">
+                      <button
+                        className="delivery-accept-btn"
+                        onClick={() => handleAcceptOrder(order.order_id)}
+                      >
+                        <Play size={16} /> Aceptar Pedido e Iniciar Ruta
+                      </button>
+                    </div>
+                  )}
+
                   {isInDelivery && (
                     <div className="delivery-actions">
                       <button
                         className="delivery-share-btn"
                         onClick={() => navigate(`/courier/tracking/${order.order_id}`)}
                       >
-                        <Navigation size={16} /> Compartir ubicación
+                        <Navigation size={16} /> Ver Ruta en Mapa
                       </button>
                       <button
                         className="delivery-done-btn"

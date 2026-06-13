@@ -41,7 +41,32 @@ const RecommendedProducts = ({ products }: RecommendedProductsProps) => {
       </div>
 
       {products.length === 0 ? (
-        <div style={{ color: '#666', fontSize: '14px' }}>No hay productos</div>
+        <div style={{ 
+          padding: '40px 20px', 
+          textAlign: 'center', 
+          color: '#666',
+          background: '#fafafa',
+          borderRadius: '16px',
+          border: '1px dashed #ddd'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '12px', opacity: 0.5 }}>📦</div>
+          <p style={{ fontSize: '14px', margin: '0 0 16px' }}>No hay productos disponibles en este momento</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '8px 16px',
+              background: '#e8500a',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Recargar página
+          </button>
+        </div>
       ) : (
         <div
           ref={scrollRef}

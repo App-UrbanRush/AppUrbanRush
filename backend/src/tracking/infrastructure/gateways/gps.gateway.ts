@@ -171,4 +171,13 @@ export class GPSGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private trackingRoom(orderId: string): string {
     return `tracking_order_${orderId}`;
   }
+
+  emitVendorStatsUpdate(vendorId: number, stats: { domiciliariosActivos: number }) {
+    const room = `vendor_${vendorId}`;
+    this.server.to(room).emit('vendor:stats:update', stats);
+  }
+
+  joinVendorRoom(client: Socket, vendorId: number) {
+    client.join(`vendor_${vendorId}`);
+  }
 }

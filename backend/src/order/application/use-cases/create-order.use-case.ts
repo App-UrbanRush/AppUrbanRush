@@ -58,6 +58,18 @@ export class CreateOrderUseCase {
 
     const savedOrder = await this.orderRepository.create(order);
 
+    for (const item of dto.items) {
+      const product = await this.productRepository.findById(item.product_id);
+      if (product) {
+        const newStock = Math.max(0, product.stock - item.quantity);
+        const isAvailable = newStock > 0;
+        await this.productRepository.update(item.product_id, {
+          stock: newStock,
+          is_available: isAvailable,
+        });
+      }
+    }
+
     const estimated_delivery = await this.fastApiService.estimateDelivery({
       order_id: savedOrder.order_id!,
       vendor_id: dto.vendor_id,

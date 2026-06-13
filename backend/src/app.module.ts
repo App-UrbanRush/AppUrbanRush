@@ -2,6 +2,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
@@ -40,6 +41,7 @@ import { TrackingModule } from './tracking/tracking.module';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
 
     // PostgreSQL — usuarios, roles, auth
     TypeOrmModule.forRootAsync({

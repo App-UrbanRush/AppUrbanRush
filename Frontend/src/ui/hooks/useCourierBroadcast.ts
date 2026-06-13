@@ -4,8 +4,6 @@ import { TrackingSocketGateway } from "../../infrastructure/socket/TrackingSocke
 import { SendCourierLocationUseCase } from "../../application/use-cases/SendCourierLocationUseCase";
 import type { LocationUpdateInput, TrackingConnectionState } from "../../domain/types/tracking.types";
 
-// El GPS de escritorio no "se mueve", así que reenviamos la última posición
-// periódicamente para mantener viva la clave en Redis (TTL 30s) y notificar al visor.
 const HEARTBEAT_MS = 10000;
 
 interface SentPoint {
@@ -14,10 +12,6 @@ interface SentPoint {
   timestamp: string;
 }
 
-/**
- * Hook del EMISOR (domiciliario).
- * Usa navigator.geolocation.watchPosition y manda cada lectura al backend por WebSocket.
- */
 export function useCourierBroadcast(orderId: string | undefined) {
   const gateway = useMemo(() => new TrackingSocketGateway(), []);
   const sendLocationUseCase = useMemo(() => new SendCourierLocationUseCase(gateway), [gateway]);
@@ -30,9 +24,12 @@ export function useCourierBroadcast(orderId: string | undefined) {
   const watchIdRef = useRef<number | null>(null);
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastInputRef = useRef<LocationUpdateInput | null>(null);
+  const orderIdRef = useRef(orderId);
+  orderIdRef.current = orderId;
 
   const start = () => {
-    if (!orderId) {
+    const currentOrderId = orderIdRef.current;
+    if (!currentOrderId) {
       setError("Falta el ID del pedido");
       return;
     }
@@ -60,11 +57,11 @@ export function useCourierBroadcast(orderId: string | undefined) {
       (pos) => {
         const { latitude, longitude, accuracy, speed, heading } = pos.coords;
         const input: LocationUpdateInput = {
-          order_id: orderId,
+          order_id: orderIdRef.current || currentOrderId,
           lat: +latitude.toFixed(6),
           lng: +longitude.toFixed(6),
           accuracy: accuracy ?? undefined,
-          speed: speed != null ? Math.round(speed * 3.6) : undefined, // m/s → km/h
+          speed: speed != null ? Math.round(speed * 3.6) : undefined,
           heading: heading ?? undefined,
         };
         lastInputRef.current = input;
@@ -75,7 +72,6 @@ export function useCourierBroadcast(orderId: string | undefined) {
       { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
     );
 
-    // Heartbeat: reenvía la última posición conocida para que Redis no expire
     heartbeatRef.current = setInterval(() => {
       if (lastInputRef.current) {
         sendLocationUseCase.execute(lastInputRef.current);

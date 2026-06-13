@@ -48,6 +48,10 @@ export class TrackingSocketGateway implements ITrackingGateway {
     this.socket?.on("tracking:closed", cb);
   }
 
+  onVendorStatsUpdate(cb: (stats: { domiciliariosActivos: number }) => void): void {
+    this.socket?.on("vendor:stats:update", cb);
+  }
+
   onError(cb: (data: { message: string }) => void): void {
     this.socket?.on("error", cb);
   }
