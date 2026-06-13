@@ -1,14 +1,14 @@
-import { useNavigate } from "react-router-dom";
 import type { Store } from "../../../../domain/types/store.types";
+import { useFavorites } from "../../../context/useFavorites";
 import "./StoreCard.css";
 
 interface StoreCardProps {
   store: Store;
   variant?: "recommended" | "nearby";
+  onClick?: () => void;
 }
 
-const Stars: React.FC<{ rating?: number }> = ({ rating }) => {
-  if (rating === undefined || rating === null) return null;
+const Stars: React.FC<{ rating: number }> = ({ rating }) => {
   const full = Math.floor(rating);
   return (
     <span style={{ color: '#f59e0b', fontSize: '13px' }}>
@@ -17,64 +17,19 @@ const Stars: React.FC<{ rating?: number }> = ({ rating }) => {
   );
 };
 
-const getInitials = (name: string): string => {
-  return name
-    .split(' ')
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-};
-
-const getColorFromName = (name: string): string => {
-  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ffa07a', '#98d8c8', '#f7b731', '#5f27cd', '#00d2d3', '#ff9ff3', '#54a0ff'];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = ((hash << 5) - hash) + name.charCodeAt(i);
-    hash = hash & hash;
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
-
-const InitialsBadge: React.FC<{ name: string; size?: 'small' | 'large' }> = ({ name, size = 'small' }) => {
-  const bgColor = getColorFromName(name);
-  const initials = getInitials(name);
-  const isLarge = size === 'large';
-  
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: isLarge ? '100%' : '80px',
-        height: isLarge ? '160px' : '64px',
-        backgroundColor: bgColor,
-        color: 'white',
-        borderRadius: isLarge ? '12px' : '10px',
-        fontSize: isLarge ? '48px' : '16px',
-        fontWeight: 700,
-      }}
-    >
-      {initials}
-    </div>
-  );
-};
-
-const StoreCard = ({ store, variant = "recommended" }: StoreCardProps) => {
-  const navigate = useNavigate();
-  const cardImage = store.logo_url  || '';
-  const hasImage = cardImage.trim().length > 0;
-  
-  const handleCardClick = () => {
-    navigate(`/store/${store.id}`);
+const StoreCard = ({ store, variant = "recommended", onClick }: StoreCardProps) => {
+  const { isFavorite, toggle } = useFavorites();
+  const fav = isFavorite(store.id);
+  const handleFav = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggle(store.id, store.name);
   };
-  
+
   if (variant === "nearby") {
     return (
       <div
+        onClick={onClick}
         className="store-card-nearby"
-        onClick={handleCardClick}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -87,48 +42,35 @@ const StoreCard = ({ store, variant = "recommended" }: StoreCardProps) => {
           cursor: 'pointer',
         }}
       >
-        {hasImage ? (
-          <img
-            src={cardImage}
-            alt={store.name}
-            style={{ width: '80px', height: '64px', borderRadius: '10px', objectFit: 'cover', flexShrink: 0 }}
-          />
-        ) : (
-          <InitialsBadge name={store.name} />
-        )}
+        <img
+          src={store.image}
+          alt={store.name}
+          style={{ width: '80px', height: '64px', borderRadius: '10px', objectFit: 'cover', flexShrink: 0 }}
+        />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 700, fontSize: '14px', color: '#1a1a1a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {store.name}
           </div>
-          {store.business_type && (
-            <div style={{ fontSize: '12px', color: '#888', marginBottom: '4px' }}>
-              {store.business_type}
-            </div>
-          )}
-          <Stars rating={store.rating} />
+          <Stars rating={store.rating ?? 0} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
-          {store.rating !== undefined && store.rating !== null && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#e8500a', fontWeight: 700, fontSize: '13px' }}>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="#e8500a"><polygon points="5,1 6.5,4 10,4.5 7.5,7 8.1,10.5 5,8.8 1.9,10.5 2.5,7 0,4.5 3.5,4"/></svg>
-              {store.rating}
-            </span>
-          )}
-          {store.deliveryTime && (
-            <span style={{
-              background: '#fff',
-              border: '1px solid #e0e0e0',
-              borderRadius: '12px',
-              padding: '2px 8px',
-              fontSize: '12px',
-              color: '#666',
-            }}>
-              {store.deliveryTime}
-            </span>
-          )}
+          <span style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#e8500a', fontWeight: 700, fontSize: '13px' }}>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="#e8500a"><polygon points="5,1 6.5,4 10,4.5 7.5,7 8.1,10.5 5,8.8 1.9,10.5 2.5,7 0,4.5 3.5,4"/></svg>
+            {store.rating ?? 0}
+          </span>
+          <span style={{
+            background: '#fff',
+            border: '1px solid #e0e0e0',
+            borderRadius: '12px',
+            padding: '2px 8px',
+            fontSize: '12px',
+            color: '#666',
+          }}>
+            {store.deliveryTime}
+          </span>
         </div>
-        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ccc', padding: '2px', flexShrink: 0 }}>
-          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <button onClick={handleFav} title="Favorito" style={{ background: 'none', border: 'none', cursor: 'pointer', color: fav ? '#ff3d6e' : '#ccc', padding: '2px', flexShrink: 0 }}>
+          <svg width="18" height="18" fill={fav ? '#ff3d6e' : 'none'} stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364L12 21l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
           </svg>
         </button>
@@ -138,52 +80,47 @@ const StoreCard = ({ store, variant = "recommended" }: StoreCardProps) => {
 
   return (
     <div
+      onClick={onClick}
       className="store-card-rec"
-      onClick={handleCardClick}
       style={{
         flexShrink: 0,
-        width: '100%',
-        maxWidth: '280px',
-        minWidth: '250px',
+        width: '230px',
         background: '#fff',
-        borderRadius: '12px',
-        boxShadow: '0 1px 6px rgba(0,0,0,0.09)',
+        borderRadius: '16px',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
         overflow: 'hidden',
         border: '1px solid #f0f0f0',
         cursor: 'pointer',
-        margin: '0 auto',
       }}
     >
-      {hasImage ? (
-        <img src={cardImage} alt={store.name} style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }} />
-      ) : (
-        <InitialsBadge name={store.name} size="large" />
-      )}
-      <div style={{ padding: '12px' }}>
-        <div style={{ fontWeight: 700, fontSize: '14px', color: '#1a1a1a', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <div style={{ position: 'relative' }}>
+        <img src={store.image} alt={store.name} style={{ width: '100%', height: '150px', objectFit: 'cover', display: 'block' }} />
+        <button onClick={handleFav} title="Favorito" style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(255,255,255,0.92)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}>
+          <svg width="16" height="16" fill={fav ? '#ff3d6e' : 'none'} stroke={fav ? '#ff3d6e' : '#666'} strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364L12 21l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
+          </svg>
+        </button>
+        <span style={{
+          position: 'absolute', top: '10px', right: '10px',
+          background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: '14px',
+          padding: '3px 9px', fontSize: '12px', fontWeight: 700,
+          display: 'flex', alignItems: 'center', gap: '3px',
+        }}>
+          <svg width="11" height="11" viewBox="0 0 10 10" fill="#ffb300"><polygon points="5,1 6.5,4 10,4.5 7.5,7 8.1,10.5 5,8.8 1.9,10.5 2.5,7 0,4.5 3.5,4"/></svg>
+          {store.rating ?? 0}
+        </span>
+      </div>
+      <div style={{ padding: '12px 14px 14px' }}>
+        <div style={{ fontWeight: 800, fontSize: '15px', color: '#1a1a1a', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {store.name}
         </div>
-        {store.business_type && (
-          <div style={{ fontSize: '12px', color: '#888', marginBottom: '6px' }}>
-            {store.business_type}
-          </div>
-        )}
-        {store.description && (
-          <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-            {store.description}
-          </div>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <Stars rating={store.rating} />
-          {store.rating !== undefined && store.rating !== null && store.deliveryTime && (
-            <span style={{ color: '#bbb', fontSize: '11px', margin: '0 2px' }}>{'\u2022'}</span>
-          )}
-          {store.deliveryTime && (
-            <>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="#e8500a" style={{ flexShrink: 0 }}><polygon points="5,1 6.5,4 10,4.5 7.5,7 8.1,10.5 5,8.8 1.9,10.5 2.5,7 0,4.5 3.5,4"/></svg>
-              <span style={{ fontSize: '11px', color: '#888' }}>{store.deliveryTime}</span>
-            </>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Stars rating={store.rating ?? 0} />
+          <span style={{ color: '#ccc', fontSize: '12px' }}>{'\u2022'}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12.5px', color: '#777', fontWeight: 600 }}>
+            <svg width="12" height="12" fill="none" stroke="#e8500a" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path strokeLinecap="round" d="M12 7v5l3 2"/></svg>
+            {store.deliveryTime}
+          </span>
         </div>
       </div>
     </div>

@@ -186,20 +186,36 @@
 .delivery-register-right {
   flex: 1;
   position: relative;
+  overflow: hidden;
 }
 
 .delivery-register-right img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform-origin: center;
+  will-change: transform;
+  animation: reg-kenburns 22s ease-in-out infinite alternate;
+}
+
+.delivery-register-right::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 22%;
+  background: linear-gradient(to left, rgba(248, 249, 251, 0) 0%, #f8f9fb 100%);
+  pointer-events: none;
+  z-index: 3;
 }
 
 .delivery-register-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    rgba(128, 0, 128, 0.295),
-    rgba(148, 0, 211, 0.473)
+    rgba(255, 106, 0, 0.32),
+    rgba(255, 140, 0, 0.48)
   );
   display: flex;
   flex-direction: column;
@@ -219,6 +235,7 @@
   object-fit: contain;
   margin-bottom: 20px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: reg-logo-float 4.5s ease-in-out infinite;
 }
 
 /* SCROLLBAR */

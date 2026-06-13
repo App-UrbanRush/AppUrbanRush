@@ -1,8 +1,10 @@
 // src/app.module.ts
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
@@ -42,6 +44,13 @@ import { TrackingModule } from './tracking/tracking.module';
     }),
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
+
+    // Rate limiting: protege contra fuerza bruta y DoS
+    ThrottlerModule.forRoot([
+      { name: 'short', ttl: 1000, limit: 10 },     // 10 req/s
+      { name: 'medium', ttl: 60_000, limit: 120 }, // 120 req/min
+      { name: 'long', ttl: 3_600_000, limit: 3000 }, // 3000 req/h
+    ]),
 
     // PostgreSQL — usuarios, roles, auth
     TypeOrmModule.forRootAsync({
@@ -93,6 +102,10 @@ import { TrackingModule } from './tracking/tracking.module';
     CourierVendorRequestModule,
     LiquidationModule,
     TrackingModule,
+  ],
+  providers: [
+    // Aplica rate limiting global a todos los endpoints
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}

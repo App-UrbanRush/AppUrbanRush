@@ -3,6 +3,7 @@ import { Body, Controller, Get, Post, Request, Res, UnauthorizedException, UseGu
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { LoginDto } from 'src/auth/application/dtos/login/login.dto';
 import { RegisterUseCase } from 'src/auth/application/use-cases/register.use-case';
 import { LoginUseCase } from 'src/auth/application/use-cases/login.use-case';
@@ -38,6 +39,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @Throttle({ medium: { ttl: 60_000, limit: 5 } }) // máx 5 intentos/min por IP
   @ApiOperation({ summary: 'Inicio de sesión' })
   @ApiResponse({ status: 200, description: 'Login exitoso.' })
   @ApiResponse({ status: 401, description: 'Credenciales incorrectas.' })

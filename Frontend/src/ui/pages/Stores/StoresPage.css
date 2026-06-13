@@ -1,0 +1,49 @@
+.stores-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 28px 28px 48px;
+}
+
+.stores-page-head {
+  margin-bottom: 20px;
+}
+.stores-page-head h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+.stores-page-head h1 svg { color: #ff6a00; }
+.stores-page-head p {
+  margin: 6px 0 0;
+  color: #8a909c;
+  font-size: 0.95rem;
+}
+
+.stores-page-map {
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 26px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stores-page-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.stores-page-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: #8a909c;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .stores-page { padding: 18px 16px 36px; }
+  .stores-page-grid { justify-content: center; }
+}

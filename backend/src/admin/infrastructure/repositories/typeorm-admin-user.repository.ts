@@ -48,6 +48,14 @@ export class TypeormAdminUserRepository implements IAdminUserRepository {
     return this.findFiltered({ role: 1 });
   }
 
+  async findById(id: number): Promise<AdminUserView | null> {
+    const user = await this.userRepo.findOne({
+      where: { user_id: id },
+      relations: ['userroles', 'person'],
+    });
+    return user ? this.toView(user) : null;
+  }
+
   private toView(u: UserEntity): AdminUserView {
     return {
       user_id: u.user_id,

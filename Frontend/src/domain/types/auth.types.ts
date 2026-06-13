@@ -15,6 +15,7 @@ export const ROLE_MAP: Record<number, string> = {
   2: "Usuario",
   3: "Domiciliario",
   4: "Negocio",
+  5: "SuperAdmin",
 };
 
 export interface AuthResponse {

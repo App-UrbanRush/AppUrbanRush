@@ -77,6 +77,6 @@ import { EmailModule } from 'src/email/email.module';
     ListAllPayoutsUseCase,
     RetryPayoutUseCase,
   ],
-  exports: [RegisterCourierEarningUseCase, RegisterVendorSaleUseCase],
+  exports: [RegisterCourierEarningUseCase, RegisterVendorSaleUseCase, GetAdminSummaryUseCase],
 })
 export class LiquidationModule {}

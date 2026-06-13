@@ -4,23 +4,73 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Botón Regresar */
+.rselect-back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #e8500a;
+  border: none;
+  border-radius: 22px;
+  padding: 9px 18px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.rselect-back:hover {
+  background: #fff;
+  transform: translateX(-3px);
+}
+.rselect-back-arrow { font-size: 18px; line-height: 1; }
+
 /* LEFT */
 .rselect-left {
   flex: 1;
   position: relative;
+  overflow: hidden;
 }
 .rselect-left img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transform-origin: center;
+  will-change: transform;
+  animation: rselect-kenburns 22s ease-in-out infinite alternate;
 }
+
+/* Degradado de borde que funde con el panel derecho */
+.rselect-left::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 26%;
+  background: linear-gradient(to right, rgba(248, 249, 251, 0) 0%, #f8f9fb 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes rselect-kenburns {
+  0%   { transform: scale(1) translate(0, 0); }
+  50%  { transform: scale(1.12) translate(-2%, 1.5%); }
+  100% { transform: scale(1.18) translate(2%, -1.5%); }
+}
+
 /* OVERLAY CON LOGO */
 .rselect-overlay {
   position: absolute;
   inset: 0;
   width: 50%;
-  background: linear-gradient(rgba(0, 255, 85, 0.377), rgba(255, 140, 0, 0.473));
+  background: linear-gradient(rgba(255, 106, 0, 0.32), rgba(255, 140, 0, 0.48));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -33,6 +83,17 @@
   object-fit: contain;
   margin-bottom: 20px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: rselect-logo-float 4.5s ease-in-out infinite;
+}
+
+@keyframes rselect-logo-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-14px) scale(1.03); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rselect-left img,
+  .rselect-logo-img { animation: none; }
 }
 
 /* RIGHT */

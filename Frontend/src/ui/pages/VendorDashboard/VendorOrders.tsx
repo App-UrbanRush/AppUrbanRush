@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Clock, User, Package, MapPin, ChefHat, CheckCircle, Truck, XCircle } from "lucide-react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
@@ -13,7 +13,7 @@ import "./VendorOrders.css";
 
 const getAllVendorOrders = new GetAllVendorOrdersUseCase(new RecentOrdersRepositoryImpl());
 
-const STATUS_CONFIG: Record<string, { color: string; label: string; icon: JSX.Element }> = {
+const STATUS_CONFIG: Record<string, { color: string; label: string; icon: ReactNode }> = {
   PENDING: { color: 'yellow', label: 'Pendiente', icon: <Clock size={14} /> },
   ACCEPTED: { color: 'orange', label: 'Aceptado', icon: <CheckCircle size={14} /> },
   PREPARING: { color: 'blue', label: 'En preparación', icon: <ChefHat size={14} /> },

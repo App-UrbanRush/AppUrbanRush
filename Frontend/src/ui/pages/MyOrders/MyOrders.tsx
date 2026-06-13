@@ -199,7 +199,7 @@ const MyOrders = () => {
                           {thumbnails.map((item, i) => (
                             <img
                               key={i}
-                              src={item.image_url}
+                              src={item.image_url ?? undefined}
                               alt=""
                               className="myorders-card-thumb"
                             />

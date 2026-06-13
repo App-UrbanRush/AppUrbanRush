@@ -12,6 +12,8 @@ import { ChangeRoleAdminUseCase } from '../../application/use-cases/change-role-
 import { DeleteUserAdminUseCase } from '../../application/use-cases/delete-user-admin.use-case';
 import { GetSystemStatsUseCase } from '../../application/use-cases/get-system-stats.use-case';
 import { GetAuditLogsUseCase } from '../../application/use-cases/get-audit-logs.use-case';
+import { UpdateCommonUserUseCase } from '../../application/use-cases/update-common-user.use-case';
+import { GetUserDetailUseCase } from '../../application/use-cases/get-user-detail.use-case';
 import { AdminUserFiltersDto } from '../../application/dtos/admin-filters.dto';
 import { CreateAdminUserDto } from '../../application/dtos/create-admin-user.dto';
 
@@ -27,6 +29,8 @@ export class AdminController {
     private readonly deleteUserAdmin: DeleteUserAdminUseCase,
     private readonly getStats: GetSystemStatsUseCase,
     private readonly getAuditLogs: GetAuditLogsUseCase,
+    private readonly updateCommonUser: UpdateCommonUserUseCase,
+    private readonly getUserDetail: GetUserDetailUseCase,
   ) {}
 
   // ═══════════════════════════════════════════
@@ -34,8 +38,8 @@ export class AdminController {
   // ═══════════════════════════════════════════
 
   @Get('stats')
-  @Roles(UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Estadísticas globales del sistema (SUPERADMIN)' })
+  @MinRole(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Estadísticas globales del sistema (ADMIN+)' })
   stats() {
     return this.getStats.execute();
   }
@@ -108,17 +112,23 @@ export class AdminController {
     return this.getFilteredUsers.executeCommonUsers();
   }
 
+  // Declarado DESPUÉS de 'users/common' para que esa ruta estática tenga prioridad
+  @Get('users/:id')
+  @MinRole(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Detalle de un usuario (ADMIN+)' })
+  userDetail(@Param('id', ParseIntPipe) id: number) {
+    return this.getUserDetail.execute(id);
+  }
+
   @Put('users/:id/edit')
   @MinRole(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Editar usuario común (ADMIN)' })
+  @ApiOperation({ summary: 'Editar usuario común — email/estado (ADMIN)' })
   editCommonUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { user_email?: string; status?: boolean },
     @Request() req,
   ) {
-    // Delegamos al cambio simple — ADMIN no puede cambiar roles
-    return this.changeRoleAdmin.execute(id, 0, req.user.user_id, req.user.user_email)
-      .catch(() => ({ message: 'Funcionalidad de edición básica' }));
+    return this.updateCommonUser.execute(id, body, req.user.user_id, req.user.user_email);
   }
 
   @Delete('users/:id/common')

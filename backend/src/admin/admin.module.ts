@@ -20,6 +20,9 @@ import { ChangeRoleAdminUseCase } from './application/use-cases/change-role-admi
 import { DeleteUserAdminUseCase } from './application/use-cases/delete-user-admin.use-case';
 import { GetSystemStatsUseCase } from './application/use-cases/get-system-stats.use-case';
 import { GetAuditLogsUseCase } from './application/use-cases/get-audit-logs.use-case';
+import { UpdateCommonUserUseCase } from './application/use-cases/update-common-user.use-case';
+import { GetUserDetailUseCase } from './application/use-cases/get-user-detail.use-case';
+import { LiquidationModule } from 'src/liquidation/liquidation.module';
 
 @Module({
   imports: [
@@ -36,6 +39,7 @@ import { GetAuditLogsUseCase } from './application/use-cases/get-audit-logs.use-
       CourierEntity,
       UserRolesEntity,
     ]),
+    LiquidationModule,
   ],
   controllers: [AdminController],
   providers: [
@@ -50,6 +54,8 @@ import { GetAuditLogsUseCase } from './application/use-cases/get-audit-logs.use-
     DeleteUserAdminUseCase,
     GetSystemStatsUseCase,
     GetAuditLogsUseCase,
+    UpdateCommonUserUseCase,
+    GetUserDetailUseCase,
   ],
 })
 export class AdminModule {}
