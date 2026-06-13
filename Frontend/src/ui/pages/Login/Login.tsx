@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { Mail, Lock, LogIn } from "lucide-react";
+import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -34,6 +34,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [apiError, setApiError] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Muestra el error si el callback de Google redirige con ?error=
   useEffect(() => {
@@ -48,10 +49,14 @@ const Login = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  const emailValue = watch("email");
+  const passwordValue = watch("password");
 
   // onSubmit: llama al caso de uso inyectado
   const onSubmit = async (data: LoginFormData) => {
@@ -106,12 +111,12 @@ const Login = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="login-input-group">
               <div className="login-input-wrapper">
-                <Mail className="login-input-icon" size={18} />
+                {!emailValue && <Mail className="login-input-icon" size={18} />}
                 <motion.input
                   whileFocus={{ scale: 1.02 }}
                   {...register("email")}
                   type="email"
-                  placeholder="     Email"
+                  placeholder="Email"
                 />
               </div>
               {errors.email && <span>{errors.email.message}</span>}
@@ -119,13 +124,21 @@ const Login = () => {
 
             <div className="login-input-group">
               <div className="login-input-wrapper">
-                <Lock className="login-input-icon" size={18} />
+                {!passwordValue && <Lock className="login-input-icon" size={18} />}
                 <motion.input
                   whileFocus={{ scale: 1.02 }}
                   {...register("password")}
-                  type="password"
-                  placeholder="     Contraseña"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Contraseña"
                 />
+                <button
+                  type="button"
+                  className="login-password-toggle"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
               {errors.password && <span>{errors.password.message}</span>}
             </div>

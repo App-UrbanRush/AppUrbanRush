@@ -188,6 +188,9 @@ const PaymentPage = () => {
               reference,
             });
             setPayment(newPayment);
+            paymentApi.confirm(reference).catch(() => {
+              // Si la confirmación manual falla, el webhook lo hará
+            });
             toast.success("Pago iniciado");
             startPolling();
           } catch (err: unknown) {
@@ -315,11 +318,15 @@ const PaymentPage = () => {
         </div>
 
         <div className="payment-items">
-          {order.items.map((item: { product_id: string; product_name: string; quantity: number; unit_price: number }) => (
+          {order.items.map((item) => (
             <div key={item.product_id} className="payment-item">
-              <div className="payment-item-img-placeholder">
-                <Package size={20} />
-              </div>
+              {item.image_url ? (
+                <img src={item.image_url} alt={item.product_name} className="payment-item-img" />
+              ) : (
+                <div className="payment-item-img-placeholder">
+                  <Package size={20} />
+                </div>
+              )}
               <div className="payment-item-info">
                 <p className="payment-item-name">{item.product_name}</p>
                 <p className="payment-item-meta">{item.quantity} × ${item.unit_price.toLocaleString()}</p>

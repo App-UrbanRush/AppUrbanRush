@@ -24,6 +24,7 @@ export interface OrderItemDetail {
   product_name: string;
   quantity: number;
   unit_price: number;
+  image_url?: string | null;
 }
 
 export interface OrderDetail {
@@ -46,6 +47,11 @@ export interface OrderDetail {
 export const ordersApi = {
   getById: async (orderId: string): Promise<OrderDetail> => {
     const response = await axios.get(`${API_URL}/orders/${orderId}`, authHeader());
+    return response.data;
+  },
+
+  getByUser: async (userId: number | string): Promise<OrderDetail[]> => {
+    const response = await axios.get(`${API_URL}/orders/user/${userId}`, authHeader());
     return response.data;
   },
 

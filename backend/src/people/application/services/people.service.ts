@@ -44,6 +44,7 @@ export class PeopleService {
     if (dto.cellphone) persona.cellphone = dto.cellphone;
     if (dto.address) persona.address = dto.address;
     if (dto.gender) persona.gender = dto.gender;
+    if (dto.avatarUrl !== undefined) persona.avatarUrl = dto.avatarUrl;
 
     await this._peopleRepository.save(persona);
     return 'Información de la persona actualizada correctamente';

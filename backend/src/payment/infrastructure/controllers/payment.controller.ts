@@ -51,6 +51,14 @@ export class PaymentController {
     return this.confirmPayment.execute(dto);
   }
 
+  @Post('confirm/:reference')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Confirmar pago manualmente después del widget de Wompi' })
+  confirm(@Param('reference') reference: string) {
+    return this.confirmPayment.confirmByReference(reference);
+  }
+
   @Get('order/:orderId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN, UserRole.BUSINESS) // ← agregar BUSINESS

@@ -27,7 +27,7 @@ export class CreateOrderUseCase {
       if (!product) throw new NotFoundException(`Producto ${item.product_id} no encontrado`);
 
       subtotal += product.price * item.quantity;
-      items.push(new OrderItemModel(item.product_id, product.name, item.quantity, product.price));
+      items.push(new OrderItemModel(item.product_id, product.name, item.quantity, product.price, product.image_url));
     }
 
     const deliveryFee = Number(this.configService.get<string>('DELIVERY_FEE') ?? 3000);

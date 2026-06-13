@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/useAuth";
 import { useCart } from "../../../context/CartContext";
 import { useCartDrawer } from "../../../context/CartDrawerContext";
+import { User, ShoppingBag, CreditCard, LogOut } from "lucide-react";
 import CartDrawer from "./CartDrawer";
 import "./Navbar.css";
 
@@ -14,7 +15,6 @@ const Navbar = () => {
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +63,7 @@ const Navbar = () => {
   };
 
   return (
+    <>
     <nav style={{ backgroundColor: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', position: 'sticky', top: 0, zIndex: 100 }}>
       <div className="navbar-row" style={{ maxWidth: '960px', margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', height: '60px', gap: '12px', position: 'relative' }}>
 
@@ -81,33 +82,16 @@ const Navbar = () => {
         )}
 
         {/* Logo */}
-        <Link to="/dashboard" className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', flexShrink: 0 }}>
-          <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-            <circle cx="17" cy="17" r="17" fill="#e8500a"/>
-            <path d="M9 21 Q17 11 25 21" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            <circle cx="17" cy="21" r="3.5" fill="white"/>
-          </svg>
-          <span style={{ color: '#e8500a', fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px' }}>UrbanRush</span>
+        <Link to="/dashboard" className="navbar-logo" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
+          <div className="navbar-logo-wrap">
+            <img src="/Logo-cor.png" alt="UrbanRush" style={{ height: '40px', width: 'auto', objectFit: 'contain', display: 'block' }} />
+          </div>
         </Link>
 
         {/* Inicio moved to the right side */}
 
         {/* Spacer for mobile */}
         <div className="navbar-spacer" style={{ display: 'none', flex: 1 }} />
-
-        {/* Search bar - desktop (ocultar en /profile) */}
-        {location.pathname !== '/profile' && (
-          <div className={`search-bar-desktop${searchOpen ? " search-bar-desktop--open" : ""}`} style={{ flex: '0 1 420px', maxWidth: '520px', display: 'flex', alignItems: 'center', backgroundColor: '#f2f2f2', borderRadius: '24px', padding: '8px 16px', gap: '8px' }}>
-          <svg width="16" height="16" fill="none" stroke="#999" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7"/><path strokeLinecap="round" d="M21 21l-4.35-4.35"/>
-          </svg>
-          <input
-            type="text"
-            placeholder="¿Qué deseas pedir hoy?"
-            style={{ background: 'none', border: 'none', outline: 'none', fontSize: '14px', color: '#555', width: '100%' }}
-          />
-          </div>
-        )}
 
         {/* Location moved to the right side */}
 
@@ -159,7 +143,11 @@ const Navbar = () => {
                 justifyContent: 'center',
               }}
             >
-              {avatarLetter}
+              {myProfile?.avatarUrl ? (
+                <img src={myProfile.avatarUrl} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                avatarLetter
+              )}
             </button>
 
             {dropdownOpen && (
@@ -174,11 +162,28 @@ const Navbar = () => {
                 padding: '12px 0',
                 zIndex: 200,
               }}>
-                <div style={{ padding: '0 16px 10px' }}>
-                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#222' }}>{displayName}</div>
-                  <div style={{ fontSize: '12px', color: '#888', marginTop: '2px' }}>{user?.email}</div>
-                  <div style={{ fontSize: '12px', color: '#e8500a', marginTop: '4px', fontWeight: 600 }}>
-                    {userRole}
+                <div style={{ padding: '12px 16px 12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    background: myProfile?.avatarUrl ? 'none' : '#e8500a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    {myProfile?.avatarUrl ? (
+                      <img src={myProfile.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ color: '#fff', fontSize: '16px', fontWeight: 700 }}>{avatarLetter}</span>
+                    )}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: '14px', color: '#222', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+                    <div style={{ fontSize: '12px', color: '#888', marginTop: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</div>
+                    <div style={{ fontSize: '11px', color: '#e8500a', marginTop: '2px', fontWeight: 600 }}>{userRole}</div>
                   </div>
                 </div>
 
@@ -198,9 +203,47 @@ const Navbar = () => {
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontSize: '16px' }}>⚙️</span>
+                  <User size={16} style={{ flexShrink: 0, color: '#6b7280' }} />
                   Mi perfil
                 </Link>
+
+                <Link
+                  to="/my-orders"
+                  onClick={() => setDropdownOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 16px',
+                    fontSize: '14px',
+                    color: '#444',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <ShoppingBag size={16} style={{ flexShrink: 0, color: '#6b7280' }} />
+                  Mis pedidos
+                </Link>
+
+                <Link
+                  to="/payment-history"
+                  onClick={() => setDropdownOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 16px',
+                    fontSize: '14px',
+                    color: '#444',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <CreditCard size={16} style={{ flexShrink: 0, color: '#6b7280' }} />
+                  Pagos
+                </Link>
+
+                <div style={{ height: '1px', background: '#eee', margin: '0 12px' }} />
 
                 <button
                   onClick={handleLogout}
@@ -210,7 +253,7 @@ const Navbar = () => {
                     gap: '10px',
                     padding: '10px 16px',
                     fontSize: '14px',
-                    color: '#444',
+                    color: '#dc2626',
                     background: 'none',
                     border: 'none',
                     width: '100%',
@@ -218,7 +261,7 @@ const Navbar = () => {
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontSize: '16px' }}>🚪</span>
+                  <LogOut size={16} style={{ flexShrink: 0 }} />
                   Cerrar sesión
                 </button>
               </div>
@@ -246,17 +289,8 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Icons - mobile (search + cart) */}
+        {/* Icons - mobile (cart) */}
         <div className="icons-mobile" style={{ display: 'none', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
-          <button
-            onClick={() => setSearchOpen((prev) => !prev)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-            aria-label="Buscar"
-          >
-            <svg width="20" height="20" fill="none" stroke="#666" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7"/><path strokeLinecap="round" d="M21 21l-4.35-4.35"/>
-            </svg>
-          </button>
           <button onClick={() => openCart()} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
             <svg width="20" height="20" fill="none" stroke="#e8500a" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 6M7 13l-1.4-6M17 13l1.4 6M9 19a1 1 0 100 2 1 1 0 000-2zM17 19a1 1 0 100 2 1 1 0 000-2z"/>
@@ -289,19 +323,21 @@ const Navbar = () => {
                 {/* User info */}
                 <div style={{ padding: '20px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
-                    background: '#e8500a',
                     borderRadius: '50%',
                     width: '44px',
                     height: '44px',
-                    color: '#fff',
-                    fontSize: '18px',
-                    fontWeight: 700,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
+                    overflow: 'hidden',
+                    background: myProfile?.avatarUrl ? 'none' : '#e8500a',
                   }}>
-                    {avatarLetter}
+                    {myProfile?.avatarUrl ? (
+                      <img src={myProfile.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ color: '#fff', fontSize: '18px', fontWeight: 700 }}>{avatarLetter}</span>
+                    )}
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: '14px', color: '#222', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
@@ -320,8 +356,6 @@ const Navbar = () => {
                     </svg>
                     <span>Envía a: <strong>{myProfile?.address || "Mi Ubicación"}</strong></span>
                   </div>
-
-                  {/* Favoritos eliminado */}
                 </div>
 
                 <div style={{ height: '1px', background: '#eee', margin: '0 16px' }} />
@@ -332,15 +366,33 @@ const Navbar = () => {
                     onClick={() => setMobileMenuOpen(false)}
                     style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', fontSize: '14px', color: '#444', textDecoration: 'none', cursor: 'pointer' }}
                   >
-                    <span style={{ fontSize: '16px' }}>⚙️</span>
+                    <User size={16} style={{ flexShrink: 0, color: '#6b7280' }} />
                     Mi perfil
+                  </Link>
+
+                  <Link
+                    to="/my-orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', fontSize: '14px', color: '#444', textDecoration: 'none', cursor: 'pointer' }}
+                  >
+                    <ShoppingBag size={16} style={{ flexShrink: 0, color: '#6b7280' }} />
+                    Mis pedidos
+                  </Link>
+
+                  <Link
+                    to="/payment-history"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', fontSize: '14px', color: '#444', textDecoration: 'none', cursor: 'pointer' }}
+                  >
+                    <CreditCard size={16} style={{ flexShrink: 0, color: '#6b7280' }} />
+                    Pagos
                   </Link>
 
                   <button
                     onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', fontSize: '14px', color: '#c0392b', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', fontSize: '14px', color: '#dc2626', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
                   >
-                    <span style={{ fontSize: '16px' }}>🚪</span>
+                    <LogOut size={16} style={{ flexShrink: 0 }} />
                     Cerrar sesión
                   </button>
                 </div>
@@ -374,6 +426,8 @@ const Navbar = () => {
         </div>
       )}
 
+    </nav>
+
       <CartDrawer isOpen={cartOpen} onClose={closeCart} />
 
       <style>{`
@@ -387,29 +441,13 @@ const Navbar = () => {
           .navbar-row { gap: 8px !important; }
           .navbar-logo { order: 3; }
           .mobile-menu-btn { order: 1; }
+          .navbar-right { order: 5; }
           .navbar-spacer { order: 4; display: block !important; }
-          .icons-mobile { order: 5; }
+          .icons-mobile { order: 6; }
           .login-btn-wrapper { order: 5; }
-
-          .search-bar-desktop {
-            display: none !important;
-          }
-          .search-bar-desktop.search-bar-desktop--open {
-            display: flex !important;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            margin: 0;
-            border-radius: 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-            z-index: 100;
-            padding: 8px 16px !important;
-            background-color: #fff !important;
-          }
         }
       `}</style>
-    </nav>
+    </>
   );
 };
 

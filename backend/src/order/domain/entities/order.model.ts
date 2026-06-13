@@ -4,6 +4,7 @@ export class OrderItemModel {
     public product_name: string,
     public quantity: number,
     public unit_price: number,
+    public image_url: string | null = null,
   ) {}
 }
 

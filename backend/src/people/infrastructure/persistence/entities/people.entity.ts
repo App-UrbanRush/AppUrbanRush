@@ -22,7 +22,7 @@ export class PeopleEntity {
   gender: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
-  avatar_url: string;
+  avatar_url: string | null;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   document_number: string;

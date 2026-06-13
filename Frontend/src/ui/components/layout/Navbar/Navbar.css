@@ -65,12 +65,39 @@
   background-color: #f9f9f9;
 }
 
-/* Search bar mobile animation handled by inline style tag */
-
 .navbar-home-btn div {
   transition: background 0.12s ease, border-color 0.12s ease;
 }
 .navbar-home-btn div:hover {
   background: #f2f4f6;
   border-color: #e2e8f0;
+}
+
+.navbar-logo-wrap {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.navbar-logo-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 45%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.35) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: logo-shimmer 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes logo-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

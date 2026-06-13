@@ -105,6 +105,12 @@ const AllProducts = () => {
                 {!product.is_available && (
                   <span className="all-products-card-badge">No disponible</span>
                 )}
+                {product.is_available && product.stock === 0 && (
+                  <span className="all-products-card-badge all-products-card-badge--out">Sin stock</span>
+                )}
+                {product.stock > 0 && product.stock <= 5 && (
+                  <span className="all-products-card-badge all-products-card-badge--low">Últimas</span>
+                )}
               </div>
               <div className="all-products-card-body">
                 {getVendorName(product.vendor_id) && (

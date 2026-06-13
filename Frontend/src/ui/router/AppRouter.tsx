@@ -27,6 +27,8 @@ import CourierDeliveries from "../pages/CourierDashboard/CourierDeliveries";
 import CourierAvailableOrders from "../pages/CourierDashboard/CourierAvailableOrders";
 import CourierEarnings from "../pages/CourierDashboard/CourierEarnings";
 import Profile from "../pages/Profile/Profile";
+import MyOrders from "../pages/MyOrders/MyOrders";
+import PaymentHistory from "../pages/PaymentHistory/PaymentHistory";
 import Stores from "../pages/Stores/Stores";
 import StoreDetail from "../pages/StoreDetail/StoreDetail";
 import AllProducts from "../pages/AllProducts/AllProducts";
@@ -202,6 +204,26 @@ const AppRouter = () => {
           }
         />
         <Route
+          path="/my-orders"
+          element={
+            <PrivateRoute allowedRoles={[2]}>
+              <Layout>
+                <MyOrders />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payment-history"
+          element={
+            <PrivateRoute allowedRoles={[2]}>
+              <Layout>
+                <PaymentHistory />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/courier/profile"
           element={
             <PrivateRoute allowedRoles={[3]}>
@@ -282,7 +304,9 @@ const AppRouter = () => {
           path="/tracking/:orderId"
           element={
             <PrivateRoute>
-              <OrderTracking />
+              <Layout>
+                <OrderTracking />
+              </Layout>
             </PrivateRoute>
           }
         />

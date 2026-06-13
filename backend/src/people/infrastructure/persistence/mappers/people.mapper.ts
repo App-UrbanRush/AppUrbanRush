@@ -26,7 +26,7 @@ export class PeopleMapper {
     entity.cellphone = domain.cellphone;
     entity.address = domain.address;
     entity.gender = domain.gender;
-    if (domain.avatarUrl !== undefined && domain.avatarUrl !== null) {
+    if (domain.avatarUrl !== undefined) {
       entity.avatar_url = domain.avatarUrl;
     }
     if (domain.userId) {

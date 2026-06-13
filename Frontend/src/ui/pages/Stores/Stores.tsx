@@ -4,6 +4,7 @@ import { vendorApi } from "../../../infrastructure/api/vendorApi";
 import type { Store } from "../../../domain/types/store.types";
 import StoreCard from "../../components/ui/StoreCard/StoreCard";
 import { Search } from "lucide-react";
+import Loading from "../../components/Loading/Loading";
 
 function mapVendorToStore(v: any): Store {
   return {
@@ -53,7 +54,7 @@ const Stores = () => {
     : stores;
 
   if (loading) {
-    return <div style={{ padding: '24px', color: '#666' }}>Cargando tiendas...</div>;
+    return <Loading text="Cargando tiendas…" />;
   }
 
   return (

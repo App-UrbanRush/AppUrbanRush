@@ -5,6 +5,7 @@ import { vendorsApi, type VendorListItem } from "../../../../infrastructure/api/
 import type { Product } from "../../../../domain/types/product.types";
 import { useCart } from "../../../context/CartContext";
 import { useCartDrawer } from "../../../context/CartDrawerContext";
+import ImageViewer from "../ImageViewer/ImageViewer";
 import "./ProductDetailModal.css";
 
 interface ProductDetailModalProps {
@@ -17,6 +18,9 @@ const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
   const { openCart } = useCartDrawer();
   const [vendor, setVendor] = useState<VendorListItem | null>(null);
   const [added, setAdded] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const hasNoStock = product.stock <= 0;
+  const isLowStock = product.stock > 0 && product.stock <= 5;
 
   useEffect(() => {
     loadVendor();
@@ -55,7 +59,7 @@ const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
 
         <div className="product-modal-banner">
           {product.image_url ? (
-            <img src={product.image_url} alt={product.name} className="product-modal-banner-img" />
+            <img src={product.image_url} alt={product.name} className="product-modal-banner-img" onClick={() => setPreviewImage(product.image_url)} />
           ) : (
             <div className="product-modal-banner-placeholder">
               <Package size={48} />
@@ -95,15 +99,17 @@ const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
                 <Package size={16} />
                 <div>
                   <span className="product-modal-label">Stock</span>
-                  <span className="product-modal-value">{product.stock}</span>
+                  <span className="product-modal-value" style={{ color: hasNoStock ? "#dc2626" : isLowStock ? "#ca8a04" : "#1f2937" }}>
+                    {hasNoStock ? "Sin stock" : `${product.stock} unidad${product.stock !== 1 ? "es" : ""}`}
+                  </span>
                 </div>
               </div>
               <div className="product-modal-field">
-                <div className={`product-modal-availability-dot ${product.is_available ? "available" : "unavailable"}`} />
+                <div className={`product-modal-availability-dot ${!product.is_available || hasNoStock ? "unavailable" : "available"}`} />
                 <div>
                   <span className="product-modal-label">Disponibilidad</span>
-                  <span className={`product-modal-value product-modal-availability-text ${product.is_available ? "available" : "unavailable"}`}>
-                    {product.is_available ? "Disponible" : "No disponible"}
+                  <span style={{ fontWeight: 600, fontSize: "14px", color: hasNoStock ? "#dc2626" : isLowStock ? "#ca8a04" : "#22a44e" }}>
+                    {hasNoStock ? "Sin disponibilidad" : isLowStock ? "Últimas unidades" : "Disponible"}
                   </span>
                 </div>
               </div>
@@ -114,22 +120,24 @@ const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
             <button
               className={`product-modal-btn product-modal-btn--add ${added ? "added" : ""}`}
               onClick={handleAddToCart}
-              disabled={!product.is_available}
+              disabled={!product.is_available || hasNoStock}
             >
               <ShoppingCart size={16} />
-              {added ? "✓ Agregado" : "Agregar al carrito"}
+              {hasNoStock ? "Sin stock" : added ? "✓ Agregado" : "Agregar al carrito"}
             </button>
             <button
               className="product-modal-btn product-modal-btn--buy"
               onClick={handleBuyNow}
-              disabled={!product.is_available}
+              disabled={!product.is_available || hasNoStock}
             >
               <CreditCard size={16} />
-              Comprar ahora
+              {hasNoStock ? "Sin stock" : "Comprar ahora"}
             </button>
           </div>
         </div>
       </div>
+
+      <ImageViewer imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
     </div>
   );
 };

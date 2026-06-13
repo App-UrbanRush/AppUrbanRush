@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
+import toast from "react-hot-toast";
 import type { Product } from "../../domain/types/product.types";
 
 export interface CartItem {
@@ -41,8 +42,17 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   const [items, setItems] = useState<CartItem[]>(loadCart);
 
   const addItem = useCallback((product: Product, quantity = 1) => {
+    if (product.stock <= 0 || !product.is_available) {
+      toast.error(`${product.name} no está disponible`);
+      return;
+    }
     setItems((prev) => {
       const existing = prev.find((i) => i.product.product_id === product.product_id);
+      const currentQty = existing ? existing.quantity : 0;
+      if (currentQty + quantity > product.stock) {
+        toast.error(`Solo hay ${product.stock} unidad${product.stock !== 1 ? "es" : ""} disponible${product.stock !== 1 ? "s" : ""}`);
+        return prev;
+      }
       let updated: CartItem[];
       if (existing) {
         updated = prev.map((i) =>

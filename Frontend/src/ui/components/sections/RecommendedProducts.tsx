@@ -69,12 +69,22 @@ const RecommendedProducts = ({ products }: RecommendedProductsProps) => {
               onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
               onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
             >
-              <div style={{ width: '100%', height: '130px', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', height: '130px', overflow: 'hidden' }}>
                 <img
                   src={product.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=280&fit=crop'}
                   alt={product.name}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
+                {product.stock === 0 && (
+                  <span style={{ position: 'absolute', top: '8px', left: '8px', background: '#dc2626', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', textTransform: 'uppercase' }}>
+                    Sin stock
+                  </span>
+                )}
+                {product.stock > 0 && product.stock <= 5 && (
+                  <span style={{ position: 'absolute', top: '8px', left: '8px', background: '#f59e0b', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', textTransform: 'uppercase' }}>
+                    Últimas
+                  </span>
+                )}
               </div>
               <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                 <div>
@@ -85,8 +95,8 @@ const RecommendedProducts = ({ products }: RecommendedProductsProps) => {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
                   <span style={{ fontWeight: 700, fontSize: '14px', color: '#e8500a' }}>${product.price.toLocaleString()}</span>
-                  <span style={{ fontSize: '11px', color: product.is_available ? '#22a44e' : '#c53030' }}>
-                    {product.is_available ? 'Disponible' : 'No disponible'}
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: product.stock === 0 ? '#dc2626' : product.stock <= 5 ? '#ca8a04' : '#22a44e' }}>
+                    {product.stock === 0 ? 'Sin stock' : product.stock <= 5 ? 'Últimas' : 'Disponible'}
                   </span>
                 </div>
               </div>
