@@ -7,6 +7,7 @@ export interface IOrderRepository {
   findByVendor(vendorId: number): Promise<OrderModel[]>;
   findByCourier(courierId: number): Promise<OrderModel[]>;
   findAvailableForCourier(): Promise<OrderModel[]>;
+  findPendingOlderThan(olderThan: Date): Promise<OrderModel[]>;
   updateStatus(id: string, status: string, courierId?: number): Promise<OrderModel | null>;
   updateCourier(id: string, courierId: number): Promise<OrderModel | null>;
   incrementDeliveryAttempts(id: string): Promise<OrderModel | null>;

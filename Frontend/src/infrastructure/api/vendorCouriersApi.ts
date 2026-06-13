@@ -8,6 +8,7 @@ export interface VendorCourier {
   name: string;
   photo_url: string | null;
   status: string;
+  vehicle_type: string | null;
 }
 
 export const vendorCouriersApi = {

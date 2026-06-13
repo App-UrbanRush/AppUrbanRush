@@ -19,38 +19,7 @@
 }
 
 .vendor-header-center {
-  flex: 2;
-  max-width: 600px;
-  display: flex;
-  justify-content: center;
-}
-
-.vendor-header-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  padding: 8px 16px;
-  width: 100%;
-  max-width: 400px;
-}
-
-.vendor-header-search-icon {
-  color: #666;
-}
-
-.vendor-header-search-input {
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 14px;
-  width: 100%;
-  color: #333;
-}
-
-.vendor-header-search-input::placeholder {
-  color: #999;
+  flex: 1;
 }
 
 .vendor-header-right {
@@ -398,4 +367,12 @@
 
 .dark-mode-wrapper.dark-mode .notification-item-title {
   color: #fff;
+}
+
+.dark-mode-wrapper.dark-mode .notification-item-icon {
+  background: rgba(254, 243, 199, 0.15);
+}
+
+.dark-mode-wrapper.dark-mode .notification-item-address {
+  color: rgba(255, 255, 255, 0.4);
 }

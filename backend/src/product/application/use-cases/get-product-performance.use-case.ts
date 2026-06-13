@@ -22,7 +22,7 @@ export class GetProductPerformanceUseCase {
         {
           $match: {
             vendor_id: vendorId,
-            status: { $in: ['DELIVERED', 'IN_DELIVERY', 'READY', 'PREPARING', 'ACCEPTED'] },
+            status: { $in: ['DELIVERED'] },
             createdAt: { $gte: startDate },
           },
         },
@@ -44,8 +44,14 @@ export class GetProductPerformanceUseCase {
         {
           $lookup: {
             from: 'products',
-            localField: '_id',
-            foreignField: '_id',
+            let: { product_id_str: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: [{ $toString: '$_id' }, '$$product_id_str'] },
+                },
+              },
+            ],
             as: 'product',
           },
         },

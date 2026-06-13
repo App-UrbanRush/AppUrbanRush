@@ -54,6 +54,8 @@ export class CreateOrderUseCase {
       deliveryCode,
       0,
       false,
+      dto.customer_lat ?? null,
+      dto.customer_lng ?? null,
     );
 
     const savedOrder = await this.orderRepository.create(order);

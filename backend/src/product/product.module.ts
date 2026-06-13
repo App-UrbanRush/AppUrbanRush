@@ -7,6 +7,7 @@ import { GetProductsByVendorUseCase } from './application/use-cases/get-products
 import { GetAllProductsUseCase } from './application/use-cases/get-all-products.use-case';
 import { UpdateProductUseCase } from './application/use-cases/update-product.use-case';
 import { DeleteProductUseCase } from './application/use-cases/delete-product.use-case';
+import { GetProductPerformanceUseCase } from './application/use-cases/get-product-performance.use-case';
 import { ProductController } from './infrastructure/controllers/product.controller';
 
 @Module({
@@ -22,6 +23,7 @@ import { ProductController } from './infrastructure/controllers/product.controll
     GetAllProductsUseCase,
     UpdateProductUseCase,
     DeleteProductUseCase,
+    GetProductPerformanceUseCase,
   ],
   exports: ['IProductRepository'],
 })

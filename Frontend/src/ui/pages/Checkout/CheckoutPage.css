@@ -258,6 +258,22 @@
   width: 100%;
 }
 
+.checkout-coords-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  font-family: monospace;
+}
+
+.dark-mode-wrapper.dark-mode .checkout-coords-info {
+  color: #94a3b8;
+}
+
 /* Payment step */
 .checkout-payment-option {
   display: flex;

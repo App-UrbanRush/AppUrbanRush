@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from "react-leaflet";
 import L from "leaflet";
 
@@ -27,15 +27,14 @@ const customerIcon = L.divIcon({
   iconAnchor: [18, 18],
 });
 
-function Recenter({ center }: { center: [number, number] }) {
+function RecenterOnce({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
-    if (center && center.length === 2 && 
-        typeof center[0] === 'number' && typeof center[1] === 'number' &&
-        !isNaN(center[0]) && !isNaN(center[1])) {
-      map.setView(center, map.getZoom(), { animate: true });
+    if (!isNaN(lat) && !isNaN(lng)) {
+      map.setView([lat, lng], map.getZoom(), { animate: true });
     }
-  }, [center, map]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return null;
 }
 
@@ -50,6 +49,23 @@ function InvalidateSize() {
       obs.disconnect();
     };
   }, [map]);
+  return null;
+}
+
+function FitBoundsOnce({ points }: { points: RoutePoints[] }) {
+  const map = useMap();
+  const done = useRef(false);
+  useEffect(() => {
+    if (done.current || points.length < 2) return;
+    done.current = true;
+    const bounds = L.latLngBounds(
+      points.map((p) => [p.lat, p.lng] as [number, number])
+    );
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [points]);
   return null;
 }
 
@@ -83,28 +99,27 @@ const LiveTrackingMap = ({
 }: LiveTrackingMapProps) => {
   const [mounted, setMounted] = useState(false);
   const [routePoints, setRoutePoints] = useState<RoutePoints[]>([]);
-  
+  const fetching = useRef(false);
+
   useEffect(() => setMounted(true), []);
 
   const hasPosition = lat != null && lng != null && !isNaN(lat) && !isNaN(lng);
   const hasCustomerPosition = customerLat != null && customerLng != null && !isNaN(customerLat) && !isNaN(customerLng);
   const center: [number, number] = hasPosition ? [lat as number, lng as number] : defaultCenter;
 
-  // Calcular ruta cuando hay ambas posiciones y showRoute es true
+  // Obtener ruta cada vez que cambien las coordenadas (nunca limpiar routePoints)
   useEffect(() => {
-    if (!showRoute || !hasPosition || !hasCustomerPosition) {
-      setRoutePoints([]);
-      return;
-    }
+    if (!showRoute || !hasPosition || !hasCustomerPosition) return;
+    if (fetching.current) return;
+    fetching.current = true;
 
     const fetchRoute = async () => {
       try {
-        // Usar OSRM para obtener la ruta
         const response = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${lng},${lat}?${customerLng},${customerLat}?overview=full&geometries=geojson`
+          `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${customerLng},${customerLat}?overview=full&geometries=geojson`
         );
         const data = await response.json();
-        
+
         if (data.routes && data.routes.length > 0) {
           const coordinates = data.routes[0].geometry.coordinates;
           const points = coordinates.map((coord: [number, number]) => ({
@@ -113,20 +128,21 @@ const LiveTrackingMap = ({
           }));
           setRoutePoints(points);
         }
-      } catch (error) {
-        console.error("Error al obtener ruta:", error);
-        // Fallback: línea recta si falla OSRM
-        setRoutePoints([
-          { lat: lat as number, lng: lng as number },
-          { lat: customerLat as number, lng: customerLng as number },
-        ]);
+      } catch {
+        if (routePoints.length === 0) {
+          setRoutePoints([
+            { lat: lat as number, lng: lng as number },
+            { lat: customerLat as number, lng: customerLng as number },
+          ]);
+        }
+      } finally {
+        fetching.current = false;
       }
     };
 
     fetchRoute();
-  }, [lat, lng, customerLat, customerLng, showRoute, hasPosition, hasCustomerPosition]);
+  }, [showRoute, hasPosition, hasCustomerPosition, customerLat, customerLng, lat, lng]);
 
-  // Calcular el centro del mapa para mostrar ambos puntos
   const mapCenter: [number, number] = 
     hasPosition && hasCustomerPosition && lat != null && customerLat != null
       ? [
@@ -148,28 +164,25 @@ const LiveTrackingMap = ({
         style={{ height: "100%", width: "100%" }}
       >
         <InvalidateSize />
-        {(hasPosition || hasCustomerPosition) && <Recenter center={mapCenter} />}
+        {hasCustomerPosition && <RecenterOnce lat={customerLat as number} lng={customerLng as number} />}
+        {showRoute && routePoints.length > 0 && <FitBoundsOnce points={routePoints} />}
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         
-        {/* Mostrar ruta */}
         {showRoute && routePoints.length > 0 && (
           <Polyline
             positions={routePoints.map((p) => [p.lat, p.lng])}
             color="#ff6b35"
-            weight={4}
-            opacity={0.8}
-            dashArray="10, 10"
+            weight={5}
+            opacity={0.9}
           />
         )}
         
-        {/* Marcador del domiciliario */}
         {hasPosition && (
           <Marker position={center} icon={courierIcon}>
             <Popup>{popupText}</Popup>
           </Marker>
         )}
         
-        {/* Marcador del cliente */}
         {hasCustomerPosition && (
           <Marker 
             position={[customerLat as number, customerLng as number]} 

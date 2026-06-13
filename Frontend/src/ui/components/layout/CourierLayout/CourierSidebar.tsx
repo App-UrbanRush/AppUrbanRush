@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Bike, PackageSearch, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, Bike, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
 import "./CourierSidebar.css";
 
 const menuItems = [
@@ -7,11 +7,6 @@ const menuItems = [
     label: "Inicio",
     path: "/courier/dashboard",
     icon: <Home size={24} />,
-  },
-  {
-    label: "Disponibles",
-    path: "/courier/available",
-    icon: <PackageSearch size={24} />,
   },
   {
     label: "Mis Entregas",

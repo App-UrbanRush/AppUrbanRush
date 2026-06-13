@@ -6,6 +6,7 @@ import { GetProductsByVendorUseCase } from '../../application/use-cases/get-prod
 import { GetAllProductsUseCase } from '../../application/use-cases/get-all-products.use-case';
 import { UpdateProductUseCase } from '../../application/use-cases/update-product.use-case';
 import { DeleteProductUseCase } from '../../application/use-cases/delete-product.use-case';
+import { GetProductPerformanceUseCase } from '../../application/use-cases/get-product-performance.use-case';
 import { CreateProductDto } from '../../application/dtos/create-product.dto';
 import { UpdateProductDto } from '../../application/dtos/update-product.dto';
 import { IProductRepository } from '../../domain/repositories/product.repository.interface';
@@ -19,6 +20,7 @@ export class ProductController {
     private readonly getAllProducts: GetAllProductsUseCase,
     private readonly updateProduct: UpdateProductUseCase,
     private readonly deleteProduct: DeleteProductUseCase,
+    private readonly getProductPerformanceUseCase: GetProductPerformanceUseCase,
     @Inject('IProductRepository') private readonly productRepository: IProductRepository,
   ) {}
 
@@ -40,6 +42,22 @@ export class ProductController {
   @ApiOperation({ summary: 'Catálogo de un vendedor' })
   getByVendorId(@Param('vendorId') vendorId: string) {
     return this.getByVendor.execute(Number(vendorId));
+  }
+
+  @Get('vendor/:vendorId/performance')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Productos más vendidos del vendedor' })
+  getProductPerformance(
+    @Param('vendorId') vendorId: string,
+    @Query('limit') limit?: string,
+    @Query('days') days?: string,
+  ) {
+    return this.getProductPerformanceUseCase.execute(
+      Number(vendorId),
+      limit ? Number(limit) : 5,
+      days ? Number(days) : 7,
+    );
   }
 
   @Post()

@@ -28,6 +28,8 @@ export class MongoOrderRepository implements IOrderRepository {
       delivery_code: order.delivery_code,
       delivery_attempts: order.delivery_attempts,
       delivery_blocked: order.delivery_blocked,
+      customer_lat: order.customer_lat,
+      customer_lng: order.customer_lng,
     });
     const saved = await created.save();
     return OrderMapper.toDomain(saved);
@@ -70,6 +72,15 @@ export class MongoOrderRepository implements IOrderRepository {
     return docs.map(OrderMapper.toDomain);
   }
 
+  async findPendingOlderThan(olderThan: Date): Promise<OrderModel[]> {
+    const docs = await this.orderModel
+      .find({
+        status: 'PENDING',
+        createdAt: { $lt: olderThan },
+      })
+      .exec();
+    return docs.map(OrderMapper.toDomain);
+  }
 
 async updateStatus(id: string, status: string, courierId?: number): Promise<OrderModel | null> {
     const update: any = { status };

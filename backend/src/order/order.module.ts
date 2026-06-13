@@ -14,6 +14,7 @@ import { ConfirmDeliveryUseCase } from './application/use-cases/confirm-delivery
 import { GetAllVendorOrdersUseCase } from './application/use-cases/get-all-vendor-orders.use-case';
 import { GetCourierActiveOrdersUseCase } from './application/use-cases/get-courier-active-orders.use-case';
 import { GetVendorRecentOrdersUseCase } from './application/use-cases/get-vendor-recent-orders.use-case';
+import { OrderAutoCancelService } from './infrastructure/services/order-auto-cancel.service';
 import { OrderController } from './infrastructure/controllers/order.controller';
 import { ProductModule } from 'src/product/product.module';
 import { LiquidationModule } from 'src/liquidation/liquidation.module';
@@ -47,6 +48,7 @@ import { CourierEntity } from 'src/courier/infrastructure/persistence/entities/c
     GetAllVendorOrdersUseCase,
     GetCourierActiveOrdersUseCase,
     GetVendorRecentOrdersUseCase,
+    OrderAutoCancelService,
   ],
   exports: ['IOrderRepository'],
 })

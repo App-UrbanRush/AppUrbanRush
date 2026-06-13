@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsArray, ValidateNested, Min } from 'class-validator';
+import { IsNumber, IsString, IsArray, ValidateNested, Min, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -16,4 +16,6 @@ export class CreateOrderDto {
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items: OrderItemDto[];
+  @ApiProperty({ required: false }) @IsOptional() @IsNumber() customer_lat?: number;
+  @ApiProperty({ required: false }) @IsOptional() @IsNumber() customer_lng?: number;
 }

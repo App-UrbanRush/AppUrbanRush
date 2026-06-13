@@ -300,12 +300,41 @@
 }
 
 .dark-mode-wrapper.dark-mode .recent-order-item {
+  background: transparent;
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark-mode-wrapper.dark-mode .recent-order-item:hover {
   border-color: #2563eb;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.dark-mode-wrapper.dark-mode .order-hash {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dark-mode-wrapper.dark-mode .customer-name {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dark-mode-wrapper.dark-mode .order-item {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dark-mode-wrapper.dark-mode .order-item-more {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.dark-mode-wrapper.dark-mode .recent-order-footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode-wrapper.dark-mode .order-total {
+  color: #fff;
 }
 
 .dark-mode-wrapper.dark-mode .order-id {

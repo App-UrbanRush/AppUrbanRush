@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, User, Package, MapPin, ChefHat, CheckCircle, Truck, XCircle } from "lucide-react";
+import { Clock, User, Package, MapPin, ChefHat, CheckCircle, Truck, XCircle, Search } from "lucide-react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import { useAuth } from "../../context/useAuth";
 import type { RecentOrder } from "../../../domain/types/recent-orders.types";
@@ -19,7 +19,7 @@ const STATUS_CONFIG: Record<string, { color: string; label: string; icon: JSX.El
   PREPARING: { color: 'blue', label: 'En preparación', icon: <ChefHat size={14} /> },
   READY: { color: 'green', label: 'Listo', icon: <CheckCircle size={14} /> },
   IN_DELIVERY: { color: 'purple', label: 'En delivery', icon: <Truck size={14} /> },
-  DELIVERED: { color: 'gray', label: 'Entregado', icon: <Package size={14} /> },
+  DELIVERED: { color: 'emerald', label: 'Entregado', icon: <Package size={14} /> },
   CANCELLED: { color: 'red', label: 'Cancelado', icon: <XCircle size={14} /> },
 };
 
@@ -30,6 +30,8 @@ const VendorOrders = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<RecentOrder | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("todos");
+  const [searchId, setSearchId] = useState("");
 
   const fetchOrders = useCallback(async () => {
     if (!vendorProfile) return;
@@ -64,8 +66,30 @@ const VendorOrders = () => {
     }
   };
 
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { todos: orders.length };
+    for (const key of Object.keys(STATUS_CONFIG)) {
+      counts[key] = orders.filter(o => o.status === key).length;
+    }
+    return counts;
+  }, [orders]);
+
+  const filteredOrders = useMemo(() => {
+    let result = orders;
+    if (statusFilter !== "todos") {
+      result = result.filter(o => o.status === statusFilter);
+    }
+    if (searchId.trim()) {
+      const q = searchId.trim().toLowerCase();
+      result = result.filter(o =>
+        o.order_id.toLowerCase().includes(q) ||
+        o.order_id.slice(-6).toLowerCase().includes(q.replace('#', ''))
+      );
+    }
+    return result;
+  }, [orders, statusFilter, searchId]);
+
   const STATUS_FLOW: Record<string, string> = {
-    PENDING: 'ACCEPTED',
     ACCEPTED: 'PREPARING',
     PREPARING: 'READY',
   };
@@ -94,7 +118,7 @@ const VendorOrders = () => {
     );
   }
 
-  if (orders.length === 0) {
+  if (!loading && orders.length === 0) {
     return (
       <VendorLayout>
         <div className="vendor-orders-empty">
@@ -111,7 +135,33 @@ const VendorOrders = () => {
       <div className="vendor-orders-container">
         <div className="vendor-orders-header">
           <h1>Gestión de Pedidos</h1>
-          <p className="orders-count">{orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en total</p>
+          <div className="vendor-orders-header-right">
+            <div className="vendor-orders-search">
+              <Search size={16} />
+              <input
+                type="text"
+                placeholder="Buscar por ID..."
+                value={searchId}
+                onChange={(e) => setSearchId(e.target.value)}
+              />
+            </div>
+            <p className="orders-count">{orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en total</p>
+          </div>
+        </div>
+
+        <div className="vendor-orders-tabs">
+          {Object.entries({ todos: "Todos", ...Object.fromEntries(
+            Object.entries(STATUS_CONFIG).map(([key, val]) => [key, val.label])
+          )}).map(([key, label]) => (
+            <button
+              key={key}
+              className={`vendor-orders-tab ${statusFilter === key ? "active" : ""}`}
+              onClick={() => setStatusFilter(key)}
+            >
+              {label}
+              <span className="vendor-orders-tab-count">{statusCounts[key] || 0}</span>
+            </button>
+          ))}
         </div>
 
         <div className="vendor-orders-table-header">
@@ -125,9 +175,13 @@ const VendorOrders = () => {
         </div>
 
         <div className="vendor-orders-list">
-          {orders.map((order) => {
+          {filteredOrders.length === 0 && statusFilter !== "todos" ? (
+            <div className="vendor-orders-empty-filter">
+              <p>No hay pedidos con estado "{STATUS_CONFIG[statusFilter]?.label || statusFilter}"</p>
+            </div>
+          ) : null}
+          {filteredOrders.map((order) => {
             const statusConfig = STATUS_CONFIG[order.status] || { color: 'gray', label: order.status, icon: <Package size={14} /> };
-            const isPending = order.status === 'PENDING';
             const isInDelivery = order.status === 'IN_DELIVERY';
 
             return (
@@ -162,13 +216,15 @@ const VendorOrders = () => {
                   </div>
 
                   <div className="order-actions">
-                    <button
-                      className="status-btn"
-                      onClick={() => handleStatusChange(order)}
-                      title={`Estado actual: ${statusConfig.label}. Click para avanzar`}
-                    >
-                      {statusConfig.icon} {statusConfig.label}
-                    </button>
+                    {order.status !== 'PENDING' && (
+                      <button
+                        className={`status-btn status-${statusConfig.color}`}
+                        onClick={() => handleStatusChange(order)}
+                        title={`Estado actual: ${statusConfig.label}. Click para avanzar`}
+                      >
+                        {statusConfig.icon} {statusConfig.label}
+                      </button>
+                    )}
 
                     {order.status === 'READY' && !order.courier_name && (
                       <button

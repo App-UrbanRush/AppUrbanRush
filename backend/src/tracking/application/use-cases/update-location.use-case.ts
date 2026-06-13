@@ -29,7 +29,7 @@ export class UpdateLocationUseCase {
     const order = await this.orderRepo.findById(dto.order_id);
     if (!order) throw new NotFoundException('Pedido no encontrado');
 
-    if (order.courier_id !== courier.couriers_id) {
+    if (order.courier_id !== courier.user_id) {
       throw new ForbiddenException('Este pedido no está asignado a ti');
     }
 
