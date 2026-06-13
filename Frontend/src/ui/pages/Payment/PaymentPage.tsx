@@ -411,9 +411,11 @@ const PaymentPage = () => {
           </div>
         )}
 
-        <button className="payment-btn payment-btn-secondary" onClick={() => navigate("/dashboard")}>
-          Ir al inicio
-        </button>
+<button className="payment-btn payment-btn-secondary" onClick={() => {
+            window.location.href = "/dashboard";
+          }}>
+            Ir al inicio
+          </button>
       </div>
     </div>
   );

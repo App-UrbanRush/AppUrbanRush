@@ -43,6 +43,11 @@ export class MongoProductRepository implements IProductRepository {
     return docs.map(ProductMapper.toDomain);
   }
 
+  async findAllIncludingUnavailable(): Promise<ProductModel[]> {
+    const docs = await this.productModel.find().exec();
+    return docs.map(ProductMapper.toDomain);
+  }
+
 
 async update(id: string, product: Partial<ProductModel>): Promise<ProductModel | null> {
     const updated = await this.productModel

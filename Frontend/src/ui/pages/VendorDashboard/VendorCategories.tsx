@@ -57,9 +57,8 @@ const VendorCategories = () => {
       return;
     }
     try {
-      console.log(`📡 Loading categories for vendor ${vendorProfile.vendor_id}`);
-      const data = await categoryRepository.getCategoriesByVendor(vendorProfile.vendor_id);
-      console.log(`✅ Categories loaded:`, data);
+      // Usar el endpoint que obtiene las categorías del vendor autenticado
+      const data = await categoryRepository.getMyCategories();
       setCategories(data);
     } catch (error) {
       console.error("Error al cargar categorías:", error);

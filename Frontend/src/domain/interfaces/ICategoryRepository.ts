@@ -6,6 +6,7 @@ export interface Category {
 }
 
 export interface ICategoryRepository {
+  getMyCategories(): Promise<Category[]>;
   getCategoriesByVendor(vendorId: number): Promise<Category[]>;
   createCategory(vendorId: number, name: string, imageUrl: string): Promise<Category>;
   updateCategory(id: string, data: { name?: string; image_url?: string }): Promise<Category>;

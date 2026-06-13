@@ -19,6 +19,7 @@ export interface ITrackingGateway {
   /** Callbacks de eventos entrantes */
   onLocation(cb: (location: CourierLocation) => void): void;
   onTrackingClosed(cb: (data: { order_id: string; message: string }) => void): void;
+  onVendorStatsUpdate(cb: (stats: { domiciliariosActivos: number }) => void): void;
   onError(cb: (data: { message: string }) => void): void;
   onConnectionChange(cb: (connected: boolean) => void): void;
 }

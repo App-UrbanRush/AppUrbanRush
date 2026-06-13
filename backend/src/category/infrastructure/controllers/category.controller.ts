@@ -10,6 +10,7 @@ import { CreateCategoryUseCase } from '../../application/use-cases/create-catego
 import { GetCategoriesByVendorUseCase } from '../../application/use-cases/get-categories-by-vendor.use-case';
 import { UpdateCategoryUseCase } from '../../application/use-cases/update-category.use-case';
 import { DeleteCategoryUseCase } from '../../application/use-cases/delete-category.use-case';
+import { GetVendorProfileUseCase } from 'src/vendor/application/use-cases/get-vendor-profile.use-case';
 
 @ApiTags('Categories')
 @ApiBearerAuth()
@@ -21,7 +22,15 @@ export class CategoryController {
     private readonly getCategoriesByVendor: GetCategoriesByVendorUseCase,
     private readonly updateCategory: UpdateCategoryUseCase,
     private readonly deleteCategory: DeleteCategoryUseCase,
+    private readonly getVendorProfile: GetVendorProfileUseCase,
   ) {}
+
+  @Get('vendor')
+  @ApiOperation({ summary: 'Obtener categorías del vendor autenticado' })
+  async getMyCategories(@Request() req) {
+    const vendor = await this.getVendorProfile.execute(req.user.user_id);
+    return this.getCategoriesByVendor.execute(vendor.vendor_id!);
+  }
 
   @Get('vendor/:vendorId')
   @ApiOperation({ summary: 'Obtener categorías de un vendedor' })
@@ -36,7 +45,9 @@ export class CategoryController {
     @Request() req,
     @Body() body: { name: string; image_url?: string },
   ) {
-    return this.createCategory.execute(req.user.user_id, body.name, body.image_url);
+    // Obtener el vendor_id correcto del perfil del vendor autenticado
+    const vendor = await this.getVendorProfile.execute(req.user.user_id);
+    return this.createCategory.execute(vendor.vendor_id!, body.name, body.image_url);
   }
 
   @Put(':id')
@@ -53,6 +64,7 @@ export class CategoryController {
   @Roles(UserRole.BUSINESS)
   @ApiOperation({ summary: 'Eliminar categoría (BUSINESS)' })
   async remove(@Param('id') id: string, @Request() req) {
-    return this.deleteCategory.execute(id, req.user.user_id);
+    const vendor = await this.getVendorProfile.execute(req.user.user_id);
+    return this.deleteCategory.execute(id, vendor.vendor_id!);
   }
 }

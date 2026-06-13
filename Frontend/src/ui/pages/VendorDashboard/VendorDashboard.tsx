@@ -4,6 +4,7 @@ import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import RecentOrders from "../../components/vendor/RecentOrders";
 import MenuPerformance from "../../components/vendor/MenuPerformance";
 import VendorCourierMap from "../../components/vendor/VendorCourierMap";
+import DashboardStats from "../../components/vendor/DashboardStats";
 import "./VendorDashboard.css";
 
 const VendorDashboard = () => {
@@ -20,6 +21,7 @@ const VendorDashboard = () => {
   return (
     <VendorLayout>
       <div className="vendor-dashboard">
+        <DashboardStats />
         <RecentOrders />
         <div className="vendor-dashboard-row">
           <MenuPerformance />

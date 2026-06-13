@@ -80,6 +80,13 @@ async updateStatus(id: string, status: string, courierId?: number): Promise<Orde
     return updated ? OrderMapper.toDomain(updated) : null;
   }
 
+  async updateCourier(id: string, courierId: number): Promise<OrderModel | null> {
+    const updated = await this.orderModel
+      .findByIdAndUpdate(id, { courier_id: courierId }, { returnDocument: 'after' })
+      .exec();
+    return updated ? OrderMapper.toDomain(updated) : null;
+  }
+
   async incrementDeliveryAttempts(id: string): Promise<OrderModel | null> {
     const updated = await this.orderModel
       .findByIdAndUpdate(id, { $inc: { delivery_attempts: 1 } }, { returnDocument: 'after' })

@@ -48,4 +48,14 @@ export class CreateFullUserDto {
   @IsOptional()
   @IsString({ message: 'El documento debe ser una cadena de texto' })
   document_number?: string;
+
+  @ApiPropertyOptional({ description: 'Latitud de la ubicación del usuario' })
+  @IsOptional()
+  @IsNumber({}, { message: 'La latitud debe ser un número' })
+  latitude?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud de la ubicación del usuario' })
+  @IsOptional()
+  @IsNumber({}, { message: 'La longitud debe ser un número' })
+  longitude?: number;
 }

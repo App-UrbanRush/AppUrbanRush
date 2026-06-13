@@ -65,7 +65,6 @@ const VendorCouriers = () => {
               <span className="couriers-col-photo">Foto</span>
               <span className="couriers-col-name">Nombre</span>
               <span className="couriers-col-status">Estado Actual</span>
-              <span className="couriers-col-action">Acción</span>
             </div>
             <div className="couriers-table">
               {filtered.map((courier) => (
@@ -86,11 +85,6 @@ const VendorCouriers = () => {
                     <span className={`courier-status ${courier.status.toLowerCase()}`}>
                       {courier.status}
                     </span>
-                  </div>
-                  <div className="couriers-col-action">
-                    <button className="courier-assign-btn">
-                      <Package size={14} /> Asignar Pedido
-                    </button>
                   </div>
                 </div>
               ))}

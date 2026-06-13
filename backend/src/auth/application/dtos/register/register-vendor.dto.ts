@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, IsOptional, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsOptional, MinLength, IsNumber } from 'class-validator';
 
 export class RegisterVendorDto {
   @IsEmail({}, { message: 'El correo electrónico no es válido' })
@@ -82,4 +82,14 @@ export class RegisterVendorDto {
   @IsOptional()
   @ApiPropertyOptional({ description: 'URL de documento legal' })
   document_url?: string;
+
+  @ApiPropertyOptional({ description: 'Latitud de la ubicación del negocio' })
+  @IsOptional()
+  @IsNumber({}, { message: 'La latitud debe ser un número' })
+  latitude?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud de la ubicación del negocio' })
+  @IsOptional()
+  @IsNumber({}, { message: 'La longitud debe ser un número' })
+  longitude?: number;
 }

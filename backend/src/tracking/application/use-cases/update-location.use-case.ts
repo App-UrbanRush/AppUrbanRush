@@ -38,7 +38,7 @@ export class UpdateLocationUseCase {
     }
 
     const location = new CourierLocationModel(
-      courier.couriers_id,
+      userId,
       dto.order_id,
       dto.lat,
       dto.lng,

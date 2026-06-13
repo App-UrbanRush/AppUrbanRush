@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Query, Inject } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/infrastructure/guards/jwt-auth.guard';
 import { CreateProductUseCase } from '../../application/use-cases/create-product.use-case';
@@ -8,6 +8,7 @@ import { UpdateProductUseCase } from '../../application/use-cases/update-product
 import { DeleteProductUseCase } from '../../application/use-cases/delete-product.use-case';
 import { CreateProductDto } from '../../application/dtos/create-product.dto';
 import { UpdateProductDto } from '../../application/dtos/update-product.dto';
+import { IProductRepository } from '../../domain/repositories/product.repository.interface';
 
 @ApiTags('Products')
 @Controller('products')
@@ -18,12 +19,21 @@ export class ProductController {
     private readonly getAllProducts: GetAllProductsUseCase,
     private readonly updateProduct: UpdateProductUseCase,
     private readonly deleteProduct: DeleteProductUseCase,
+    @Inject('IProductRepository') private readonly productRepository: IProductRepository,
   ) {}
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los productos disponibles' })
   findAll() {
     return this.getAllProducts.execute();
+  }
+
+  @Get('all')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener todos los productos (incluyendo no disponibles)' })
+  findAllIncludingUnavailable() {
+    return this.productRepository.findAllIncludingUnavailable();
   }
 
   @Get('vendor/:vendorId')

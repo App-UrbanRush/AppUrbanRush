@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import { trackingApi } from "../../../infrastructure/api/trackingApi";
@@ -6,15 +6,17 @@ import type { VendorCourierLocation } from "../../../domain/types/tracking.types
 import { Bike } from "lucide-react";
 import "./VendorCourierMap.css";
 
-const courierIcon = L.divIcon({
+const createCourierIcon = (name: string) => L.divIcon({
   className: "",
-  html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="11" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
-    <path d="M7 15a2 2 0 100-4 2 2 0 000 4zm10 0a2 2 0 100-4 2 2 0 000 4z" fill="#fff"/>
-    <path d="M5 13h3l2-3h4l1 3h3" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
+  html: `<div style="position:relative;">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;background:rgba(124,58,237,0.15);animation:vendorPulse 2s infinite;"></div>
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="11" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">${name.charAt(0).toUpperCase()}</text>
+    </svg>
+  </div>`,
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
 });
 
 const defaultCenter: [number, number] = [4.6097, -74.0817];
@@ -78,8 +80,14 @@ const VendorCourierMap = () => {
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <FitBounds couriers={couriers} />
           {couriers.map((c) => (
-            <Marker key={c.courier_id} position={[c.lat, c.lng]} icon={courierIcon}>
-              <Popup>{c.name}</Popup>
+            <Marker key={c.courier_id} position={[c.lat, c.lng]} icon={createCourierIcon(c.name)}>
+              <Popup>
+                <strong>🛵 {c.name}</strong><br />
+                <span style="font-size:12px;color:#666;">
+                  ID: {c.courier_id}<br />
+                  {new Date(c.timestamp).toLocaleTimeString()}
+                </span>
+              </Popup>
             </Marker>
           ))}
         </MapContainer>

@@ -199,6 +199,38 @@
   margin-top: 18px;
 }
 
+/* Botón aceptar pedido (azul con gradiente) */
+.delivery-accept-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  color: #fff;
+  border: 0;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.delivery-accept-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+}
+
+.delivery-accept-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.delivery-accept-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Botón primario (gradiente como login) */
 .delivery-share-btn {
   width: 100%;

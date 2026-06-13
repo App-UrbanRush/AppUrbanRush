@@ -1,24 +1,26 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, User, Package, MapPin } from "lucide-react";
+import { Clock, User, Package, MapPin, ChefHat, CheckCircle, Truck, XCircle } from "lucide-react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import { useAuth } from "../../context/useAuth";
 import type { RecentOrder } from "../../../domain/types/recent-orders.types";
 import { GetAllVendorOrdersUseCase } from "../../../application/use-cases/GetAllVendorOrdersUseCase";
 import { RecentOrdersRepositoryImpl } from "../../../infrastructure/repositories/RecentOrdersRepositoryImpl";
 import OrderDetailModal from "../../components/vendor/OrderDetailModal";
+import { ordersApi } from "../../../infrastructure/api/ordersApi";
+import toast from "react-hot-toast";
 import "./VendorOrders.css";
 
 const getAllVendorOrders = new GetAllVendorOrdersUseCase(new RecentOrdersRepositoryImpl());
 
-const STATUS_CONFIG: Record<string, { color: string; label: string; icon: string }> = {
-  PENDING: { color: 'yellow', label: 'Pendiente', icon: '⏳' },
-  ACCEPTED: { color: 'orange', label: 'Aceptado', icon: '✅' },
-  PREPARING: { color: 'blue', label: 'En preparación', icon: '👨‍🍳' },
-  READY: { color: 'green', label: 'Listo', icon: '✅' },
-  IN_DELIVERY: { color: 'purple', label: 'En delivery', icon: '🚴' },
-  DELIVERED: { color: 'gray', label: 'Entregado', icon: '📦' },
-  CANCELLED: { color: 'red', label: 'Cancelado', icon: '❌' },
+const STATUS_CONFIG: Record<string, { color: string; label: string; icon: JSX.Element }> = {
+  PENDING: { color: 'yellow', label: 'Pendiente', icon: <Clock size={14} /> },
+  ACCEPTED: { color: 'orange', label: 'Aceptado', icon: <CheckCircle size={14} /> },
+  PREPARING: { color: 'blue', label: 'En preparación', icon: <ChefHat size={14} /> },
+  READY: { color: 'green', label: 'Listo', icon: <CheckCircle size={14} /> },
+  IN_DELIVERY: { color: 'purple', label: 'En delivery', icon: <Truck size={14} /> },
+  DELIVERED: { color: 'gray', label: 'Entregado', icon: <Package size={14} /> },
+  CANCELLED: { color: 'red', label: 'Cancelado', icon: <XCircle size={14} /> },
 };
 
 const VendorOrders = () => {
@@ -50,8 +52,38 @@ const VendorOrders = () => {
     setIsModalOpen(true);
   };
 
-  const handleAcceptClick = (_orderId: string) => {
-    // TODO: implementar lógica de aceptar pedido via API
+  const handlePublishOrder = async (order: RecentOrder) => {
+    try {
+      // Cambiar el estado a READY para que esté disponible para todos los domiciliarios
+      await ordersApi.updateStatus(order.order_id, 'READY');
+      toast.success('Pedido publicado! Los domiciliarios activos pueden verlo ahora');
+      await fetchOrders();
+    } catch (error: any) {
+      console.error("Error al publicar pedido:", error);
+      toast.error('Error al publicar el pedido');
+    }
+  };
+
+  const STATUS_FLOW: Record<string, string> = {
+    PENDING: 'ACCEPTED',
+    ACCEPTED: 'PREPARING',
+    PREPARING: 'READY',
+  };
+
+  const handleStatusChange = async (order: RecentOrder) => {
+    const nextStatus = STATUS_FLOW[order.status];
+    if (!nextStatus) {
+      alert('El pedido ya está listo para recoger o fue finalizado');
+      return;
+    }
+    
+    try {
+      await ordersApi.updateStatus(order.order_id, nextStatus);
+      await fetchOrders();
+    } catch (error) {
+      console.error("Error al actualizar estado:", error);
+      alert('Error al actualizar el estado del pedido');
+    }
   };
 
   if (loading) {
@@ -78,13 +110,23 @@ const VendorOrders = () => {
     <VendorLayout>
       <div className="vendor-orders-container">
         <div className="vendor-orders-header">
-          <h1>Todos los Pedidos</h1>
-          <p className="orders-count">{orders.length} pedidos en total</p>
+          <h1>Gestión de Pedidos</h1>
+          <p className="orders-count">{orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en total</p>
+        </div>
+
+        <div className="vendor-orders-table-header">
+          <span>ID Pedido</span>
+          <span>Cliente</span>
+          <span>Estado</span>
+          <span>Domiciliario</span>
+          <span>Total</span>
+          <span>Tiempo</span>
+          <span>Acciones</span>
         </div>
 
         <div className="vendor-orders-list">
           {orders.map((order) => {
-            const statusConfig = STATUS_CONFIG[order.status] || { color: 'gray', label: order.status, icon: '' };
+            const statusConfig = STATUS_CONFIG[order.status] || { color: 'gray', label: order.status, icon: <Package size={14} /> };
             const isPending = order.status === 'PENDING';
             const isInDelivery = order.status === 'IN_DELIVERY';
 
@@ -93,9 +135,6 @@ const VendorOrders = () => {
                 <div className="order-main-info">
                   <div className="order-id-status">
                     <span className="order-id">#{order.order_id.slice(-6).toUpperCase()}</span>
-                    <span className={`order-status status-${statusConfig.color}`}>
-                      {statusConfig.icon} {statusConfig.label}
-                    </span>
                   </div>
 
                   <div className="order-customer">
@@ -103,8 +142,13 @@ const VendorOrders = () => {
                     <span>{order.customer_name}</span>
                   </div>
 
+                  <div className={`order-status status-${statusConfig.color}`}>
+                    {statusConfig.icon}
+                    <span>{statusConfig.label}</span>
+                  </div>
+
                   <div className="order-courier">
-                    <span className="courier-label">Domiciliario:</span>
+                    <User size={16} />
                     <span className="courier-name">{order.courier_name || 'No asignado'}</span>
                   </div>
 
@@ -112,37 +156,45 @@ const VendorOrders = () => {
                     <span className="total-amount">${order.total.toLocaleString()}</span>
                   </div>
 
-                  <button
-                    className="details-btn"
-                    onClick={() => handleDetailsClick(order)}
-                  >
-                    Detalles
-                  </button>
-
-                  {isInDelivery && (
-                    <button
-                      className="track-btn"
-                      onClick={() => navigate(`/tracking/${order.order_id}`)}
-                    >
-                      <MapPin size={14} /> Ver seguimiento
-                    </button>
-                  )}
-                </div>
-
-                <div className="order-secondary-info">
                   <div className="order-time">
                     <Clock size={14} />
                     <span>{order.time_elapsed}</span>
                   </div>
 
-                  {isPending && (
+                  <div className="order-actions">
                     <button
-                      className="accept-btn"
-                      onClick={() => handleAcceptClick(order.order_id)}
+                      className="status-btn"
+                      onClick={() => handleStatusChange(order)}
+                      title={`Estado actual: ${statusConfig.label}. Click para avanzar`}
                     >
-                      ACEPTAR
+                      {statusConfig.icon} {statusConfig.label}
                     </button>
-                  )}
+
+                    {order.status === 'READY' && !order.courier_name && (
+                      <button
+                        className="publish-btn"
+                        onClick={() => handlePublishOrder(order)}
+                      >
+                        Publicar
+                      </button>
+                    )}
+
+                    {isInDelivery && (
+                      <button
+                        className="track-btn"
+                        onClick={() => navigate(`/tracking/${order.order_id}`)}
+                      >
+                        <MapPin size={14} /> Ruta
+                      </button>
+                    )}
+
+                    <button
+                      className="details-btn"
+                      onClick={() => handleDetailsClick(order)}
+                    >
+                      Detalles
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -153,7 +205,6 @@ const VendorOrders = () => {
           <OrderDetailModal
             order={selectedOrder}
             onClose={() => setIsModalOpen(false)}
-            onAccept={() => handleAcceptClick(selectedOrder.order_id)}
           />
         )}
       </div>

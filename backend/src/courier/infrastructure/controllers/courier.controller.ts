@@ -1,5 +1,6 @@
 import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GetCourierProfileUseCase } from '../../application/use-cases/get-courier-profile.use-case';
 import { UpdateCourierProfileUseCase } from '../../application/use-cases/update-courier-profile.use-case';
 import { JwtAuthGuard } from 'src/auth/infrastructure/guards/jwt-auth.guard';
@@ -14,6 +15,7 @@ export class CourierController {
   constructor(
     private readonly getCourierProfileUseCase: GetCourierProfileUseCase,
     private readonly updateCourierProfileUseCase: UpdateCourierProfileUseCase,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Get(':userId/profile')
@@ -30,6 +32,15 @@ export class CourierController {
     @Param('userId') userId: number,
     @Body() body: { vehicle_type?: string; vehicle_plate?: string; soat_number?: string; photo_url?: string; status?: string },
   ) {
-    return this.updateCourierProfileUseCase.execute(userId, body);
+    const result = await this.updateCourierProfileUseCase.execute(userId, body);
+
+    if (body.status) {
+      this.eventEmitter.emit('courier.status.changed', {
+        courierUserId: userId,
+        newStatus: body.status,
+      });
+    }
+
+    return result;
   }
 }

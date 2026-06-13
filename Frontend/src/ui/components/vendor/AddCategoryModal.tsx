@@ -64,8 +64,9 @@ const AddCategoryModal = ({ isOpen, onClose, onCategoryAdded }: AddCategoryModal
       setName("");
       setImagePreview(null);
       setImageFile(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear la categoría");
+    } catch (err: any) {
+      const message = err?.response?.data?.message || (err instanceof Error ? err.message : "Error al crear la categoría");
+      setError(Array.isArray(message) ? message.join(', ') : message);
     } finally {
       setLoading(false);
     }

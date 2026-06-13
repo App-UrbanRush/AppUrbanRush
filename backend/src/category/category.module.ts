@@ -8,11 +8,14 @@ import { UpdateCategoryUseCase } from './application/use-cases/update-category.u
 import { DeleteCategoryUseCase } from './application/use-cases/delete-category.use-case';
 import { CategoryController } from './infrastructure/controllers/category.controller';
 import { ProductModule } from 'src/product/product.module';
+import { VendorModule } from 'src/vendor/vendor.module';
+import { GetVendorProfileUseCase } from 'src/vendor/application/use-cases/get-vendor-profile.use-case';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Category.name, schema: CategorySchema }]),
     ProductModule,
+    VendorModule,
   ],
   controllers: [CategoryController],
   providers: [
@@ -22,6 +25,7 @@ import { ProductModule } from 'src/product/product.module';
     GetCategoriesByVendorUseCase,
     UpdateCategoryUseCase,
     DeleteCategoryUseCase,
+    GetVendorProfileUseCase,
   ],
   exports: ['ICategoryRepository'],
 })

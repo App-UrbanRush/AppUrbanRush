@@ -2,6 +2,12 @@ import { useState, useEffect } from "react";
 import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { vendorsApi, type VendorListItem, type VendorPhotoItem } from "../../../infrastructure/api/vendorsApi";
 import { courierVendorRequestsApi, type CourierVendorRequest } from "../../../infrastructure/api/courierVendorRequestsApi";
+import { courierOrdersApi, type CourierOrder } from "../../../infrastructure/api/courierOrdersApi";
+import { useAuth } from "../../context/useAuth";
+import { AcceptOrderUseCase } from "../../../application/use-cases/AcceptOrderUseCase";
+import { CourierOrdersRepositoryImpl } from "../../../infrastructure/repositories/CourierOrdersRepositoryImpl";
+import { useCourierBroadcast } from "../../hooks/useCourierBroadcast";
+import toast from "react-hot-toast";
 import {
   Store,
   Navigation,
@@ -15,11 +21,15 @@ import {
   Truck,
   Package,
   ChevronRight,
+  Play,
+  MapPin,
+  RefreshCw,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import CourierDeliveryMap from "../../components/courier/CourierDeliveryMap";
 import "./CourierDashboard.css";
 
 const CourierDashboard = () => {
+  const { courierProfile } = useAuth();
   const [vendors, setVendors] = useState<VendorListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVendor, setSelectedVendor] = useState<VendorListItem | null>(null);
@@ -30,11 +40,47 @@ const CourierDashboard = () => {
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [welcomeVendorName, setWelcomeVendorName] = useState("");
   const [activeView, setActiveView] = useState<"browse" | "active">("browse");
+  
+  // Pedidos
+  const [availableOrders, setAvailableOrders] = useState<CourierOrder[]>([]);
+  const [activeOrders, setActiveOrders] = useState<CourierOrder[]>([]);
+  const [completedOrders, setCompletedOrders] = useState<CourierOrder[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  
+  // GPS y ruta
+  const [showRouteOnMap, setShowRouteOnMap] = useState(false);
+  const [activeOrderForRoute, setActiveOrderForRoute] = useState<CourierOrder | null>(null);
+  const activeOrderId = activeOrders.length > 0 && showRouteOnMap ? activeOrders[0].order_id : undefined;
+  const { broadcasting, connectionState, lastSent, start, stop, error: gpsError } = useCourierBroadcast(activeOrderId);
+  
+  const acceptOrderUseCase = new AcceptOrderUseCase(new CourierOrdersRepositoryImpl());
+
+  // Polling para pedidos disponibles (cada 5 segundos)
+  useEffect(() => {
+    if (activeView === "active") {
+      loadOrders();
+      const interval = setInterval(loadOrders, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [activeView]);
+
+  // Activar GPS automáticamente cuando hay pedido activo y se muestra la ruta
+  useEffect(() => {
+    if (activeOrders.length > 0 && showRouteOnMap && !broadcasting) {
+      start();
+    }
+  }, [activeOrders, showRouteOnMap, broadcasting]);
 
   useEffect(() => {
     loadVendors();
     loadMyRequests();
   }, []);
+
+  useEffect(() => {
+    if (activeView === "active" && courierProfile?.couriers_id) {
+      loadOrders();
+    }
+  }, [activeView, courierProfile]);
 
   useEffect(() => {
     if (selectedVendor) {
@@ -67,6 +113,86 @@ const CourierDashboard = () => {
       console.error("Error loading requests:", error);
     }
   };
+
+  const loadOrders = async () => {
+    if (!courierProfile?.user_id) {
+      console.warn("Courier profile or user_id not available");
+      return;
+    }
+    
+    setLoadingOrders(true);
+    try {
+      // Cargar pedidos disponibles (READY sin courier_id)
+      const available = await courierOrdersApi.getAvailable();
+      
+      // Cargar pedidos del courier (activos y completados)
+      const allCourierOrders = await courierOrdersApi.getByCourier(courierProfile.user_id);
+      const active = allCourierOrders.filter(o => o.status === 'IN_DELIVERY');
+      const completed = allCourierOrders.filter(o => o.status === 'DELIVERED');
+      
+      setAvailableOrders(available);
+      setActiveOrders(active);
+      setCompletedOrders(completed);
+    } catch (error) {
+      console.error("Error loading orders:", error);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const handleAcceptOrder = async (orderId: string) => {
+    if (!courierProfile?.user_id) return;
+    
+    try {
+      await acceptOrderUseCase.execute(orderId, courierProfile.user_id);
+      toast.success("¡Pedido aceptado! Iniciando ruta...");
+      await loadOrders(); // Recargar para que desaparezca de disponibles
+    } catch (error: any) {
+      const msg = error.response?.data?.message || error.response?.data?.error || "Error al aceptar el pedido";
+      toast.error(msg);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!courierProfile?.user_id) return;
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/orders/${orderId}/cancel`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al cancelar');
+      }
+      
+      toast.success("Pedido cancelado, vuelto a disponibles");
+      await loadOrders();
+    } catch (error: any) {
+      toast.error(error.message || "Error al cancelar el pedido");
+    }
+  };
+
+  const handleViewRoute = (order: CourierOrder) => {
+    if (!order.customer_lat || !order.customer_lng) {
+      toast.error('El cliente no tiene ubicación registrada');
+      return;
+    }
+    
+    setActiveOrderForRoute(order);
+    setShowRouteOnMap(true);
+  };
+  
+  // Activar GPS automáticamente cuando se muestra la ruta
+  useEffect(() => {
+    if (showRouteOnMap && activeOrders.length > 0 && !broadcasting) {
+      start();
+    }
+  }, [showRouteOnMap, activeOrders, broadcasting]);
 
   const loadPhotos = async (vendorId: number) => {
     setLoadingPhotos(true);
@@ -186,62 +312,180 @@ const CourierDashboard = () => {
       <div className="courier-dashboard">
         {/* ========== VISTA: ACTIVO (En ruta + Historial) ========== */}
         {activeView === "active" ? (
-          <>
-            <div className="courier-active-header">
-              <div>
-                <h1>Mis Entregas</h1>
-                <p className="courier-dashboard-subtitle">Gestiona tus entregas activas y pasadas</p>
+          <div className="courier-dashboard-active-layout">
+            <div className="courier-dashboard-left">
+              <div className="courier-active-header">
+                <div>
+                </div>
+                <button className="courier-browse-btn" onClick={() => setActiveView("browse")}>
+                  <Store size={16} /> Ver Negocios
+                </button>
               </div>
-              <button className="courier-browse-btn" onClick={() => setActiveView("browse")}>
-                <Store size={16} /> Ver Negocios
-              </button>
+
+              {/* Sección: Pedidos Disponibles */}
+              <div className="courier-active-section">
+                <div className="courier-section-header">
+                  <div className="courier-section-icon assigned">
+                    <Package size={18} />
+                  </div>
+                  <h2>Pedidos Disponibles</h2>
+                  <button className="courier-refresh-small" onClick={loadOrders} disabled={loadingOrders}>
+                    <RefreshCw size={14} className={loadingOrders ? "spinning" : ""} />
+                  </button>
+                </div>
+                
+                {loadingOrders && availableOrders.length === 0 ? (
+                  <div className="courier-orders-loading">Cargando pedidos...</div>
+                ) : availableOrders.length === 0 ? (
+                  <div className="courier-active-empty">
+                    <Package size={40} />
+                    <p>No hay pedidos disponibles</p>
+                    <span>Cuando un negocio publique un pedido, aparecerá aquí</span>
+                  </div>
+                ) : (
+                  <div className="courier-orders-list">
+                    {availableOrders.map((order) => (
+                      <div key={order.order_id} className="courier-order-card available">
+                        <div className="courier-order-header">
+                          <span className="courier-order-id">#{order.order_id.slice(-6).toUpperCase()}</span>
+                          <span className="courier-order-status status-available">Disponible</span>
+                        </div>
+                        <div className="courier-order-info">
+                          <MapPin size={14} />
+                          <span>{order.delivery_address}</span>
+                        </div>
+                        {order.items && order.items.length > 0 && (
+                          <div className="courier-order-info">
+                            <Package size={14} />
+                            <span>{order.items.length} producto(s)</span>
+                          </div>
+                        )}
+                        {order.delivery_fee && (
+                          <div className="courier-order-info">
+                            <ClockIcon size={14} />
+                            <span>Domicilio: ${order.delivery_fee.toLocaleString()}</span>
+                          </div>
+                        )}
+                        <button
+                          className="courier-accept-order-btn"
+                          onClick={() => handleAcceptOrder(order.order_id)}
+                        >
+                          <Play size={16} /> Aceptar Pedido
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sección: En Ruta */}
+              <div className="courier-active-section">
+                <div className="courier-section-header">
+                  <div className="courier-section-icon active-pulse">
+                    <Truck size={18} />
+                  </div>
+                  <h2>En Ruta</h2>
+                </div>
+                
+                {loadingOrders && activeOrders.length === 0 ? (
+                  <div className="courier-orders-loading">Cargando pedidos...</div>
+                ) : activeOrders.length === 0 ? (
+                  <div className="courier-active-empty">
+                    <Package size={40} />
+                    <p>No tienes entregas activas en este momento</p>
+                    <span>Los pedidos que aceptes aparecerán aquí</span>
+                  </div>
+                ) : (
+                  <div className="courier-orders-list">
+                    {activeOrders.map((order) => (
+                      <div key={order.order_id} className="courier-order-card active">
+                        <div className="courier-order-header">
+                          <span className="courier-order-id">#{order.order_id.slice(-6).toUpperCase()}</span>
+                          <span className="courier-order-status status-in-delivery">En entrega</span>
+                        </div>
+                        <div className="courier-order-info">
+                          <MapPin size={14} />
+                          <span>{order.delivery_address}</span>
+                        </div>
+                        {order.items && order.items.length > 0 && (
+                          <div className="courier-order-info">
+                            <Package size={14} />
+                            <span>{order.items.length} producto(s)</span>
+                          </div>
+                        )}
+                        <div className="courier-order-actions">
+                          <button
+                            className={`courier-view-route-btn ${broadcasting && showRouteOnMap ? 'active' : ''}`}
+                            onClick={() => handleViewRoute(order)}
+                          >
+                            <Navigation size={14} /> {broadcasting && showRouteOnMap ? 'Mostrando Ruta' : 'Ver Ruta en Mapa'}
+                          </button>
+                          <button
+                            className="courier-cancel-order-btn"
+                            onClick={() => handleCancelOrder(order.order_id)}
+                          >
+                            <X size={14} /> Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sección: Pedidos Pasados */}
+              <div className="courier-active-section">
+                <div className="courier-section-header">
+                  <div className="courier-section-icon">
+                    <Clock size={18} />
+                  </div>
+                  <h2>Pedidos Pasados</h2>
+                </div>
+                
+                {loadingOrders ? (
+                  <div className="courier-orders-loading">Cargando pedidos...</div>
+                ) : completedOrders.length === 0 ? (
+                  <div className="courier-active-empty">
+                    <Package size={40} />
+                    <p>Aún no tienes pedidos completados</p>
+                    <span>Tus entregas finalizadas aparecerán aquí</span>
+                  </div>
+                ) : (
+                  <div className="courier-orders-list">
+                    {completedOrders.map((order) => (
+                      <div key={order.order_id} className="courier-order-card completed">
+                        <div className="courier-order-header">
+                          <span className="courier-order-id">#{order.order_id.slice(-6).toUpperCase()}</span>
+                          <span className="courier-order-status status-delivered">
+                            <CheckCircle size={12} /> Entregado
+                          </span>
+                        </div>
+                        <div className="courier-order-info">
+                          <MapPin size={14} />
+                          <span>{order.delivery_address}</span>
+                        </div>
+                        <div className="courier-order-info">
+                          <Package size={14} />
+                          <span>{order.items.length} producto(s)</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Sección: Pedidos Asignados */}
-            <div className="courier-active-section">
-              <div className="courier-section-header">
-                <div className="courier-section-icon assigned">
-                  <Package size={18} />
-                </div>
-                <h2>Pedidos Asignados</h2>
-              </div>
-              <div className="courier-active-empty">
-                <Package size={40} />
-                <p>No tienes pedidos asignados</p>
-                <span>Cuando el negocio te asigne un pedido, aparecerá aquí</span>
-              </div>
+            <div className="courier-dashboard-right">
+              <CourierDeliveryMap 
+                showRoute={showRouteOnMap}
+                courierLat={lastSent?.lat || null}
+                courierLng={lastSent?.lng || null}
+                customerLat={activeOrderForRoute?.customer_lat || null}
+                customerLng={activeOrderForRoute?.customer_lng || null}
+                customerAddress={activeOrderForRoute?.delivery_address || null}
+              />
             </div>
-
-            {/* Sección: En Ruta */}
-            <div className="courier-active-section">
-              <div className="courier-section-header">
-                <div className="courier-section-icon active-pulse">
-                  <Truck size={18} />
-                </div>
-                <h2>En Ruta</h2>
-              </div>
-              <div className="courier-active-empty">
-                <Package size={40} />
-                <p>No tienes entregas activas en este momento</p>
-                <span>Los pedidos asignados que aceptes aparecerán aquí</span>
-              </div>
-            </div>
-
-            {/* Sección: Pedidos Pasados */}
-            <div className="courier-active-section">
-              <div className="courier-section-header">
-                <div className="courier-section-icon">
-                  <Clock size={18} />
-                </div>
-                <h2>Pedidos Pasados</h2>
-              </div>
-              <div className="courier-active-empty">
-                <Package size={40} />
-                <p>Aún no tienes pedidos completados</p>
-                <span>Tus entregas finalizadas aparecerán aquí</span>
-              </div>
-            </div>
-          </>
+          </div>
         ) : (
           <>
             {/* ========== VISTA: NEGOCIOS ========== */}

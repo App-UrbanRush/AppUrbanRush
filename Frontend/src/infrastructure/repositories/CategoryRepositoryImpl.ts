@@ -2,6 +2,10 @@ import type { Category, ICategoryRepository } from "../../domain/interfaces/ICat
 import { categoryApi } from "../api/categoryApi";
 
 export class CategoryRepositoryImpl implements ICategoryRepository {
+  async getMyCategories(): Promise<Category[]> {
+    return categoryApi.getMyCategories();
+  }
+
   async getCategoriesByVendor(vendorId: number): Promise<Category[]> {
     return categoryApi.getCategoriesByVendor(vendorId);
   }

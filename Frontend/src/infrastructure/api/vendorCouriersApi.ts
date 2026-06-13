@@ -13,6 +13,9 @@ export interface VendorCourier {
 export const vendorCouriersApi = {
   getAll: async (): Promise<VendorCourier[]> => {
     const token = authLocalStorage.getToken();
+    if (!token) {
+      throw new Error('No hay token de autenticación');
+    }
     const response = await axios.get(`${API_URL}/vendor/couriers`, {
       headers: {
         Authorization: `Bearer ${token}`,

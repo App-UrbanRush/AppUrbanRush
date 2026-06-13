@@ -5,7 +5,6 @@ import "./OrderDetailModal.css";
 interface OrderDetailModalProps {
   order: RecentOrder;
   onClose: () => void;
-  onAccept: () => void;
 }
 
 const STATUS_CONFIG: Record<string, { color: string; label: string; icon: string }> = {
@@ -15,9 +14,8 @@ const STATUS_CONFIG: Record<string, { color: string; label: string; icon: string
   READY: { color: 'green', label: 'Listo', icon: '✅' },
 };
 
-const OrderDetailModal = ({ order, onClose, onAccept }: OrderDetailModalProps) => {
+const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
   const statusConfig = STATUS_CONFIG[order.status] || { color: 'gray', label: order.status, icon: '' };
-  const isPending = order.status === 'PENDING';
 
   const subtotal = order.items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
   const deliveryFee = order.total - subtotal;
@@ -96,11 +94,6 @@ const OrderDetailModal = ({ order, onClose, onAccept }: OrderDetailModalProps) =
         </div>
 
         <div className="order-modal-footer">
-          {isPending && (
-            <button className="accept-order-btn" onClick={onAccept}>
-              ACEPTAR PEDIDO
-            </button>
-          )}
           <button className="cancel-order-btn" onClick={onClose}>
             Cerrar
           </button>

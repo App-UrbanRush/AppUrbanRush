@@ -52,7 +52,7 @@
 /* INPUTS */
 .register-card input,
 .register-card select {
-  width: 100%;
+  width: calc(100% - 50px);
   padding: 12px;
   margin-bottom: 12px;
   border-radius: 8px;
@@ -186,10 +186,18 @@
     gap: 0;
   }
 
-  .input-group input,
-  .input-group select {
-    width: 100%;
-  }
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.input-group input,
+.input-group select {
+  flex: 1;
+}
 }
 
 .register-success-overlay {
