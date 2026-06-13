@@ -26,4 +26,8 @@ export class UpdatePeopleDto {
   @IsOptional()
   @IsString({ message: 'El género debe ser una cadena de texto' })
   gender?: string;
+
+  @ApiPropertyOptional({ description: 'URL del avatar (enviar null para eliminar)' })
+  @IsOptional()
+  avatarUrl?: string | null;
 }

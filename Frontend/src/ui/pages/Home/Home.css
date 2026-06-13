@@ -4,11 +4,4 @@
   padding: 16px 16px 0;
 }
 
-.home-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  font-size: 1.1rem;
-  color: #999;
-}
+

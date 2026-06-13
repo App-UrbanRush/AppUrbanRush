@@ -5,6 +5,7 @@ import type { HomeData } from "../../../domain/types/store.types";
 import HeroBanner from "../../components/sections/HeroBanner";
 import RecommendedProducts from "../../components/sections/RecommendedProducts";
 import NearbyStores from "../../components/sections/NearbyStores";
+import Loading from "../../components/Loading/Loading";
 import "./Home.css";
 
 const getHomeDataUseCase = new GetHomeDataUseCase(new MockStoreRepositoryImpl());
@@ -29,11 +30,11 @@ const HomeNew = () => {
   }, []);
 
   if (loading) {
-    return <div className="home-loading">Cargando...</div>;
+    return <Loading text="Cargando…" />;
   }
 
   if (!data) {
-    return <div className="home-loading">Error al cargar la pagina</div>;
+    return <Loading text="Error al cargar la página" />;
   }
 
   return (

@@ -168,6 +168,14 @@
   border-radius: 20px;
 }
 
+.all-products-card-badge--out {
+  background: #dc2626;
+}
+
+.all-products-card-badge--low {
+  background: #f59e0b;
+}
+
 .all-products-card-body {
   padding: 14px;
   display: flex;

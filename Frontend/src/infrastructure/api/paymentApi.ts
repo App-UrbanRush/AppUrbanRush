@@ -19,6 +19,16 @@ export const paymentApi = {
     return response.data;
   },
 
+  getByUser: async (userId: number): Promise<PaymentResponse[]> => {
+    const response = await axios.get(`${API_URL}/payments/user/${userId}`, authHeader());
+    return response.data;
+  },
+
+  confirm: async (reference: string): Promise<{ status: string }> => {
+    const response = await axios.post(`${API_URL}/payments/confirm/${reference}`, {}, authHeader());
+    return response.data;
+  },
+
   getCheckoutConfig: async (reference: string, amount: number): Promise<{ publicKey: string; signature: string }> => {
     const response = await axios.get(`${API_URL}/payments/checkout-config/${reference}/${amount}`, authHeader());
     return response.data;

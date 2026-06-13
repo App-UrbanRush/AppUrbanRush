@@ -8,6 +8,7 @@ class OrderItemSchema {
   @Prop({ required: true }) product_name: string;
   @Prop({ required: true }) quantity: number;
   @Prop({ required: true }) unit_price: number;
+  @Prop({ type: String, default: null }) image_url: string | null;
 }
 
 @Schema({ timestamps: true, collection: 'orders' })

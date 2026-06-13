@@ -13,6 +13,7 @@ export interface UpdateProfilePayload {
   cellphone?: string;
   address?: string;
   gender?: string;
+  avatarUrl?: string | null;
 }
 
 export const peopleApi = {

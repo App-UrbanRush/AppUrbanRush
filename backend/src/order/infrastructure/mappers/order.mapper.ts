@@ -4,7 +4,7 @@ import { OrderDocument } from '../schemas/order.schema';
 export class OrderMapper {
   static toDomain(doc: OrderDocument): OrderModel {
     const items = (doc.items ?? []).map(
-      (i) => new OrderItemModel(i.product_id, i.product_name, i.quantity, i.unit_price),
+      (i) => new OrderItemModel(i.product_id, i.product_name, i.quantity, i.unit_price, i.image_url ?? null),
     );
     return new OrderModel(
       doc._id.toString(),

@@ -296,6 +296,14 @@
   border-bottom: none;
 }
 
+.payment-item-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .payment-item-img-placeholder {
   width: 44px;
   height: 44px;
