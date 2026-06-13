@@ -28,6 +28,10 @@ export class Order {
   @Prop({ type: String, default: null }) delivery_code: string | null;
   @Prop({ default: 0 }) delivery_attempts: number;
   @Prop({ default: false }) delivery_blocked: boolean;
+
+  // Coordenadas de entrega
+  @Prop({ type: Number, default: null }) customer_lat: number | null;
+  @Prop({ type: Number, default: null }) customer_lng: number | null;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

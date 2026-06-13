@@ -57,6 +57,7 @@ export class GetVendorCouriersUseCase {
         name: person ? `${person.firstName} ${person.firstLastName}` : 'Sin nombre',
         photo_url: c.photo_url,
         status: c.status,
+        vehicle_type: c.vehicle_type,
       };
     });
   }

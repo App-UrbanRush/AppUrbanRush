@@ -63,6 +63,21 @@ export const courierVendorRequestsApi = {
     return response.data;
   },
 
+  getPendingCount: async (): Promise<number> => {
+    try {
+      const token = authLocalStorage.getToken();
+      const response = await axios.get(`${API_URL}/courier-vendor-requests/vendor`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const requests: CourierVendorRequest[] = response.data;
+      return requests.filter((r) => r.status === "pending").length;
+    } catch {
+      return 0;
+    }
+  },
+
   acceptRequest: async (requestId: number): Promise<{ message: string }> => {
     const token = authLocalStorage.getToken();
     const response = await axios.put(

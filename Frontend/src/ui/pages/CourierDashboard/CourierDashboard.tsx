@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { vendorsApi, type VendorListItem, type VendorPhotoItem } from "../../../infrastructure/api/vendorsApi";
 import { courierVendorRequestsApi, type CourierVendorRequest } from "../../../infrastructure/api/courierVendorRequestsApi";
@@ -6,7 +7,6 @@ import { courierOrdersApi, type CourierOrder } from "../../../infrastructure/api
 import { useAuth } from "../../context/useAuth";
 import { AcceptOrderUseCase } from "../../../application/use-cases/AcceptOrderUseCase";
 import { CourierOrdersRepositoryImpl } from "../../../infrastructure/repositories/CourierOrdersRepositoryImpl";
-import { useCourierBroadcast } from "../../hooks/useCourierBroadcast";
 import toast from "react-hot-toast";
 import {
   Store,
@@ -25,10 +25,10 @@ import {
   MapPin,
   RefreshCw,
 } from "lucide-react";
-import CourierDeliveryMap from "../../components/courier/CourierDeliveryMap";
 import "./CourierDashboard.css";
 
 const CourierDashboard = () => {
+  const navigate = useNavigate();
   const { courierProfile } = useAuth();
   const [vendors, setVendors] = useState<VendorListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,12 +47,6 @@ const CourierDashboard = () => {
   const [completedOrders, setCompletedOrders] = useState<CourierOrder[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   
-  // GPS y ruta
-  const [showRouteOnMap, setShowRouteOnMap] = useState(false);
-  const [activeOrderForRoute, setActiveOrderForRoute] = useState<CourierOrder | null>(null);
-  const activeOrderId = activeOrders.length > 0 && showRouteOnMap ? activeOrders[0].order_id : undefined;
-  const { broadcasting, connectionState, lastSent, start, stop, error: gpsError } = useCourierBroadcast(activeOrderId);
-  
   const acceptOrderUseCase = new AcceptOrderUseCase(new CourierOrdersRepositoryImpl());
 
   // Polling para pedidos disponibles (cada 5 segundos)
@@ -63,13 +57,6 @@ const CourierDashboard = () => {
       return () => clearInterval(interval);
     }
   }, [activeView]);
-
-  // Activar GPS automáticamente cuando hay pedido activo y se muestra la ruta
-  useEffect(() => {
-    if (activeOrders.length > 0 && showRouteOnMap && !broadcasting) {
-      start();
-    }
-  }, [activeOrders, showRouteOnMap, broadcasting]);
 
   useEffect(() => {
     loadVendors();
@@ -183,16 +170,8 @@ const CourierDashboard = () => {
       return;
     }
     
-    setActiveOrderForRoute(order);
-    setShowRouteOnMap(true);
+    navigate(`/courier/tracking/${order.order_id}`);
   };
-  
-  // Activar GPS automáticamente cuando se muestra la ruta
-  useEffect(() => {
-    if (showRouteOnMap && activeOrders.length > 0 && !broadcasting) {
-      start();
-    }
-  }, [showRouteOnMap, activeOrders, broadcasting]);
 
   const loadPhotos = async (vendorId: number) => {
     setLoadingPhotos(true);
@@ -415,10 +394,10 @@ const CourierDashboard = () => {
                         )}
                         <div className="courier-order-actions">
                           <button
-                            className={`courier-view-route-btn ${broadcasting && showRouteOnMap ? 'active' : ''}`}
+                            className="courier-view-route-btn"
                             onClick={() => handleViewRoute(order)}
                           >
-                            <Navigation size={14} /> {broadcasting && showRouteOnMap ? 'Mostrando Ruta' : 'Ver Ruta en Mapa'}
+                            <Navigation size={14} /> Ver Ruta en Mapa
                           </button>
                           <button
                             className="courier-cancel-order-btn"
@@ -432,58 +411,6 @@ const CourierDashboard = () => {
                   </div>
                 )}
               </div>
-
-              {/* Sección: Pedidos Pasados */}
-              <div className="courier-active-section">
-                <div className="courier-section-header">
-                  <div className="courier-section-icon">
-                    <Clock size={18} />
-                  </div>
-                  <h2>Pedidos Pasados</h2>
-                </div>
-                
-                {loadingOrders ? (
-                  <div className="courier-orders-loading">Cargando pedidos...</div>
-                ) : completedOrders.length === 0 ? (
-                  <div className="courier-active-empty">
-                    <Package size={40} />
-                    <p>Aún no tienes pedidos completados</p>
-                    <span>Tus entregas finalizadas aparecerán aquí</span>
-                  </div>
-                ) : (
-                  <div className="courier-orders-list">
-                    {completedOrders.map((order) => (
-                      <div key={order.order_id} className="courier-order-card completed">
-                        <div className="courier-order-header">
-                          <span className="courier-order-id">#{order.order_id.slice(-6).toUpperCase()}</span>
-                          <span className="courier-order-status status-delivered">
-                            <CheckCircle size={12} /> Entregado
-                          </span>
-                        </div>
-                        <div className="courier-order-info">
-                          <MapPin size={14} />
-                          <span>{order.delivery_address}</span>
-                        </div>
-                        <div className="courier-order-info">
-                          <Package size={14} />
-                          <span>{order.items.length} producto(s)</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="courier-dashboard-right">
-              <CourierDeliveryMap 
-                showRoute={showRouteOnMap}
-                courierLat={lastSent?.lat || null}
-                courierLng={lastSent?.lng || null}
-                customerLat={activeOrderForRoute?.customer_lat || null}
-                customerLng={activeOrderForRoute?.customer_lng || null}
-                customerAddress={activeOrderForRoute?.delivery_address || null}
-              />
             </div>
           </div>
         ) : (

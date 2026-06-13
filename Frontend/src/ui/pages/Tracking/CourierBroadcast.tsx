@@ -1,12 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Navigation, MapPin, Clock, Radio, Wifi, Play, Square, Info, User } from "lucide-react";
+import { ArrowLeft, Navigation, MapPin, Clock, Wifi, Play, Square, Info, KeyRound, CheckCircle, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useCourierBroadcast } from "../../hooks/useCourierBroadcast";
 import LiveTrackingMap from "../../components/DeliveryMap/LiveTrackingMap";
 import ChatWindow from "../../components/chat/ChatWindow";
 import { useAuth } from "../../context/useAuth";
+import { DarkModeProvider } from "../../context/useDarkMode";
 import { ordersApi } from "../../../infrastructure/api/ordersApi";
-import { useEffect, useState } from "react";
+import { ConfirmDeliveryUseCase } from "../../../application/use-cases/ConfirmDeliveryUseCase";
+import { CourierOrdersRepositoryImpl } from "../../../infrastructure/repositories/CourierOrdersRepositoryImpl";
 import "./Tracking.css";
+
+const confirmDelivery = new ConfirmDeliveryUseCase(new CourierOrdersRepositoryImpl());
 
 interface OrderLocation {
   customer_lat: number | null;
@@ -20,10 +26,13 @@ const CourierBroadcast = () => {
   const { user } = useAuth();
   const { broadcasting, connectionState, lastSent, error, start, stop } = useCourierBroadcast(orderId);
   const [orderLocation, setOrderLocation] = useState<OrderLocation | null>(null);
+  const [orderStatus, setOrderStatus] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [confirming, setConfirming] = useState(false);
+  const [codeModalOpen, setCodeModalOpen] = useState(false);
 
   useEffect(() => {
     if (!orderId) return;
-    // Obtener las coordenadas del cliente
     ordersApi.getById(orderId)
       .then((order) => {
         setOrderLocation({
@@ -31,16 +40,52 @@ const CourierBroadcast = () => {
           customer_lng: (order as any).customer_lng || null,
           delivery_address: order.delivery_address,
         });
+        setOrderStatus(order.status);
       })
       .catch((err) => {
         console.error("Error al obtener ubicación del cliente:", err);
       });
   }, [orderId]);
 
+  const handleConfirmDelivery = async () => {
+    if (!user?.id || !orderId) return;
+    if (code.length !== 4) {
+      toast.error("El código debe tener 4 dígitos");
+      return;
+    }
+    setConfirming(true);
+    try {
+      await confirmDelivery.execute(orderId, code, Number(user.id));
+      toast.success("¡Entrega confirmada! 🎉");
+      setCode("");
+      setCodeModalOpen(false);
+      setOrderStatus("DELIVERED");
+    } catch (error: any) {
+      const msg = error.response?.data?.message || "No se pudo confirmar la entrega";
+      toast.error(msg);
+    } finally {
+      setConfirming(false);
+    }
+  };
+
+  const openCodeModal = () => {
+    setCode("");
+    setCodeModalOpen(true);
+  };
+
+  const closeCodeModal = () => {
+    if (confirming) return;
+    setCodeModalOpen(false);
+    setCode("");
+  };
+
   const lastTime = lastSent ? new Date(lastSent.timestamp).toLocaleTimeString() : null;
   const connected = connectionState === "connected";
+  const isInDelivery = orderStatus === "IN_DELIVERY";
+  const isDelivered = orderStatus === "DELIVERED";
 
   return (
+    <DarkModeProvider>
     <div className="tracking-page">
       <button className="tracking-back" onClick={() => navigate(-1)}>
         <ArrowLeft size={18} /> Volver
@@ -61,19 +106,18 @@ const CourierBroadcast = () => {
 
       {error && <div className="tracking-banner error">⚠ {error}</div>}
 
-      {/* Estado de transmisión */}
-      <div className="tracking-pulse-card">
-        <div className={`tracking-pulse-ring ${broadcasting ? "on" : ""}`}>
-          <Radio size={28} />
+      {isDelivered && (
+        <div className="tracking-banner success">
+          <CheckCircle size={16} /> ¡Entrega confirmada!
         </div>
-        <div className="tracking-pulse-info">
-          <span className="tracking-pulse-title">
-            {broadcasting ? "Compartiendo tu ubicación en vivo" : "Transmisión detenida"}
-          </span>
-          <span className="tracking-pulse-sub">
-            <Wifi size={13} /> {connected ? "Conectado al servidor" : "Sin conexión"}
-          </span>
-        </div>
+      )}
+
+      <div className="tracking-status-bar">
+        <div className={`tracking-status-dot ${broadcasting ? "live" : "off"}`} />
+        <span className="tracking-status-text">{broadcasting ? "Compartiendo tu ubicación en vivo" : "Transmisión detenida"}</span>
+        <span className="tracking-status-divider" />
+        <Wifi size={14} className={`tracking-wifi ${connected ? "on" : "off"}`} />
+        <span className="tracking-status-conn">{connected ? "Conectado" : "Sin conexión"}</span>
       </div>
 
       <div className="tracking-map-wrap">
@@ -84,21 +128,63 @@ const CourierBroadcast = () => {
           customerLat={orderLocation?.customer_lat ?? null}
           customerLng={orderLocation?.customer_lng ?? null}
           customerAddress={orderLocation?.delivery_address ?? null}
-          showRoute={broadcasting}
+          showRoute={true}
         />
       </div>
 
-      <div className="tracking-actions">
-        {!broadcasting ? (
-          <button className="tracking-btn start" onClick={start}>
-            <Play size={18} /> Iniciar transmisión GPS
-          </button>
-        ) : (
-          <button className="tracking-btn stop" onClick={stop}>
-            <Square size={16} /> Detener
+      <div className="tracking-actions-row">
+        <div className="tracking-actions">
+          {!broadcasting ? (
+            <button className="tracking-btn start" onClick={start}>
+              <Play size={18} /> Iniciar transmisión GPS
+            </button>
+          ) : (
+            <button className="tracking-btn stop" onClick={stop}>
+              <Square size={16} /> Detener
+            </button>
+          )}
+        </div>
+
+        {isInDelivery && !isDelivered && (
+          <button className="tracking-code-btn" onClick={openCodeModal}>
+            <KeyRound size={16} /> Obtener código
           </button>
         )}
       </div>
+
+      {codeModalOpen && (
+        <div className="tracking-code-overlay" onClick={closeCodeModal}>
+          <div className="tracking-code-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="tracking-code-modal-close" onClick={closeCodeModal} disabled={confirming}>
+              <X size={18} />
+            </button>
+            <div className="tracking-code-modal-icon">
+              <KeyRound size={28} />
+            </div>
+            <h2>Confirmar entrega</h2>
+            <p className="tracking-code-modal-hint">
+              Pídele al cliente su <strong>código de 4 dígitos</strong> e ingrésalo aquí.
+            </p>
+            <input
+              className="tracking-code-modal-input"
+              inputMode="numeric"
+              autoFocus
+              maxLength={4}
+              placeholder="0000"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              onKeyDown={(e) => e.key === "Enter" && handleConfirmDelivery()}
+            />
+            <button
+              className="tracking-code-modal-submit"
+              onClick={handleConfirmDelivery}
+              disabled={confirming || code.length !== 4}
+            >
+              {confirming ? "Confirmando..." : "Confirmar entrega"}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="tracking-info">
         <div className="tracking-info-item">
@@ -122,6 +208,7 @@ const CourierBroadcast = () => {
         <ChatWindow orderId={orderId} enabled currentUserId={Number(user.id)} />
       )}
     </div>
+    </DarkModeProvider>
   );
 };
 

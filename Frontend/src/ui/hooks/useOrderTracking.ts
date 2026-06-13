@@ -60,6 +60,9 @@ export function useOrderTracking(orderId: string | undefined) {
     gateway.onConnectionChange((connected) => {
       connectedRef.current = connected;
       setConnectionState(connected ? "connected" : "disconnected");
+      if (connected && orderId) {
+        gateway.subscribeToOrder(orderId);
+      }
     });
     gateway.onLocation((loc) => {
       setLocation(loc);

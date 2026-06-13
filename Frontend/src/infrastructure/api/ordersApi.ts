@@ -17,6 +17,8 @@ export interface CreateOrderRequest {
   vendor_id: number;
   delivery_address: string;
   items: OrderItemInput[];
+  customer_lat?: number;
+  customer_lng?: number;
 }
 
 export interface OrderItemDetail {
@@ -42,6 +44,8 @@ export interface OrderDetail {
   created_at: string;
   delivery_code?: string | null;
   estimated_delivery?: string;
+  customer_lat?: number | null;
+  customer_lng?: number | null;
 }
 
 export const ordersApi = {

@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import { ShoppingBag, MapPin, CreditCard, ArrowLeft, ArrowRight, Check, Package, Plus, Minus, Trash2, Navigation } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCart } from "../../context/CartContext";
@@ -27,6 +27,14 @@ const LocationMarker = ({ onMove }: LocationMarkerProps) => {
   return null;
 };
 
+function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([lat, lng], map.getZoom(), { animate: true });
+  }, [lat, lng, map]);
+  return null;
+}
+
 const CheckoutPage = () => {
   const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCart();
   const { myProfile, user } = useAuth();
@@ -45,25 +53,12 @@ const CheckoutPage = () => {
     }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
+      (pos) => {
         const { latitude, longitude } = pos.coords;
         setCoords({ lat: latitude, lng: longitude });
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=es`
-          );
-          const data = await res.json();
-          if (data?.display_name) {
-            setAddress(data.display_name);
-            toast.success("Ubicación encontrada");
-          } else {
-            toast.error("No se pudo obtener la dirección");
-          }
-        } catch {
-          toast.error("Error al buscar la dirección");
-        } finally {
-          setLocating(false);
-        }
+        setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+        toast.success("Ubicación obtenida");
+        setLocating(false);
       },
       () => {
         toast.error("No se pudo acceder a tu ubicación");
@@ -71,6 +66,40 @@ const CheckoutPage = () => {
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  }, []);
+
+  // Geocodificar dirección o parsear coordenadas
+  const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleAddressChange = useCallback((value: string) => {
+    setAddress(value);
+    if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
+
+    // Detectar si el texto son coordenadas numéricas: "lat, lng" o "lat lng"
+    const coordMatch = value.trim().match(/^(-?\d+\.?\d*)\s*[,;\s]\s*(-?\d+\.?\d*)$/);
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lng = parseFloat(coordMatch[2]);
+      if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        setCoords({ lat, lng });
+        return;
+      }
+    }
+
+    if (value.trim().length < 5) return;
+    geocodeTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&limit=1&accept-language=es`
+        );
+        const data = await res.json();
+        if (data && data.length > 0) {
+          setCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+        }
+      } catch {
+        // Si falla la geocodificación, no actualizar coordenadas
+      }
+    }, 800);
   }, []);
 
   const canContinue = useMemo(() => {
@@ -113,6 +142,8 @@ const CheckoutPage = () => {
         vendor_id: vendorId,
         delivery_address: address,
         items: orderItems,
+        customer_lat: coords.lat,
+        customer_lng: coords.lng,
       });
 
       clearCart();
@@ -229,9 +260,9 @@ const CheckoutPage = () => {
             <input
               className="checkout-address-input"
               type="text"
-              placeholder="Ej: Cra 10 # 5-67, Bogotá"
+              placeholder="Ej: 4.711, -74.0721 o una dirección"
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={(e) => handleAddressChange(e.target.value)}
               style={{ flex: 1 }}
             />
             <button
@@ -252,7 +283,11 @@ const CheckoutPage = () => {
               />
               <Marker position={[coords.lat, coords.lng]} draggable />
               <LocationMarker onMove={(lat, lng) => setCoords({ lat, lng })} />
+              <RecenterMap lat={coords.lat} lng={coords.lng} />
             </MapContainer>
+          </div>
+          <div className="checkout-coords-info">
+            <MapPin size={14} /> {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
           </div>
           <div className="checkout-actions">
             <button className="checkout-btn checkout-btn-secondary" onClick={() => setStep(0)}>

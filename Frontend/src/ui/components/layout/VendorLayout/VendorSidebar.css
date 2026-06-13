@@ -75,6 +75,29 @@
   box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
 }
 
+.sidebar-label-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sidebar-badge {
+  position: absolute;
+  top: -8px;
+  right: -18px;
+  background: #e8500a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .sidebar-icon {
   display: flex;
   align-items: center;

@@ -69,7 +69,7 @@ export function useCourierBroadcast(orderId: string | undefined) {
         setLastSent({ lat: input.lat, lng: input.lng, timestamp: new Date().toISOString() });
       },
       (err) => setError(`Error de GPS: ${err.message}`),
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
+      { enableHighAccuracy: false, maximumAge: 30000, timeout: 15000 },
     );
 
     heartbeatRef.current = setInterval(() => {

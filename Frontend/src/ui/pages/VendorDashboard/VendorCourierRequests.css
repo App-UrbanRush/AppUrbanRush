@@ -371,3 +371,44 @@
 .dark-mode-wrapper.dark-mode .vendor-requests-modal-value {
   color: #f3f4f6;
 }
+
+.dark-mode-wrapper.dark-mode .vendor-requests-card-date {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.dark-mode-wrapper.dark-mode .vendor-requests-modal-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-wrapper.dark-mode .vendor-requests-card-status.pending,
+.dark-mode-wrapper.dark-mode .vendor-requests-card.pending .vendor-requests-card-icon {
+  background: rgba(202, 138, 4, 0.2);
+  color: #fbbf24;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-requests-card-status.accepted,
+.dark-mode-wrapper.dark-mode .vendor-requests-card.accepted .vendor-requests-card-icon {
+  background: rgba(22, 163, 74, 0.2);
+  color: #34d399;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-requests-card-status.rejected,
+.dark-mode-wrapper.dark-mode .vendor-requests-card.rejected .vendor-requests-card-icon {
+  background: rgba(220, 38, 38, 0.2);
+  color: #f87171;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-requests-modal-status.active {
+  background: rgba(22, 163, 74, 0.2);
+  color: #34d399;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-requests-modal-status.pending {
+  background: rgba(202, 138, 4, 0.2);
+  color: #fbbf24;
+}
+
+.dark-mode-wrapper.dark-mode .vendor-requests-modal-status.inactive {
+  background: rgba(220, 38, 38, 0.2);
+  color: #f87171;
+}

@@ -22,6 +22,8 @@ export class OrderMapper {
       doc.delivery_code ?? null,
       doc.delivery_attempts ?? 0,
       doc.delivery_blocked ?? false,
+      doc.customer_lat ?? null,
+      doc.customer_lng ?? null,
     );
   }
 }
