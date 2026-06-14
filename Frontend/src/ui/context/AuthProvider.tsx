@@ -93,23 +93,38 @@ const [state, setState] = useState<AuthState>({
 
   // Auto-fetch profiles on mount if already authenticated
   useEffect(() => {
-    if (authLocalStorage.getToken()) {
-      getMyProfileUseCase.execute().then((profile) => {
-        setMyProfile(profile);
-        if (profile.firstName) {
-          setState((prev) => ({
-            ...prev,
-            user: prev.user
-              ? { ...prev.user, name: `${profile.firstName} ${profile.firstLastName}` }
-              : null,
-          }));
-        }
-      }).catch(() => {});
+    const token = authLocalStorage.getToken();
+    if (!token) return;
 
-      getVendorProfile().then((profile) => {
-        setVendorProfile(profile);
-      }).catch(() => {});
+    // Verificar expiración del token antes de hacer fetch
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp * 1000 < Date.now()) {
+        authLocalStorage.clear();
+        setState({ user: null, token: null, isAuthenticated: false, isLoading: false, error: null });
+        return;
+      }
+    } catch {
+      authLocalStorage.clear();
+      setState({ user: null, token: null, isAuthenticated: false, isLoading: false, error: null });
+      return;
     }
+
+    getMyProfileUseCase.execute().then((profile) => {
+      setMyProfile(profile);
+      if (profile.firstName) {
+        setState((prev) => ({
+          ...prev,
+          user: prev.user
+            ? { ...prev.user, name: `${profile.firstName} ${profile.firstLastName}` }
+            : null,
+        }));
+      }
+    }).catch(() => {});
+
+    getVendorProfile().then((profile) => {
+      setVendorProfile(profile);
+    }).catch(() => {});
   }, [getMyProfileUseCase]);
 
   // LOGIN

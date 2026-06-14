@@ -24,9 +24,11 @@
   background: #fff;
   padding: 40px;
   border-radius: 20px;
-  width: 480px;
-  max-height: 90vh;
+  width: 500px;
+  min-height: 480px;
+  max-height: 85vh;
   overflow-y: auto;
+  flex-shrink: 0;
   box-shadow: 0px 20px 60px rgba(0, 0, 0, 0.15);
 }
 
@@ -102,16 +104,18 @@
 
 /* INPUTS */
 .delivery-register-form input,
-.delivery-register-form select {
+.delivery-register-form select,
+.delivery-register-form .field-container input,
+.delivery-register-form .field-container select {
   width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 8px;
+  padding: 10px 14px;
   border-radius: 10px;
   border: 2px solid #e1e8ed;
   outline: none;
   font-size: 14px;
   transition: all 0.3s ease;
   background: #f8f9fa;
+  box-sizing: border-box;
 }
 
 .delivery-register-form input:focus,
@@ -121,22 +125,15 @@
   box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.2);
 }
 
-.error-message {
-  color: #e74c3c;
-  font-size: 12px;
-  margin-top: -5px;
-  margin-bottom: 8px;
-  display: block;
-}
-
 /* FILA */
 .delivery-register-row {
   display: flex;
   gap: 12px;
 }
 
-.delivery-register-row input {
+.delivery-register-row > .field-container {
   flex: 1;
+  min-width: 0;
 }
 
 /* CHECKBOX */
@@ -669,7 +666,6 @@
 
   .delivery-register-row {
     flex-direction: column;
-    gap: 0;
   }
 
   .cc-preview {

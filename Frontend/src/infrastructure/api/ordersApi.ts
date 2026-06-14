@@ -1,11 +1,4 @@
-import axios from "axios";
-import { authLocalStorage } from "../persistence/authLocalStorage";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
-const authHeader = () => ({
-  headers: { Authorization: `Bearer ${authLocalStorage.getToken()}` },
-});
+import { authApi } from "./authApi";
 
 export interface OrderItemInput {
   product_id: string;
@@ -46,21 +39,33 @@ export interface OrderDetail {
   estimated_delivery?: string;
   customer_lat?: number | null;
   customer_lng?: number | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  customer_avatar?: string | null;
+  vendor_lat?: number | null;
+  vendor_lng?: number | null;
+  vendor_name?: string | null;
+  vendor_address?: string | null;
+  vendor_logo?: string | null;
+  courier_name?: string | null;
+  courier_phone?: string | null;
+  courier_avatar?: string | null;
+  courier_vehicle_type?: string | null;
 }
 
 export const ordersApi = {
   getById: async (orderId: string): Promise<OrderDetail> => {
-    const response = await axios.get(`${API_URL}/orders/${orderId}`, authHeader());
+    const response = await authApi.get(`/orders/${orderId}`);
     return response.data;
   },
 
   getByUser: async (userId: number | string): Promise<OrderDetail[]> => {
-    const response = await axios.get(`${API_URL}/orders/user/${userId}`, authHeader());
+    const response = await authApi.get(`/orders/user/${userId}`);
     return response.data;
   },
 
   create: async (data: CreateOrderRequest): Promise<OrderDetail> => {
-    const response = await axios.post(`${API_URL}/orders`, data, authHeader());
+    const response = await authApi.post(`/orders`, data);
     return response.data;
   },
 
@@ -70,20 +75,14 @@ export const ordersApi = {
       body.courier_id = courierId;
     }
     
-    // Determinar el endpoint según el contexto
     let endpoint: string;
     if (courierId !== undefined && status === 'IN_DELIVERY') {
-      // Si es IN_DELIVERY con courier_id, usar el endpoint de asignar courier (vendor)
-      endpoint = `${API_URL}/orders/${orderId}/assign-courier`;
-    } else if (courierId !== undefined && status === 'IN_DELIVERY') {
-      // Endpoint para courier (no usado por vendor)
-      endpoint = `${API_URL}/orders/${orderId}/status/courier`;
+      endpoint = `/orders/${orderId}/assign-courier`;
     } else {
-      // Endpoint para vendor actualizando estado (sin courier)
-      endpoint = `${API_URL}/orders/${orderId}/status/vendor`;
+      endpoint = `/orders/${orderId}/status/vendor`;
     }
     
-    const response = await axios.put(endpoint, body, authHeader());
+    const response = await authApi.put(endpoint, body);
     return response.data;
   },
 };

@@ -97,16 +97,23 @@ const VendorOrders = () => {
   const handleStatusChange = async (order: RecentOrder) => {
     const nextStatus = STATUS_FLOW[order.status];
     if (!nextStatus) {
-      alert('El pedido ya está listo para recoger o fue finalizado');
+      if (order.status === 'DELIVERED') {
+        toast.success('Pedido entregado');
+      } else if (order.status === 'CANCELLED') {
+        toast.error('Pedido cancelado');
+      } else {
+        toast.success('No hay más acciones disponibles para este pedido');
+      }
       return;
     }
     
     try {
       await ordersApi.updateStatus(order.order_id, nextStatus);
+      toast.success('Estado actualizado correctamente');
       await fetchOrders();
     } catch (error) {
       console.error("Error al actualizar estado:", error);
-      alert('Error al actualizar el estado del pedido');
+      toast.error('Error al actualizar el estado del pedido');
     }
   };
 

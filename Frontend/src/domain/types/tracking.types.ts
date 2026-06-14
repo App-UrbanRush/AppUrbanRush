@@ -45,4 +45,7 @@ export interface VendorCourierLocation {
   lat: number;
   lng: number;
   timestamp: string;
+  phone: string | null;
+  avatar: string | null;
+  vehicle_type: string | null;
 }

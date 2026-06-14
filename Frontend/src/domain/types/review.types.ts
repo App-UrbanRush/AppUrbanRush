@@ -8,6 +8,8 @@ export interface Review {
   comment: string;
   created_at: Date;
   time_ago: string;
+  items: { name: string; image_url: string | null }[];
+  total: number;
 }
 
 export interface ReviewStats {

@@ -12,6 +12,8 @@ export interface UserProfile {
   userId?: number;
   email?: string;
   avatarUrl?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface UpdateProfileData {
@@ -20,6 +22,8 @@ export interface UpdateProfileData {
   cellphone?: string;
   address?: string;
   gender?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface VendorProfile {

@@ -15,6 +15,8 @@ export class PeopleMapper {
       entity.gender,
       entity.user?.user_id || null,
       entity.avatar_url ?? null,
+      entity.latitude ? Number(entity.latitude) : null,
+      entity.longitude ? Number(entity.longitude) : null,
     );
   }
 
@@ -32,6 +34,8 @@ export class PeopleMapper {
     if (domain.userId) {
       entity.user = { user_id: domain.userId } as UserEntity;
     }
+    entity.latitude = domain.latitude;
+    entity.longitude = domain.longitude;
     return entity;
   }
 }

@@ -1,5 +1,6 @@
 import "./Register.css";
 import PasswordInput from "../../components/ui/PasswordInput";
+import FormField from "../../components/ui/FormField/FormField";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -99,73 +100,66 @@ const Register = () => {
           <p style={{ marginTop: -6, marginBottom: 18, color: '#888', fontSize: 14, fontWeight: 600 }}>Registro de usuario</p>
 
           {(apiError || contextError) && (
-            <div style={{ color: "red", marginBottom: "15px" }}>
+            <div className="register-api-error">
               {apiError || contextError}
             </div>
           )}
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="input-group">
+            <FormField label="Correo electrónico" error={errors.user_email?.message}>
               <input
                 {...register("user_email")}
                 type="email"
                 placeholder="Correo electrónico"
               />
-              {errors.user_email && <span className="error">{errors.user_email.message}</span>}
-            </div>
+            </FormField>
 
-            <div className="input-group">
+            <FormField label="Contraseña" error={errors.user_password?.message}>
               <PasswordInput
                 {...register("user_password")}
                 placeholder="Contraseña"
               />
-              {errors.user_password && <span className="error">{errors.user_password.message}</span>}
-            </div>
+            </FormField>
 
             <div className="register-row">
-              <div className="input-group" style={{ flex: 1, marginRight: '10px' }}>
+              <FormField label="Nombre" error={errors.firstName?.message}>
                 <input
                   {...register("firstName")}
                   placeholder="Nombre"
                 />
-                {errors.firstName && <span className="error">{errors.firstName.message}</span>}
-              </div>
-              <div className="input-group" style={{ flex: 1 }}>
+              </FormField>
+              <FormField label="Apellido" error={errors.firstLastName?.message}>
                 <input
                   {...register("firstLastName")}
                   placeholder="Apellido"
                 />
-                {errors.firstLastName && <span className="error">{errors.firstLastName.message}</span>}
-              </div>
+              </FormField>
             </div>
 
             <div className="register-row">
-              <div className="register-input-group" style={{ flex: 1, marginRight: '10px' }}>
+              <FormField label="Celular" error={errors.cellphone?.message}>
                 <input
                   {...register("cellphone")}
                   placeholder="Celular"
                 />
-                {errors.cellphone && <span className="error">{errors.cellphone.message}</span>}
-              </div>
-              <div className="register-input-group" style={{ flex: 1 }}>
+              </FormField>
+              <FormField label="Género" error={errors.gender?.message}>
                 <select {...register("gender")} defaultValue="">
                   <option value="" disabled>Seleccione Género</option>
                   <option value="M">Masculino</option>
                   <option value="F">Femenino</option>
                   <option value="Otro">Otro</option>
                 </select>
-                {errors.gender && <span className="error">{errors.gender.message}</span>}
-              </div>
+              </FormField>
             </div>
 
-            <div className="input-group">
+            <FormField label="Dirección" error={errors.address?.message}>
               <input
                 {...register("address")}
                 placeholder="Dirección"
               />
-              {errors.address && <span className="error">{errors.address.message}</span>}
               <LocationInput onAddressFound={handleLocationSelect} />
-            </div>
+            </FormField>
 
             <button type="submit" disabled={isLoading}>
               {isLoading ? "Creando..." : "Registrarse"}

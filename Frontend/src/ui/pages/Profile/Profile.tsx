@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/useAuth";
 import { peopleApi } from "../../../infrastructure/api/peopleApi";
-import { Camera, Trash2, User, Mail, Phone, MapPin } from "lucide-react";
+import { Camera, Trash2, User, Mail, Phone, MapPin, Navigation } from "lucide-react";
 import toast from "react-hot-toast";
 import Loading from "../../components/Loading/Loading";
 import "./Profile.css";
@@ -15,7 +15,37 @@ const Profile = () => {
   const genderRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Tu navegador no soporta geolocalización");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          if (myProfile?.id) {
+            await peopleApi.updateMyProfile(myProfile.id, { latitude, longitude });
+            await fetchMyProfile();
+            toast.success(`Ubicación guardada: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          }
+        } catch {
+          toast.error("Error al guardar la ubicación");
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      () => {
+        toast.error("No se pudo obtener tu ubicación. Verifica los permisos.");
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
 
   useEffect(() => {
     void fetchMyProfile();
@@ -230,6 +260,22 @@ const Profile = () => {
                   />
                 </div>
               </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                <button
+                  type="button"
+                  className="profile-location-btn"
+                  onClick={handleUseMyLocation}
+                  disabled={isLocating}
+                >
+                  <Navigation size={14} />
+                  {isLocating ? "Obteniendo ubicación..." : "Usar mi ubicación"}
+                </button>
+                {myProfile?.latitude && myProfile?.longitude && (
+                  <span style={{ fontSize: '12px', color: '#666' }}>
+                    ({myProfile.latitude.toFixed(4)}, {myProfile.longitude.toFixed(4)})
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

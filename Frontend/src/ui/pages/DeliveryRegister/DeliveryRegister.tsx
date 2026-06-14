@@ -8,6 +8,7 @@
 
 import "./DeliveryRegister.css";
 import PasswordInput from "../../components/ui/PasswordInput";
+import FormField from "../../components/ui/FormField/FormField";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -207,85 +208,83 @@ const DeliveryRegister = () => {
               <form onSubmit={handleNextStep} className="delivery-register-form">
                 <div className="form-section">
                   <h3>Información Personal</h3>
-                  
-                  <input
-                    name="user_email"
-                    type="email"
-                    placeholder="Correo electrónico"
-                    value={form.user_email}
-                    onChange={handleChange}
-                  />
-                  {errors.user_email && <span className="error-message">{errors.user_email}</span>}
 
-                  <PasswordInput
-                    name="user_password"
-                    placeholder="Contraseña"
-                    value={form.user_password}
-                    onChange={handleChange}
-                  />
-                  {errors.user_password && <span className="error-message">{errors.user_password}</span>}
+                  <FormField label="Correo electrónico" error={errors.user_email}>
+                    <input
+                      name="user_email"
+                      type="email"
+                      placeholder="Correo electrónico"
+                      value={form.user_email}
+                      onChange={handleChange}
+                    />
+                  </FormField>
+
+                  <FormField label="Contraseña" error={errors.user_password}>
+                    <PasswordInput
+                      name="user_password"
+                      placeholder="Contraseña"
+                      value={form.user_password}
+                      onChange={handleChange}
+                    />
+                  </FormField>
 
                   <div className="delivery-register-row">
-                    <div>
+                    <FormField label="Nombre" error={errors.firstName}>
                       <input
                         name="firstName"
                         placeholder="Nombre"
                         value={form.firstName}
                         onChange={handleChange}
                       />
-                      {errors.firstName && <span className="error-message">{errors.firstName}</span>}
-                    </div>
-                    <div>
+                    </FormField>
+                    <FormField label="Apellido" error={errors.firstLastName}>
                       <input
                         name="firstLastName"
                         placeholder="Apellido"
                         value={form.firstLastName}
                         onChange={handleChange}
                       />
-                      {errors.firstLastName && <span className="error-message">{errors.firstLastName}</span>}
-                    </div>
+                    </FormField>
                   </div>
 
                   <div className="delivery-register-row">
-                    <div>
+                    <FormField label="Celular" error={errors.cellphone}>
                       <input
                         name="cellphone"
                         placeholder="Celular"
                         value={form.cellphone}
                         onChange={handleChange}
                       />
-                      {errors.cellphone && <span className="error-message">{errors.cellphone}</span>}
-                    </div>
-                    <div>
+                    </FormField>
+                    <FormField label="Género" error={errors.gender}>
                       <select name="gender" value={form.gender} onChange={handleChange}>
                         <option value="" disabled>Género</option>
                         <option value="M">Masculino</option>
                         <option value="F">Femenino</option>
                         <option value="Otro">Otro</option>
                       </select>
-                      {errors.gender && <span className="error-message">{errors.gender}</span>}
-                    </div>
+                    </FormField>
                   </div>
 
-                  <input
-                    name="address"
-                    placeholder="Dirección"
-                    value={form.address}
-                    onChange={handleChange}
-                  />
-                  {errors.address && <span className="error-message">{errors.address}</span>}
+                  <FormField label="Dirección" error={errors.address}>
+                    <input
+                      name="address"
+                      placeholder="Dirección"
+                      value={form.address}
+                      onChange={handleChange}
+                    />
+                  </FormField>
 
                   <div className="delivery-register-row">
-                    <div>
+                    <FormField label="Cédula" error={errors.document_number}>
                       <input
                         name="document_number"
                         placeholder="Número de Cédula"
                         value={form.document_number}
                         onChange={handleChange}
                       />
-                      {errors.document_number && <span className="error-message">{errors.document_number}</span>}
-                    </div>
-                    <div>
+                    </FormField>
+                    <FormField label="Fecha exp." error={errors.expedition_date}>
                       <input
                         name="expedition_date"
                         type="date"
@@ -293,54 +292,52 @@ const DeliveryRegister = () => {
                         value={form.expedition_date}
                         onChange={handleChange}
                       />
-                      {errors.expedition_date && <span className="error-message">{errors.expedition_date}</span>}
-                    </div>
+                    </FormField>
                   </div>
-                  <input
-                    name="city"
-                    placeholder="Ciudad de expedición"
-                    value={form.city}
-                    onChange={handleChange}
-                  />
-          {errors.city && <span className="error-message">{errors.city}</span>}
+
+                  <FormField label="Ciudad de expedición" error={errors.city}>
+                    <input
+                      name="city"
+                      placeholder="Ciudad de expedición"
+                      value={form.city}
+                      onChange={handleChange}
+                    />
+                  </FormField>
                 </div>
 
                 <div className="form-section">
                   <h3>Información del Vehículo</h3>
-                  
-                  <select
-                    name="vehicle_type"
-                    value={form.vehicle_type}
-                    onChange={handleChange}
-                  >
-                    <option value="" disabled>Selecciona tipo de vehículo</option>
-                    <option value="motorcycle">Motocicleta</option>
-                    <option value="bicycle">Bicicleta</option>
-                    <option value="car">Auto</option>
-                  </select>
-                  {errors.vehicle_type && (
-                    <span className="error-message">{errors.vehicle_type}</span>
-                  )}
 
-                  <input
-                    name="vehicle_plate"
-                    placeholder="Placa del vehículo"
-                    value={form.vehicle_plate}
-                    onChange={handleChange}
-                  />
-                  {errors.vehicle_plate && (
-                    <span className="error-message">{errors.vehicle_plate}</span>
-                  )}
+                  <FormField label="Tipo de vehículo" error={errors.vehicle_type}>
+                    <select
+                      name="vehicle_type"
+                      value={form.vehicle_type}
+                      onChange={handleChange}
+                    >
+                      <option value="" disabled>Selecciona tipo de vehículo</option>
+                      <option value="motorcycle">Motocicleta</option>
+                      <option value="bicycle">Bicicleta</option>
+                      <option value="car">Auto</option>
+                    </select>
+                  </FormField>
 
-                  <input
-                    name="soat_number"
-                    placeholder="Número de SOAT"
-                    value={form.soat_number}
-                    onChange={handleChange}
-                  />
-                  {errors.soat_number && (
-                    <span className="error-message">{errors.soat_number}</span>
-                  )}
+                  <FormField label="Placa" error={errors.vehicle_plate}>
+                    <input
+                      name="vehicle_plate"
+                      placeholder="Placa del vehículo"
+                      value={form.vehicle_plate}
+                      onChange={handleChange}
+                    />
+                  </FormField>
+
+                  <FormField label="SOAT" error={errors.soat_number}>
+                    <input
+                      name="soat_number"
+                      placeholder="Número de SOAT"
+                      value={form.soat_number}
+                      onChange={handleChange}
+                    />
+                  </FormField>
                 </div>
 
                 <button type="submit" className="delivery-register-btn">

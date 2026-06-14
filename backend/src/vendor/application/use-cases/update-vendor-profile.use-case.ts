@@ -21,6 +21,8 @@ export class UpdateVendorProfileUseCase {
       ...(dto.business_hours !== undefined && { business_hours: dto.business_hours }),
       ...(dto.phone !== undefined && { phone: dto.phone }),
       ...(dto.description !== undefined && { description: dto.description }),
+      ...(dto.latitude !== undefined && { latitude: dto.latitude }),
+      ...(dto.longitude !== undefined && { longitude: dto.longitude }),
     });
 
     return updated;

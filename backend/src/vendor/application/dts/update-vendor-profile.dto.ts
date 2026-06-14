@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateVendorProfileDto {
@@ -21,4 +21,14 @@ export class UpdateVendorProfileDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiPropertyOptional({ description: 'Latitud de la ubicación del negocio' })
+  @IsNumber()
+  @IsOptional()
+  latitude?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud de la ubicación del negocio' })
+  @IsNumber()
+  @IsOptional()
+  longitude?: number;
 }

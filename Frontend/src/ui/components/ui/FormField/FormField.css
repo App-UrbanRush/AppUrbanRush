@@ -1,0 +1,26 @@
+.field-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 68px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.field-error {
+  font-size: 12px;
+  color: #e74c3c;
+  min-height: 14px;
+  line-height: 14px;
+  transition: opacity 0.15s;
+}
+
+.field-error--empty {
+  visibility: hidden;
+}

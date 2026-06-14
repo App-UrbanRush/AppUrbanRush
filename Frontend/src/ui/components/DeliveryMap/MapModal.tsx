@@ -8,9 +8,10 @@ interface MapModalProps {
   center: [number, number];
   zoom?: number;
   locations: Array<{ id: string; lat: number; lng: number; address: string; status: "pending" | "in-transit" | "delivered" }>;
+  userPosition?: [number, number] | null;
 }
 
-const MapModal = ({ open, onClose, center, zoom = 14, locations }: MapModalProps) => {
+const MapModal = ({ open, onClose, center, zoom = 14, locations, userPosition = null }: MapModalProps) => {
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -35,6 +36,7 @@ const MapModal = ({ open, onClose, center, zoom = 14, locations }: MapModalProps
           zoom={zoom}
           height="100%"
           locations={locations}
+          userPosition={userPosition}
           showMyLocation
         />
       </div>

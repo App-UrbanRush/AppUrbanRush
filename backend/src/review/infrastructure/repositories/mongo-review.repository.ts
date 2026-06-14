@@ -28,8 +28,87 @@ export class MongoReviewRepository implements IReviewRepository {
           doc.rating,
           doc.comment,
           doc.created_at,
+          doc.items || [],
+          doc.total ?? 0,
         ),
     );
+  }
+
+  async findByVendorIdAndUserId(vendorId: number, userId: number): Promise<ReviewModel | null> {
+    const doc = await this.reviewModel.findOne({ vendor_id: vendorId, user_id: userId }).exec();
+    if (!doc) return null;
+    return new ReviewModel(
+      doc._id.toString(),
+      doc.vendor_id,
+      doc.user_id,
+      doc.order_id || null,
+      doc.rating,
+      doc.comment,
+      doc.created_at,
+      doc.items || [],
+      doc.total ?? 0,
+    );
+  }
+
+  async findByOrderId(orderId: string): Promise<ReviewModel | null> {
+    const doc = await this.reviewModel.findOne({ order_id: orderId }).exec();
+    if (!doc) return null;
+    return new ReviewModel(
+      doc._id.toString(),
+      doc.vendor_id,
+      doc.user_id,
+      doc.order_id || null,
+      doc.rating,
+      doc.comment,
+      doc.created_at,
+      doc.items || [],
+      doc.total ?? 0,
+    );
+  }
+
+  async findById(reviewId: string): Promise<ReviewModel | null> {
+    const doc = await this.reviewModel.findById(reviewId).exec();
+    if (!doc) return null;
+    return new ReviewModel(
+      doc._id.toString(),
+      doc.vendor_id,
+      doc.user_id,
+      doc.order_id || null,
+      doc.rating,
+      doc.comment,
+      doc.created_at,
+      doc.items || [],
+      doc.total ?? 0,
+    );
+  }
+
+  async create(data: Partial<ReviewModel>): Promise<ReviewModel> {
+    const doc = new this.reviewModel({
+      vendor_id: data.vendor_id,
+      user_id: data.user_id,
+      order_id: data.order_id,
+      rating: data.rating,
+      comment: data.comment,
+      items: data.items || [],
+      total: data.total ?? 0,
+      created_at: new Date(),
+    });
+    const saved = await doc.save();
+    return new ReviewModel(
+      saved._id.toString(),
+      saved.vendor_id,
+      saved.user_id,
+      saved.order_id || null,
+      saved.rating,
+      saved.comment,
+      saved.created_at,
+      saved.items || [],
+      saved.total ?? 0,
+    );
+  }
+
+  async delete(reviewId: string): Promise<void> {
+    await this.reviewModel.findByIdAndDelete(reviewId).exec();
   }
 
   async findStatsByVendorId(vendorId: number): Promise<{

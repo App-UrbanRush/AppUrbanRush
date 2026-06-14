@@ -18,19 +18,54 @@
 }
 
 .vendor-sidebar-logo {
-  padding: 24px 20px;
+  padding: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
 }
 
-.vendor-sidebar-logo h1 {
-  font-size: 20px;
-  font-weight: 800;
-  margin: 0;
-  color: #fff;
-  letter-spacing: -0.5px;
+.vendor-sidebar-logo-wrap {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.vendor-sidebar-logo-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 45%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.35) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: logo-shimmer 3.5s ease-in-out infinite;
+  pointer-events: none;
+  mask-image: url(/Logo-cor.png);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url(/Logo-cor.png);
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+@keyframes logo-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.vendor-sidebar-logo-img {
+  width: 140px;
+  height: auto;
+  display: block;
 }
 
 .vendor-sidebar-nav {

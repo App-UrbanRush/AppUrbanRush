@@ -61,6 +61,8 @@ export class RegisterVendorUseCase {
       phone: dto.business_phone,
       description: dto.description ?? null,
       status: 'PENDING',
+      latitude: dto.latitude ?? null,
+      longitude: dto.longitude ?? null,
     });
 
     return {

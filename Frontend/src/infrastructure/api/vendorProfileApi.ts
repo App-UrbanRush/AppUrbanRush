@@ -8,6 +8,8 @@ export interface UpdateVendorProfileData {
   business_hours?: string;
   phone?: string;
   description?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export const vendorProfileApi = {

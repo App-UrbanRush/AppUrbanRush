@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
-import { Upload, MapPin, Clock, Image as ImageIcon, Save, X, Loader2, Check, Trash2, Phone, FileText } from "lucide-react";
+import { Upload, MapPin, Clock, Image as ImageIcon, Save, X, Loader2, Check, Trash2, Phone, FileText, Navigation } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import { storageApi } from "../../../infrastructure/api/storageApi";
 import { vendorPhotosApi, type VendorPhoto } from "../../../infrastructure/api/vendorPhotosApi";
 import { vendorProfileApi } from "../../../infrastructure/api/vendorProfileApi";
+import LocationPickerMap from "../../components/ui/LocationPickerMap/LocationPickerMap";
 import "./VendorSettings.css";
 
 const VendorSettings = () => {
@@ -14,6 +15,10 @@ const VendorSettings = () => {
   const [phone, setPhone] = useState("");
   const [description, setDescription] = useState("");
   const [hours, setHours] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const [logoPreview, setLogoPreview] = useState("");
 
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -34,6 +39,8 @@ const VendorSettings = () => {
       setDescription(vendorProfile?.description || "");
       setHours(vendorProfile?.business_hours || "");
       setLogoPreview(vendorProfile?.logo_url || "");
+      setLatitude(vendorProfile?.latitude ?? null);
+      setLongitude(vendorProfile?.longitude ?? null);
     }
   }, [vendorProfile, myProfile]);
 
@@ -106,6 +113,48 @@ const VendorSettings = () => {
     }
   };
 
+  const handleMapConfirm = (address: string, lat: number, lng: number) => {
+    setAddress(address);
+    setLatitude(lat);
+    setLongitude(lng);
+    setShowMapPicker(false);
+  };
+
+  const handleLocate = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocalización no soportada por tu navegador");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude: lat, longitude: lng } = position.coords;
+        setLatitude(lat);
+        setLongitude(lng);
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+            { headers: { 'User-Agent': 'AppUrbanRush/1.0' } },
+          );
+          const data = await res.json();
+          if (data.display_name) {
+            setAddress(data.display_name);
+          }
+        } catch {
+          // fallback: mantener dirección actual
+        }
+
+        setIsLocating(false);
+      },
+      () => {
+        alert("No se pudo obtener tu ubicación. Verifica los permisos.");
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: false, timeout: 10000 },
+    );
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     setSaveSuccess(false);
@@ -115,6 +164,8 @@ const VendorSettings = () => {
         business_hours: hours,
         phone,
         description,
+        ...(latitude !== null && { latitude }),
+        ...(longitude !== null && { longitude }),
       });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -210,6 +261,36 @@ const VendorSettings = () => {
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Ej: Calle Principal #123, Ciudad"
               />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="vendor-locate-btn"
+                  onClick={handleLocate}
+                  disabled={isLocating}
+                >
+                  <Navigation size={16} />
+                  {isLocating ? "Obteniendo ubicación..." : "Actualizar ubicación"}
+                </button>
+                <button
+                  type="button"
+                  className="vendor-locate-btn"
+                  onClick={() => setShowMapPicker(true)}
+                >
+                  🗺️ Abrir mapa
+                </button>
+                {latitude !== null && longitude !== null && (
+                  <span className="vendor-coords">
+                    ({latitude.toFixed(5)}, {longitude.toFixed(5)})
+                  </span>
+                )}
+              </div>
+              {showMapPicker && (
+                <LocationPickerMap
+                  initialPosition={latitude !== null && longitude !== null ? [latitude, longitude] : undefined}
+                  onConfirm={handleMapConfirm}
+                  onClose={() => setShowMapPicker(false)}
+                />
+              )}
             </div>
           </div>
 

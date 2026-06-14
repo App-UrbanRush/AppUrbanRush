@@ -2,12 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/Logo-icono.png" />
+    <link rel="apple-touch-icon" href="/Logo-icono.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UrbanRush</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="app-loading" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff">
+        <img src="/Logo-icono.png" alt="UrbanRush" style="width:100px;height:auto" />
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

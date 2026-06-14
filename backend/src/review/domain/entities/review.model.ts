@@ -7,5 +7,7 @@ export class ReviewModel {
     public readonly rating: number,
     public readonly comment: string,
     public readonly created_at: Date | null,
+    public readonly items: { name: string; image_url: string | null }[] = [],
+    public readonly total: number = 0,
   ) {}
 }

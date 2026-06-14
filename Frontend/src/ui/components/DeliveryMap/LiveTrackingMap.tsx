@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from "react-leaflet";
 import L from "leaflet";
 
@@ -21,6 +22,19 @@ const customerIcon = L.divIcon({
     <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="11" fill="#10b981" stroke="#fff" stroke-width="2"/>
       <path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#fff"/>
+    </svg>
+  </div>`,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+});
+
+const storeIcon = L.divIcon({
+  className: "",
+  html: `<div style="position:relative;">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="11" fill="#3b82f6" stroke="#fff" stroke-width="2"/>
+      <rect x="7" y="9" width="10" height="10" rx="1" fill="#fff"/>
+      <path d="M7 9l5-4 5 4" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </div>`,
   iconSize: [36, 36],
@@ -82,7 +96,22 @@ interface LiveTrackingMapProps {
   customerLat?: number | null;
   customerLng?: number | null;
   customerAddress?: string | null;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  customerAvatar?: string | null;
   showRoute?: boolean;
+  vendorLat?: number | null;
+  vendorLng?: number | null;
+  vendorName?: string | null;
+  vendorAddress?: string | null;
+  vendorLogo?: string | null;
+  vendorRating?: number | null;
+  vendorId?: number | null;
+  courierName?: string | null;
+  courierPhone?: string | null;
+  courierAvatar?: string | null;
+  courierVehicle?: string | null;
+  baseRoutePoints?: RoutePoints[];
 }
 
 const defaultCenter: [number, number] = [4.6097, -74.0817];
@@ -95,8 +124,24 @@ const LiveTrackingMap = ({
   customerLat,
   customerLng,
   customerAddress,
-  showRoute = false
+  customerName,
+  customerPhone,
+  customerAvatar,
+  showRoute = false,
+  vendorLat,
+  vendorLng,
+  vendorName,
+  vendorAddress,
+  vendorLogo,
+  vendorRating,
+  vendorId,
+  courierName,
+  courierPhone,
+  courierAvatar,
+  courierVehicle,
+  baseRoutePoints = [],
 }: LiveTrackingMapProps) => {
+  const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const [routePoints, setRoutePoints] = useState<RoutePoints[]>([]);
   const fetching = useRef(false);
@@ -105,6 +150,7 @@ const LiveTrackingMap = ({
 
   const hasPosition = lat != null && lng != null && !isNaN(lat) && !isNaN(lng);
   const hasCustomerPosition = customerLat != null && customerLng != null && !isNaN(customerLat) && !isNaN(customerLng);
+  const hasVendorPosition = vendorLat != null && vendorLng != null && !isNaN(vendorLat) && !isNaN(vendorLng);
   const center: [number, number] = hasPosition ? [lat as number, lng as number] : defaultCenter;
 
   // Obtener ruta cada vez que cambien las coordenadas (nunca limpiar routePoints)
@@ -168,6 +214,16 @@ const LiveTrackingMap = ({
         {showRoute && routePoints.length > 0 && <FitBoundsOnce points={routePoints} />}
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         
+        {baseRoutePoints.length > 0 && (
+          <Polyline
+            positions={baseRoutePoints.map((p) => [p.lat, p.lng])}
+            color="#3b82f6"
+            weight={3}
+            opacity={0.5}
+            dashArray="10 10"
+          />
+        )}
+
         {showRoute && routePoints.length > 0 && (
           <Polyline
             positions={routePoints.map((p) => [p.lat, p.lng])}
@@ -177,9 +233,70 @@ const LiveTrackingMap = ({
           />
         )}
         
+        {hasVendorPosition && (
+          <Marker 
+            position={[vendorLat as number, vendorLng as number]} 
+            icon={storeIcon}
+          >
+            <Popup>
+              <div style={{ minWidth: '180px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '6px' }}>
+                  {vendorLogo && (
+                    <img src={vendorLogo} alt="" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
+                  )}
+                  <div>
+                    <strong style={{ fontSize: '14px' }}>{vendorName || "Tienda"}</strong>
+                    {vendorAddress && <div style={{ fontSize: '12px', color: '#666' }}>{vendorAddress}</div>}
+                  </div>
+                </div>
+                {vendorRating != null && (
+                  <div style={{ fontSize: '13px', color: '#f59e0b', marginBottom: '4px' }}>
+                    {"★".repeat(Math.round(vendorRating))}{"☆".repeat(5 - Math.round(vendorRating))}
+                    {" "}{vendorRating.toFixed(1)}
+                  </div>
+                )}
+                {vendorId && (
+                  <button
+                    onClick={() => navigate(`/store/${vendorId}`)}
+                    style={{
+                      width: '100%', padding: '7px 0',
+                      background: '#e8500a', color: '#fff', border: 'none',
+                      borderRadius: '8px', fontSize: '12px', fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Ver tienda
+                  </button>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
         {hasPosition && (
           <Marker position={center} icon={courierIcon}>
-            <Popup>{popupText}</Popup>
+            <Popup>
+              <div style={{ minWidth: '180px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '6px' }}>
+                  {courierAvatar ? (
+                    <img src={courierAvatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#ff6b35', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700 }}>
+                      {(courierName || "D")[0]}
+                    </div>
+                  )}
+                  <div>
+                    <strong style={{ fontSize: '14px' }}>{courierName || "Domiciliario"}</strong>
+                    {courierPhone && <div style={{ fontSize: '12px' }}>📞 {courierPhone}</div>}
+                  </div>
+                </div>
+                {courierVehicle && (
+                  <div style={{ fontSize: '12px', color: '#666' }}>
+                    🚲 {courierVehicle === 'motorcycle' ? 'Motocicleta' : courierVehicle === 'bicycle' ? 'Bicicleta' : courierVehicle === 'car' ? 'Auto' : courierVehicle}
+                  </div>
+                )}
+              </div>
+            </Popup>
           </Marker>
         )}
         
@@ -189,9 +306,24 @@ const LiveTrackingMap = ({
             icon={customerIcon}
           >
             <Popup>
-              <strong>Cliente</strong>
-              <br />
-              {customerAddress || "Dirección de entrega"}
+              <div style={{ minWidth: '180px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '6px' }}>
+                  {customerAvatar ? (
+                    <img src={customerAvatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700 }}>
+                      {(customerName || "C")[0]}
+                    </div>
+                  )}
+                  <div>
+                    <strong style={{ fontSize: '14px' }}>{customerName || "Cliente"}</strong>
+                    {customerPhone && <div style={{ fontSize: '12px' }}>📞 {customerPhone}</div>}
+                  </div>
+                </div>
+                <div style={{ fontSize: '12px', color: '#666' }}>
+                  📍 {customerAddress || "Dirección de entrega"}
+                </div>
+              </div>
             </Popup>
           </Marker>
         )}

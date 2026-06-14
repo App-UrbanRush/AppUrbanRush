@@ -18,11 +18,20 @@ interface OrderLocation {
   customer_lat: number | null;
   customer_lng: number | null;
   delivery_address: string;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  customer_avatar?: string | null;
+  vendor_lat?: number | null;
+  vendor_lng?: number | null;
+  vendor_name?: string | null;
+  vendor_address?: string | null;
+  vendor_logo?: string | null;
+  vendor_id?: number;
 }
 
 const CourierBroadcast = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const { user } = useAuth();
+  const { user, myProfile, courierProfile } = useAuth();
   const { broadcasting, connectionState, lastSent, error, start, stop } = useCourierBroadcast(orderId);
   const [orderLocation, setOrderLocation] = useState<OrderLocation | null>(null);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
@@ -35,9 +44,18 @@ const CourierBroadcast = () => {
     ordersApi.getById(orderId)
       .then((order) => {
         setOrderLocation({
-          customer_lat: (order as any).customer_lat || null,
-          customer_lng: (order as any).customer_lng || null,
+          customer_lat: order.customer_lat ?? null,
+          customer_lng: order.customer_lng ?? null,
           delivery_address: order.delivery_address,
+          customer_name: order.customer_name ?? null,
+          customer_phone: order.customer_phone ?? null,
+          customer_avatar: order.customer_avatar ?? null,
+          vendor_lat: order.vendor_lat ?? null,
+          vendor_lng: order.vendor_lng ?? null,
+          vendor_name: order.vendor_name ?? null,
+          vendor_address: order.vendor_address ?? null,
+          vendor_logo: order.vendor_logo ?? null,
+          vendor_id: order.vendor_id,
         });
         setOrderStatus(order.status);
       })
@@ -123,7 +141,20 @@ const CourierBroadcast = () => {
             customerLat={orderLocation?.customer_lat ?? null}
             customerLng={orderLocation?.customer_lng ?? null}
             customerAddress={orderLocation?.delivery_address ?? null}
+            customerName={orderLocation?.customer_name}
+            customerPhone={orderLocation?.customer_phone}
+            customerAvatar={orderLocation?.customer_avatar}
             showRoute={true}
+            courierName={myProfile ? `${myProfile.firstName} ${myProfile.firstLastName}` : undefined}
+            courierPhone={myProfile?.cellphone}
+            courierAvatar={courierProfile?.photo_url}
+            courierVehicle={courierProfile?.vehicle_type}
+            vendorLat={orderLocation?.vendor_lat ?? null}
+            vendorLng={orderLocation?.vendor_lng ?? null}
+            vendorName={orderLocation?.vendor_name}
+            vendorAddress={orderLocation?.vendor_address}
+            vendorLogo={orderLocation?.vendor_logo}
+            vendorId={orderLocation?.vendor_id}
           />
         </div>
 

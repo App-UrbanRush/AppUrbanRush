@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 
@@ -15,6 +16,9 @@ interface DeliveryLocation {
   lng: number;
   address: string;
   status: "pending" | "in-transit" | "delivered";
+  name?: string;
+  image?: string;
+  businessType?: string;
 }
 
 function ChangeView({ center }: { center: [number, number] }) {
@@ -114,6 +118,50 @@ interface DeliveryMapProps {
   locations?: DeliveryLocation[];
   height?: string;
   showMyLocation?: boolean;
+  userPosition?: [number, number] | null;
+}
+
+function StorePopupContent({ loc }: { loc: DeliveryLocation }) {
+  const navigate = useNavigate();
+  return (
+    <div style={{ minWidth: '180px' }}>
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+        {loc.image && (
+          <img
+            src={loc.image}
+            alt={loc.name || loc.address}
+            style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover' }}
+            onError={(e) => { (e.currentTarget).style.display = 'none'; }}
+          />
+        )}
+        <div>
+          <strong style={{ fontSize: '14px', display: 'block', marginBottom: '2px' }}>{loc.name || loc.address}</strong>
+          {loc.businessType && (
+            <span style={{ fontSize: '11px', color: '#e8500a', fontWeight: 600, display: 'block', marginBottom: '2px' }}>
+              {loc.businessType}
+            </span>
+          )}
+          <span style={{ fontSize: '11px', color: '#888' }}>{loc.address}</span>
+        </div>
+      </div>
+      <button
+        onClick={() => navigate(`/store/${loc.id}`)}
+        style={{
+          width: '100%',
+          padding: '7px 0',
+          background: '#e8500a',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          fontSize: '13px',
+          fontWeight: 600,
+          cursor: 'pointer',
+        }}
+      >
+        Ver tienda
+      </button>
+    </div>
+  );
 }
 
 const defaultCenter: [number, number] = [4.6097, -74.0817];
@@ -124,9 +172,12 @@ const DeliveryMap = ({
   locations = [],
   height = "400px",
   showMyLocation = false,
+  userPosition = null,
 }: DeliveryMapProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
+
+  const activeUserPos = userPosition ?? userPos;
 
   useEffect(() => {
     setIsMounted(true);
@@ -147,14 +198,12 @@ const DeliveryMap = ({
         {locations.map((loc) => (
           <Marker key={loc.id} position={[loc.lat, loc.lng]}>
             <Popup>
-              <strong>{loc.address}</strong>
-              <br />
-              Estado: {loc.status}
+              <StorePopupContent loc={loc} />
             </Popup>
           </Marker>
         ))}
-        {userPos && (
-          <Marker position={userPos} icon={userIcon}>
+        {activeUserPos && (
+          <Marker position={activeUserPos} icon={userIcon}>
             <Popup>Tu ubicación</Popup>
           </Marker>
         )}
