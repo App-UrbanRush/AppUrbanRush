@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, User, LogOut, Moon, Sun, UserCircle } from "lucide-react";
+import { User, LogOut, Moon, Sun, UserCircle } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
 import { useDarkMode } from "../../../context/useDarkMode";
 import "./CourierHeader.css";
@@ -35,10 +35,6 @@ const CourierHeader = () => {
           onClick={toggleDarkMode}
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-
-        <button className="courier-header-notification-btn">
-          <Bell size={20} />
         </button>
 
         <div className="courier-header-profile">

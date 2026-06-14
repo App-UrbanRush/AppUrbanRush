@@ -17,6 +17,7 @@ export interface UpdateProductData {
   category?: string;
   image_url?: string;
   stock?: number;
+  is_available?: boolean;
 }
 
 export interface IProductRepository {

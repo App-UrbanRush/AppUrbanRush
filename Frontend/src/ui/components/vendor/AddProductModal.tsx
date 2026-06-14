@@ -81,12 +81,14 @@ const AddProductModal = ({ isOpen, onClose, onProductCreated, editProduct, categ
     setLoading(true);
     try {
       if (isEditing) {
+        const newStock = parseInt(formData.stock) || 10;
         await updateProductUseCase.execute(editProduct.product_id, {
           name: formData.name,
           description: formData.description,
           price: parseFloat(formData.price),
           category: formData.category,
-          stock: parseInt(formData.stock) || 10,
+          stock: newStock,
+          is_available: newStock > 0,
         });
 
         if (imageFile) {

@@ -27,4 +27,6 @@ export interface CourierOrder {
   customer_lng?: number | null;
   customer_name?: string;
   customer_phone?: string;
+  // Nombre del restaurante
+  vendor_name?: string;
 }

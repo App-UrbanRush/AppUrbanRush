@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { vendorsApi, type VendorListItem, type VendorPhotoItem } from "../../../infrastructure/api/vendorsApi";
@@ -25,6 +25,9 @@ import {
   Play,
   MapPin,
   RefreshCw,
+  User,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import "./CourierDashboard.css";
 
@@ -49,6 +52,25 @@ const CourierDashboard = () => {
   const [loadingOrders, setLoadingOrders] = useState(false);
   
   const acceptOrderUseCase = new AcceptOrderUseCase(new CourierOrdersRepositoryImpl());
+
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const onCarouselScroll = useCallback(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const idx = Math.round(el.scrollTop / el.clientHeight);
+    setCarouselIdx(Math.min(idx, availableOrders.length - 1));
+  }, [availableOrders.length]);
+
+  const scrollCarousel = (dir: 1 | -1) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const next = carouselIdx + dir;
+    if (next < 0 || next >= availableOrders.length) return;
+    el.children[next]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setCarouselIdx(next);
+  };
 
   // Polling para pedidos disponibles (cada 5 segundos)
   useEffect(() => {
@@ -105,6 +127,12 @@ const CourierDashboard = () => {
   const loadOrders = async () => {
     if (!courierProfile?.user_id) {
       console.warn("Courier profile or user_id not available");
+      return;
+    }
+
+    if (courierProfile?.status !== 'ACTIVE') {
+      setAvailableOrders([]);
+      setLoadingOrders(false);
       return;
     }
     
@@ -316,6 +344,12 @@ const CourierDashboard = () => {
                 
                 {loadingOrders && availableOrders.length === 0 ? (
                   <div className="courier-orders-loading">Cargando pedidos...</div>
+                ) : courierProfile?.status !== 'ACTIVE' ? (
+                  <div className="courier-active-empty">
+                    <Package size={40} />
+                    <p>Estás inactivo</p>
+                    <span>Activa tu estado desde tu perfil para recibir pedidos disponibles</span>
+                  </div>
                 ) : availableOrders.length === 0 ? (
                   <div className="courier-active-empty">
                     <Package size={40} />
@@ -323,37 +357,50 @@ const CourierDashboard = () => {
                     <span>Cuando un negocio publique un pedido, aparecerá aquí</span>
                   </div>
                 ) : (
-                  <div className="courier-orders-list">
-                    {availableOrders.map((order) => (
-                      <div key={order.order_id} className="courier-order-card available">
-                        <div className="courier-order-header">
-                          <span className="courier-order-id">#{order.order_id.slice(-6).toUpperCase()}</span>
-                          <span className="courier-order-status status-available">Disponible</span>
-                        </div>
-                        <div className="courier-order-info">
-                          <MapPin size={14} />
-                          <span>{order.delivery_address}</span>
-                        </div>
-                        {order.items && order.items.length > 0 && (
-                          <div className="courier-order-info">
-                            <Package size={14} />
-                            <span>{order.items.length} producto(s)</span>
+                  <div className="available-carousel-wrap">
+                    <button className="carousel-arrow carousel-arrow-up" onClick={() => scrollCarousel(-1)} disabled={carouselIdx === 0}>
+                      <ChevronUp size={22} />
+                    </button>
+
+                    <div className="available-carousel" ref={carouselRef} onScroll={onCarouselScroll}>
+                      {availableOrders.map((order) => (
+                        <div key={order.order_id} className="carousel-card">
+                          <div className="courier-order-header">
+                            <span className="courier-order-id">#{order.order_id.slice(-6).toUpperCase()}</span>
+                            <span className="courier-order-status status-available">Disponible</span>
                           </div>
-                        )}
-                        {order.delivery_fee && (
                           <div className="courier-order-info">
-                            <ClockIcon size={14} />
-                            <span>Domicilio: ${order.delivery_fee.toLocaleString()}</span>
+                            <User size={14} />
+                            <span>Cliente: {order.customer_name || "Cliente"}</span>
                           </div>
-                        )}
-                        <button
-                          className="courier-accept-order-btn"
-                          onClick={() => handleAcceptOrder(order.order_id)}
-                        >
-                          <Play size={16} /> Aceptar Pedido
-                        </button>
+                          {order.delivery_fee && (
+                            <div className="courier-order-info">
+                              <ClockIcon size={14} />
+                              <span>Domicilio: ${order.delivery_fee.toLocaleString()}</span>
+                            </div>
+                          )}
+                          <button
+                            className="courier-accept-order-btn"
+                            onClick={() => handleAcceptOrder(order.order_id)}
+                          >
+                            <Play size={16} /> Aceptar Pedido
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button className="carousel-arrow carousel-arrow-down" onClick={() => scrollCarousel(1)} disabled={carouselIdx === availableOrders.length - 1}>
+                      <ChevronDown size={22} />
+                    </button>
+
+                    <div className="carousel-footer">
+                      <div className="carousel-dots">
+                        {availableOrders.map((_, i) => (
+                          <span key={i} className={`carousel-dot ${i === carouselIdx ? 'active' : ''}`} />
+                        ))}
                       </div>
-                    ))}
+                      <span className="carousel-count">{carouselIdx + 1} de {availableOrders.length} pedidos</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -377,20 +424,29 @@ const CourierDashboard = () => {
                   </div>
                 ) : (
                   <div className="courier-orders-list">
-                    {activeOrders.map((order) => (
+                    {activeOrders.map((order) => {
+                      return (
                       <div key={order.order_id} className="courier-order-card active">
                         <div className="courier-order-header">
                           <span className="courier-order-id">#{order.order_id.slice(-6).toUpperCase()}</span>
                           <span className="courier-order-status status-in-delivery">En entrega</span>
                         </div>
                         <div className="courier-order-info">
-                          <MapPin size={14} />
-                          <span>{order.delivery_address}</span>
+                          <User size={13} />
+                          <span>Cliente: {order.customer_name || "Cliente"}</span>
+                        </div>
+                        <div className="courier-order-info">
+                          <MapPin size={13} />
+                          <span>Dirección: {order.delivery_address}</span>
                         </div>
                         {order.items && order.items.length > 0 && (
-                          <div className="courier-order-info">
-                            <Package size={14} />
-                            <span>{order.items.length} producto(s)</span>
+                          <div className="courier-order-info" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 3 }}>
+                            <span style={{ fontWeight: 600, fontSize: 11, color: '#6b7280' }}>Productos:</span>
+                            {order.items.map((item, idx) => (
+                              <div key={idx} style={{ fontSize: 12 }}>
+                                <span>{item.product_name} x{item.quantity}</span>
+                              </div>
+                            ))}
                           </div>
                         )}
                         <div className="courier-order-actions">
@@ -398,17 +454,17 @@ const CourierDashboard = () => {
                             className="courier-view-route-btn"
                             onClick={() => handleViewRoute(order)}
                           >
-                            <Navigation size={14} /> Ver Ruta en Mapa
+                            <Navigation size={13} /> Ver Ruta
                           </button>
                           <button
                             className="courier-cancel-order-btn"
                             onClick={() => handleCancelOrder(order.order_id)}
                           >
-                            <X size={14} /> Cancelar
+                            <X size={13} /> Cancelar
                           </button>
                         </div>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 )}
               </div>

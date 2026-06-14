@@ -28,7 +28,7 @@ export class GetVendorDashboardStatsUseCase {
       status: 'DELIVERED',
       updatedAt: { $gte: today },
     });
-    const ventasHoy = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const ventasHoy = todayOrders.reduce((sum, o) => sum + (o.subtotal || 0), 0);
 
     // 2. Pedidos totales
     const pedidosTotales = await this.orderModel.countDocuments({ vendor_id: vendorId });
