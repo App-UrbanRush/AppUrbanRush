@@ -21,8 +21,8 @@ export class GetOrdersByCourierUseCase {
         
         return {
           ...order,
-          customer_lat: customer?.latitude || null,
-          customer_lng: customer?.longitude || null,
+          customer_lat: order.customer_lat ?? customer?.latitude ?? null,
+          customer_lng: order.customer_lng ?? customer?.longitude ?? null,
           customer_name: customer ? `${customer.firstName} ${customer.firstLastName}` : 'Cliente',
           customer_phone: customer?.cellphone || null,
         };
