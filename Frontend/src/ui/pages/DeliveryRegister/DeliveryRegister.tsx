@@ -7,6 +7,7 @@
  */
 
 import "./DeliveryRegister.css";
+import PasswordInput from "../../components/ui/PasswordInput";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -149,6 +150,13 @@ const DeliveryRegister = () => {
 
   return (
     <div className="delivery-register-container">
+      <button
+        type="button"
+        onClick={() => navigate("/register-select")}
+        style={{ position: 'absolute', top: 20, left: 20, zIndex: 20, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.92)', color: '#e8500a', border: 'none', borderRadius: 22, padding: '9px 18px', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.18)' }}
+      >
+        ← Regresar
+      </button>
       {showSuccess && (
         <div className="delivery-success-overlay">
           <div className="delivery-success-modal">
@@ -173,10 +181,6 @@ const DeliveryRegister = () => {
           {/* PASO 1: FORMULARIO */}
           {step === "form" && (
             <>
-              <button className="delivery-back-btn" onClick={() => navigate("/register-select")}>
-                ← Volver
-              </button>
-
               <div className="delivery-register-header">
                 <h2>Registro de Domiciliario</h2>
                 <p>Paso 1 de 2 — Información personal y vehículo</p>
@@ -201,9 +205,8 @@ const DeliveryRegister = () => {
                   />
                   {errors.user_email && <span className="error-message">{errors.user_email}</span>}
 
-                  <input
+                  <PasswordInput
                     name="user_password"
-                    type="password"
                     placeholder="Contraseña"
                     value={form.user_password}
                     onChange={handleChange}

@@ -11,6 +11,11 @@ const RegisterSelect = () => {
 
   return (
     <div className="rselect-container">
+      {/* Botón Regresar al inicio */}
+      <button className="rselect-back" onClick={() => navigate("/")}>
+        <span className="rselect-back-arrow">←</span> Regresar
+      </button>
+
       {/* LEFT → IMAGEN */}
       <div className="rselect-left">
         <img src="/delivery2.png" alt="delivery" />
@@ -36,6 +41,9 @@ const RegisterSelect = () => {
             {/* OPCIÓN USUARIO NORMAL */}
             <motion.div
               className="rselect-option rselect-option--user"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNavigate("/register")}
@@ -52,6 +60,9 @@ const RegisterSelect = () => {
             {/* OPCIÓN DOMICILIARIO */}
             <motion.div
               className="rselect-option rselect-option--delivery"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNavigate("/register-delivery")}
@@ -68,6 +79,9 @@ const RegisterSelect = () => {
             {/* OPCIÓN NEGOCIO/RESTAURANTE */}
             <motion.div
               className="rselect-option rselect-option--vendor"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNavigate("/register-vendor")}

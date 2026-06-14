@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
-  FileText, FileSpreadsheet, Calendar, Filter, ArrowLeft,
+  FileText, FileSpreadsheet, Calendar, Filter,
   Package, CreditCard, Users, Bike, Loader2,
 } from "lucide-react";
+import AdminLayout from "../../components/layout/AdminLayout/AdminLayout";
 import { reportsApi, type ReportFilters } from "../../../infrastructure/api/reportsApi";
 import "./AdminReports.css";
 
@@ -21,7 +21,6 @@ const ORDER_STATUSES = ["PENDING", "ACCEPTED", "PREPARING", "READY", "IN_DELIVER
 const PAYMENT_STATUSES = ["APPROVED", "PENDING", "DECLINED", "VOIDED", "ERROR"];
 
 const AdminReports = () => {
-  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("orders");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -60,11 +59,9 @@ const AdminReports = () => {
   );
 
   return (
+    <AdminLayout>
     <div className="admin-reports">
       <header className="admin-reports-header">
-        <button className="admin-reports-back" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} /> Volver
-        </button>
         <div>
           <h1>Reportes</h1>
           <p>Panel de administración — descarga reportes del sistema</p>
@@ -132,6 +129,7 @@ const AdminReports = () => {
         </p>
       </div>
     </div>
+    </AdminLayout>
   );
 };
 

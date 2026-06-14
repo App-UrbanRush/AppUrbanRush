@@ -20,6 +20,8 @@ export interface IUserRepository {
   createFromGoogle(data: { user_email: string; google_id: string }): Promise<User>;
 
 
+  updateAdminFields(userId: number, data: { user_email?: string; status?: boolean }): Promise<void>;
+
   saveResetCode(user_id: number, code: string, expiresAt: Date): Promise<void>;
   validateResetCode(user_email: string, code: string): Promise<boolean>;
   updatePassword(user_id: number, passwordHashed: string): Promise<void>;

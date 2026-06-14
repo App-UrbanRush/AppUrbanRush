@@ -83,7 +83,7 @@ const VendorCourierMap = () => {
             <Marker key={c.courier_id} position={[c.lat, c.lng]} icon={createCourierIcon(c.name)}>
               <Popup>
                 <strong>🛵 {c.name}</strong><br />
-                <span style="font-size:12px;color:#666;">
+                <span style={{ fontSize: "12px", color: "#666" }}>
                   ID: {c.courier_id}<br />
                   {new Date(c.timestamp).toLocaleTimeString()}
                 </span>

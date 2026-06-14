@@ -37,6 +37,13 @@ import PaymentPage from "../pages/Payment/PaymentPage";
 import OrderTracking from "../pages/Tracking/OrderTracking";
 import CourierBroadcast from "../pages/Tracking/CourierBroadcast";
 import AdminReports from "../pages/AdminDashboard/AdminReports";
+import AdminOverview from "../pages/AdminDashboard/AdminOverview";
+import AdminUsers from "../pages/AdminDashboard/AdminUsers";
+import AdminAdmins from "../pages/AdminDashboard/AdminAdmins";
+import AdminAuditLogs from "../pages/AdminDashboard/AdminAuditLogs";
+import AdminLiquidations from "../pages/AdminDashboard/AdminLiquidations";
+import AdminBackups from "../pages/AdminDashboard/AdminBackups";
+import AdminFiles from "../pages/AdminDashboard/AdminFiles";
 
 const HomeRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -49,6 +56,7 @@ const HomeRedirect = () => {
     );
   }
 
+  if (user.role === "Administrador" || user.role === "SuperAdmin") return <Navigate to="/admin/dashboard" replace />;
   if (user.role === "Negocio") return <Navigate to="/vendor/dashboard" replace />;
   if (user.role === "Domiciliario") return <Navigate to="/courier/dashboard" replace />;
   return <Navigate to="/dashboard" replace />;
@@ -265,15 +273,25 @@ const AppRouter = () => {
           }
         />
 
-        {/* Panel de administración — reportes */}
+        {/* Panel de administración — reportes (compat) */}
         <Route
           path="/admin/reports"
           element={
-            <PrivateRoute allowedRoles={[1]}>
+            <PrivateRoute allowedRoles={[1, 5]}>
               <AdminReports />
             </PrivateRoute>
           }
         />
+
+        {/* Panel de administración — rutas completas (ADMIN=1, SUPERADMIN=5) */}
+        <Route path="/admin/dashboard" element={<PrivateRoute allowedRoles={[1, 5]}><AdminOverview /></PrivateRoute>} />
+        <Route path="/admin/dashboard/usuarios" element={<PrivateRoute allowedRoles={[1, 5]}><AdminUsers /></PrivateRoute>} />
+        <Route path="/admin/dashboard/admins" element={<PrivateRoute allowedRoles={[5]}><AdminAdmins /></PrivateRoute>} />
+        <Route path="/admin/dashboard/auditoria" element={<PrivateRoute allowedRoles={[5]}><AdminAuditLogs /></PrivateRoute>} />
+        <Route path="/admin/dashboard/liquidaciones" element={<PrivateRoute allowedRoles={[1, 5]}><AdminLiquidations /></PrivateRoute>} />
+        <Route path="/admin/dashboard/reportes" element={<PrivateRoute allowedRoles={[1, 5]}><AdminReports /></PrivateRoute>} />
+        <Route path="/admin/dashboard/backups" element={<PrivateRoute allowedRoles={[1, 5]}><AdminBackups /></PrivateRoute>} />
+        <Route path="/admin/dashboard/archivos" element={<PrivateRoute allowedRoles={[1, 5]}><AdminFiles /></PrivateRoute>} />
 
         {/* Checkout (solo usuario) */}
         <Route

@@ -1,12 +1,22 @@
+/**
+ * UI LAYER - PÁGINA LOGIN
+ * Usa correctamente la arquitectura hexagonal:
+ * - NO crea instancias de casos de uso
+ * - NO importa detalles de implementación (axios, localStorage, etc)
+ * - Usa useAuth() hook que ya tiene todo inyectado
+ */
+
 import "./Login.css";
+import toast from "react-hot-toast";
+import PasswordInput from "../../components/ui/PasswordInput";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect, useState } from "react";
-import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
+import { useEffect } from "react";
+import { Mail, Lock, LogIn } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -30,16 +40,14 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   // Los casos de uso ya vienen inyectados del AuthProvider
-  const { login, isLoading, error: contextError } = useAuth();
+  const { login, isLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [apiError, setApiError] = useState<string>("");
-  const [showPassword, setShowPassword] = useState(false);
 
-  // Muestra el error si el callback de Google redirige con ?error=
+  // Si el callback de Google redirige con ?error=, lo mostramos como notificación
   useEffect(() => {
     const googleError = searchParams.get("error");
-    if (googleError) setApiError(googleError);
+    if (googleError) toast.error(googleError);
   }, [searchParams]);
 
   const handleGoogleLogin = () => {
@@ -49,42 +57,42 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
-  const emailValue = watch("email");
-  const passwordValue = watch("password");
-
   // onSubmit: llama al caso de uso inyectado
   const onSubmit = async (data: LoginFormData) => {
     try {
-      setApiError("");
-      // Aquí login es el LoginUseCase inyectado en el AuthProvider
-      // Él se encarga de:
-      // 1. Llamar al repositorio
-      // 2. Guardar en localStorage
-      // 3. Actualizar el contexto
       const response = await login(data.email, data.password);
 
       // Redirigir según el rol del usuario desde la respuesta
-      if (response.user?.role === "Negocio") {
+      const role = response.user?.role;
+      if (role === "Administrador" || role === "SuperAdmin") {
+        navigate("/admin/dashboard");
+      } else if (role === "Negocio") {
         navigate("/vendor/dashboard");
-      } else if (response.user?.role === "Domiciliario") {
+      } else if (role === "Domiciliario") {
         navigate("/courier/dashboard");
       } else {
         navigate("/dashboard");
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Credenciales incorrectas";
-      setApiError(errorMsg);
+      const errorMsg = err instanceof Error ? err.message : "Correo o contraseña incorrectos";
+      toast.error(errorMsg);
     }
   };
 
   return (
     <div className="login-container">
+      <button
+        type="button"
+        onClick={() => navigate("/")}
+        style={{ position: 'absolute', top: 20, left: 20, zIndex: 20, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.92)', color: '#e8500a', border: 'none', borderRadius: 22, padding: '9px 18px', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.18)' }}
+      >
+        ← Regresar
+      </button>
       <div className="login-left">
         <img src="/delivery1.png" alt="delivery" />
         <div className="login-overlay">
@@ -102,16 +110,10 @@ const Login = () => {
           <h2>¡Hola, Bienvenido a UrbanRush!</h2>
           <p>Inicia sesión para continuar</p>
 
-          {(apiError || contextError) && (
-            <span style={{ display: "block", marginBottom: "15px", color: "red" }}>
-              {apiError || contextError}
-            </span>
-          )}
-
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="login-input-group">
               <div className="login-input-wrapper">
-                {!emailValue && <Mail className="login-input-icon" size={18} />}
+                <Mail className="login-input-icon" size={18} />
                 <motion.input
                   whileFocus={{ scale: 1.02 }}
                   {...register("email")}
@@ -124,21 +126,11 @@ const Login = () => {
 
             <div className="login-input-group">
               <div className="login-input-wrapper">
-                {!passwordValue && <Lock className="login-input-icon" size={18} />}
-                <motion.input
-                  whileFocus={{ scale: 1.02 }}
+                <Lock className="login-input-icon" size={18} />
+                <PasswordInput
                   {...register("password")}
-                  type={showPassword ? "text" : "password"}
                   placeholder="Contraseña"
                 />
-                <button
-                  type="button"
-                  className="login-password-toggle"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
               </div>
               {errors.password && <span>{errors.password.message}</span>}
             </div>

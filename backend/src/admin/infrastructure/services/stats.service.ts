@@ -10,6 +10,8 @@ import { VendorEntity } from 'src/vendor/infrastructure/persistence/entities/ven
 import { CourierEntity } from 'src/courier/infrastructure/persistence/entities/courier.entity';
 import { SystemStats } from '../../domain/interfaces/admin.interfaces';
 
+type BaseSystemStats = Omit<SystemStats, 'liquidations'>;
+
 @Injectable()
 export class StatsService {
   constructor(
@@ -20,7 +22,7 @@ export class StatsService {
     @InjectRepository(CourierEntity) private readonly courierRepo: Repository<CourierEntity>,
   ) {}
 
-  async getSystemStats(): Promise<SystemStats> {
+  async getSystemStats(): Promise<BaseSystemStats> {
     const [totalUsers, totalVendors, totalCouriers] = await Promise.all([
       this.userRepo.count(),
       this.vendorRepo.count(),

@@ -2,12 +2,21 @@ import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SERVER_PORT } from './config/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
+
+  // Cabeceras de seguridad HTTP (XSS, clickjacking, MIME-sniffing, etc.)
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Lo maneja el front (Vite/Nginx)
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   const configService = app.get(ConfigService);
 

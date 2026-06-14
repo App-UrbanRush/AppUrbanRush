@@ -158,6 +158,7 @@ button:active {
   left: 14px;
   color: #999;
   pointer-events: none;
+  z-index: 2;
 }
 
 .login-input-wrapper input {
@@ -174,22 +175,24 @@ button:active {
   box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.2);
 }
 
-.login-password-toggle {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.login-input-group input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  outline: none;
+  transition: 0.3s;
 }
 
-.login-password-toggle:hover {
-  color: #555;
+/* Mayor especificidad: si el input tiene ícono, conserva el espacio a la
+   izquierda para que el texto no se monte sobre el ícono */
+.login-input-group .login-input-wrapper input {
+  padding-left: 42px;
+}
+
+.login-input-group input:focus {
+  border-color: #ff6a00;
+  box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.2);
 }
 
 /* BOTÓN PRINCIPAL */

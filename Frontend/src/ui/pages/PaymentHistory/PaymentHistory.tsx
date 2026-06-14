@@ -63,7 +63,7 @@ const PaymentHistory = () => {
     (async () => {
       try {
         setLoading(true);
-        const data = await paymentApi.getByUser(user.id);
+        const data = await paymentApi.getByUser(Number(user.id));
         setPayments(data);
       } catch {
         // silent

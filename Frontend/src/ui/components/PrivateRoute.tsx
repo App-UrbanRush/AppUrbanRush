@@ -29,6 +29,7 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
       Usuario: 2,
       Domiciliario: 3,
       Negocio: 4,
+      SuperAdmin: 5,
     };
     const userRoleId = ROLE_NAME_TO_ID[user.role];
     const isAllowed = userRoleId != null && allowedRoles.includes(userRoleId);
