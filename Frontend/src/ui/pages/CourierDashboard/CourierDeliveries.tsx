@@ -1,17 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
-import { MapPin, Package, Clock, RefreshCw, Play } from "lucide-react";
-import toast from "react-hot-toast";
+import { MapPin, Package, Clock, RefreshCw, Store, User } from "lucide-react";
 import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { useAuth } from "../../context/useAuth";
 import { GetCourierOrdersUseCase } from "../../../application/use-cases/GetCourierOrdersUseCase";
-import { AcceptOrderUseCase } from "../../../application/use-cases/AcceptOrderUseCase";
 import { CourierOrdersRepositoryImpl } from "../../../infrastructure/repositories/CourierOrdersRepositoryImpl";
 import type { CourierOrder } from "../../../domain/types/courier-orders.types";
 import "./CourierDeliveries.css";
 
 const repo = new CourierOrdersRepositoryImpl();
 const getCourierOrders = new GetCourierOrdersUseCase(repo);
-const acceptOrder = new AcceptOrderUseCase(repo);
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   READY: { label: "Listo para recoger", color: "blue" },
@@ -48,24 +45,12 @@ const CourierDeliveries = () => {
     load();
   }, [load]);
 
-  const handleAcceptOrder = async (orderId: string) => {
-    if (!courierProfile?.user_id) return;
-    
-    try {
-      await acceptOrder.execute(orderId, courierProfile.user_id);
-      toast.success("¡Pedido aceptado! Inicia la ruta hacia el cliente");
-      await load();
-    } catch (error: any) {
-      const msg = error.response?.data?.message || "No se pudo aceptar el pedido";
-      toast.error(msg);
-    }
-  };
-
-  // Mostrar primero las entregas activas
   const sorted = [...orders].sort((a, b) => {
     const rank: Record<string, number> = { IN_DELIVERY: 0, READY: 1, DELIVERED: 2 };
     return (rank[a.status] ?? 3) - (rank[b.status] ?? 3);
   });
+
+  const formatPrice = (n: number) => `$${n.toLocaleString()}`;
 
   return (
     <CourierLayout>
@@ -91,39 +76,41 @@ const CourierDeliveries = () => {
           <div className="courier-deliveries-list">
             {sorted.map((order) => {
               const st = STATUS_LABEL[order.status] || { label: order.status, color: "gray" };
-              const isInDelivery = order.status === "IN_DELIVERY";
-              const isReady = order.status === "READY";
 
               return (
-                <div key={order.order_id} className={`delivery-card ${isInDelivery ? "active" : ""}`}>
+                <div key={order.order_id} className="delivery-card">
                   <div className="delivery-card-top">
                     <span className="delivery-id">#{order.order_id.slice(-6).toUpperCase()}</span>
                     <span className={`delivery-status status-${st.color}`}>{st.label}</span>
                   </div>
 
                   <div className="delivery-info">
-                    <MapPin size={15} />
-                    <span>{order.delivery_address}</span>
+                    <Store size={15} />
+                    <span>Restaurante: {order.vendor_name || "Restaurante"}</span>
                   </div>
                   <div className="delivery-info">
-                    <Package size={15} />
-                    <span>{order.items.length} producto(s)</span>
+                    <User size={15} />
+                    <span>Cliente: {order.customer_name || "Cliente"}</span>
+                  </div>
+                  <div className="delivery-info">
+                    <MapPin size={15} />
+                    <span>Dirección: {order.delivery_address}</span>
                   </div>
                   <div className="delivery-info">
                     <Clock size={15} />
-                    <span>Domicilio: ${order.delivery_fee.toLocaleString()}</span>
+                    <span>Domicilio: {formatPrice(order.delivery_fee)}</span>
                   </div>
 
-                  {isReady && (
-                    <div className="delivery-actions">
-                      <button
-                        className={`delivery-accept-btn ${orders.some(o => o.status === 'IN_DELIVERY') ? 'disabled' : ''}`}
-                        onClick={() => handleAcceptOrder(order.order_id)}
-                        disabled={orders.some(o => o.status === 'IN_DELIVERY')}
-                        title={orders.some(o => o.status === 'IN_DELIVERY') ? 'Finaliza tu entrega actual para aceptar otro pedido' : 'Aceptar pedido'}
-                      >
-                        <Play size={16} /> Aceptar Pedido e Iniciar Ruta
-                      </button>
+                  {order.items && order.items.length > 0 && (
+                    <div className="delivery-items">
+                      <div className="delivery-items-title">
+                        <Package size={14} /> Productos:
+                      </div>
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="delivery-item-row">
+                          <span className="delivery-item-name">{item.product_name} x{item.quantity}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -132,7 +119,6 @@ const CourierDeliveries = () => {
           </div>
         )}
       </div>
-
     </CourierLayout>
   );
 };

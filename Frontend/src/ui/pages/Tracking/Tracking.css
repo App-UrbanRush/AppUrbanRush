@@ -1,16 +1,6 @@
 .tracking-page {
   max-width: 720px;
   margin: 0 auto;
-  padding: 20px 16px 48px;
-}
-
-.dark-mode-wrapper.dark-mode .tracking-page {
-  background: transparent;
-}
-
-.dark-mode-wrapper.dark-mode {
-  background: #111827;
-  min-height: 100vh;
 }
 
 /* ───────── BACK ───────── */

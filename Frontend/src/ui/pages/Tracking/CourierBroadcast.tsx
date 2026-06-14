@@ -1,12 +1,12 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Navigation, MapPin, Clock, Wifi, Play, Square, Info, KeyRound, CheckCircle, X } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Navigation, MapPin, Clock, Wifi, Play, Square, Info, KeyRound, CheckCircle, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useCourierBroadcast } from "../../hooks/useCourierBroadcast";
 import LiveTrackingMap from "../../components/DeliveryMap/LiveTrackingMap";
 import ChatWindow from "../../components/chat/ChatWindow";
 import { useAuth } from "../../context/useAuth";
-import { DarkModeProvider } from "../../context/useDarkMode";
+import CourierLayout from "../../components/layout/CourierLayout/CourierLayout";
 import { ordersApi } from "../../../infrastructure/api/ordersApi";
 import { ConfirmDeliveryUseCase } from "../../../application/use-cases/ConfirmDeliveryUseCase";
 import { CourierOrdersRepositoryImpl } from "../../../infrastructure/repositories/CourierOrdersRepositoryImpl";
@@ -22,7 +22,6 @@ interface OrderLocation {
 
 const CourierBroadcast = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { broadcasting, connectionState, lastSent, error, start, stop } = useCourierBroadcast(orderId);
   const [orderLocation, setOrderLocation] = useState<OrderLocation | null>(null);
@@ -85,130 +84,126 @@ const CourierBroadcast = () => {
   const isDelivered = orderStatus === "DELIVERED";
 
   return (
-    <DarkModeProvider>
-    <div className="tracking-page">
-      <button className="tracking-back" onClick={() => navigate(-1)}>
-        <ArrowLeft size={18} /> Volver
-      </button>
-
-      <div className="tracking-hero">
-        <div className="tracking-hero-icon">
-          <Navigation size={26} />
+    <CourierLayout>
+      <div className="tracking-page">
+        <div className="tracking-hero">
+          <div className="tracking-hero-icon">
+            <Navigation size={26} />
+          </div>
+          <div className="tracking-hero-text">
+            <h1>Compartir mi ubicación</h1>
+            <p className="tracking-order-id">Pedido #{orderId}</p>
+          </div>
+          <span className={`tracking-badge ${broadcasting ? "live" : "off"}`}>
+            <span className="tracking-dot" /> {broadcasting ? "Transmitiendo" : "Detenido"}
+          </span>
         </div>
-        <div className="tracking-hero-text">
-          <h1>Compartir mi ubicación</h1>
-          <p className="tracking-order-id">Pedido #{orderId}</p>
+
+        {error && <div className="tracking-banner error">⚠ {error}</div>}
+
+        {isDelivered && (
+          <div className="tracking-banner success">
+            <CheckCircle size={16} /> ¡Entrega confirmada!
+          </div>
+        )}
+
+        <div className="tracking-status-bar">
+          <div className={`tracking-status-dot ${broadcasting ? "live" : "off"}`} />
+          <span className="tracking-status-text">{broadcasting ? "Compartiendo tu ubicación en vivo" : "Transmisión detenida"}</span>
+          <span className="tracking-status-divider" />
+          <Wifi size={14} className={`tracking-wifi ${connected ? "on" : "off"}`} />
+          <span className="tracking-status-conn">{connected ? "Conectado" : "Sin conexión"}</span>
         </div>
-        <span className={`tracking-badge ${broadcasting ? "live" : "off"}`}>
-          <span className="tracking-dot" /> {broadcasting ? "Transmitiendo" : "Detenido"}
-        </span>
-      </div>
 
-      {error && <div className="tracking-banner error">⚠ {error}</div>}
-
-      {isDelivered && (
-        <div className="tracking-banner success">
-          <CheckCircle size={16} /> ¡Entrega confirmada!
+        <div className="tracking-map-wrap">
+          <LiveTrackingMap
+            lat={lastSent?.lat ?? null}
+            lng={lastSent?.lng ?? null}
+            popupText="Tu posición actual"
+            customerLat={orderLocation?.customer_lat ?? null}
+            customerLng={orderLocation?.customer_lng ?? null}
+            customerAddress={orderLocation?.delivery_address ?? null}
+            showRoute={true}
+          />
         </div>
-      )}
 
-      <div className="tracking-status-bar">
-        <div className={`tracking-status-dot ${broadcasting ? "live" : "off"}`} />
-        <span className="tracking-status-text">{broadcasting ? "Compartiendo tu ubicación en vivo" : "Transmisión detenida"}</span>
-        <span className="tracking-status-divider" />
-        <Wifi size={14} className={`tracking-wifi ${connected ? "on" : "off"}`} />
-        <span className="tracking-status-conn">{connected ? "Conectado" : "Sin conexión"}</span>
-      </div>
+        <div className="tracking-actions-row">
+          <div className="tracking-actions">
+            {!broadcasting ? (
+              <button className="tracking-btn start" onClick={start}>
+                <Play size={18} /> Iniciar transmisión GPS
+              </button>
+            ) : (
+              <button className="tracking-btn stop" onClick={stop}>
+                <Square size={16} /> Detener
+              </button>
+            )}
+          </div>
 
-      <div className="tracking-map-wrap">
-        <LiveTrackingMap
-          lat={lastSent?.lat ?? null}
-          lng={lastSent?.lng ?? null}
-          popupText="Tu posición actual"
-          customerLat={orderLocation?.customer_lat ?? null}
-          customerLng={orderLocation?.customer_lng ?? null}
-          customerAddress={orderLocation?.delivery_address ?? null}
-          showRoute={true}
-        />
-      </div>
-
-      <div className="tracking-actions-row">
-        <div className="tracking-actions">
-          {!broadcasting ? (
-            <button className="tracking-btn start" onClick={start}>
-              <Play size={18} /> Iniciar transmisión GPS
-            </button>
-          ) : (
-            <button className="tracking-btn stop" onClick={stop}>
-              <Square size={16} /> Detener
+          {isInDelivery && !isDelivered && (
+            <button className="tracking-code-btn" onClick={openCodeModal}>
+              <KeyRound size={16} /> Obtener código
             </button>
           )}
         </div>
 
-        {isInDelivery && !isDelivered && (
-          <button className="tracking-code-btn" onClick={openCodeModal}>
-            <KeyRound size={16} /> Obtener código
-          </button>
-        )}
-      </div>
-
-      {codeModalOpen && (
-        <div className="tracking-code-overlay" onClick={closeCodeModal}>
-          <div className="tracking-code-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="tracking-code-modal-close" onClick={closeCodeModal} disabled={confirming}>
-              <X size={18} />
-            </button>
-            <div className="tracking-code-modal-icon">
-              <KeyRound size={28} />
+        {codeModalOpen && (
+          <div className="tracking-code-overlay" onClick={closeCodeModal}>
+            <div className="tracking-code-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="tracking-code-modal-close" onClick={closeCodeModal} disabled={confirming}>
+                <X size={18} />
+              </button>
+              <div className="tracking-code-modal-icon">
+                <KeyRound size={28} />
+              </div>
+              <h2>Confirmar entrega</h2>
+              <p className="tracking-code-modal-hint">
+                Pídele al cliente su <strong>código de 4 dígitos</strong> e ingrésalo aquí.
+              </p>
+              <input
+                className="tracking-code-modal-input"
+                inputMode="numeric"
+                autoFocus
+                maxLength={4}
+                placeholder="0000"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                onKeyDown={(e) => e.key === "Enter" && handleConfirmDelivery()}
+              />
+              <button
+                className="tracking-code-modal-submit"
+                onClick={handleConfirmDelivery}
+                disabled={confirming || code.length !== 4}
+              >
+                {confirming ? "Confirmando..." : "Confirmar entrega"}
+              </button>
             </div>
-            <h2>Confirmar entrega</h2>
-            <p className="tracking-code-modal-hint">
-              Pídele al cliente su <strong>código de 4 dígitos</strong> e ingrésalo aquí.
-            </p>
-            <input
-              className="tracking-code-modal-input"
-              inputMode="numeric"
-              autoFocus
-              maxLength={4}
-              placeholder="0000"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              onKeyDown={(e) => e.key === "Enter" && handleConfirmDelivery()}
-            />
-            <button
-              className="tracking-code-modal-submit"
-              onClick={handleConfirmDelivery}
-              disabled={confirming || code.length !== 4}
-            >
-              {confirming ? "Confirmando..." : "Confirmar entrega"}
-            </button>
+          </div>
+        )}
+
+        <div className="tracking-info">
+          <div className="tracking-info-item">
+            <span className="tracking-info-label"><MapPin size={12} /> Última posición</span>
+            <span className="tracking-info-value">
+              {lastSent ? `${lastSent.lat}, ${lastSent.lng}` : "—"}
+            </span>
+          </div>
+          <div className="tracking-info-item">
+            <span className="tracking-info-label"><Clock size={12} /> Hora</span>
+            <span className="tracking-info-value">{lastTime ?? "—"}</span>
           </div>
         </div>
-      )}
 
-      <div className="tracking-info">
-        <div className="tracking-info-item">
-          <span className="tracking-info-label"><MapPin size={12} /> Última posición</span>
-          <span className="tracking-info-value">
-            {lastSent ? `${lastSent.lat}, ${lastSent.lng}` : "—"}
-          </span>
+        <div className="tracking-tip">
+          <Info size={16} />
+          <span>Mantén esta pantalla abierta mientras realizas la entrega. Tu ubicación se comparte con el cliente en tiempo real.</span>
         </div>
-        <div className="tracking-info-item">
-          <span className="tracking-info-label"><Clock size={12} /> Hora</span>
-          <span className="tracking-info-value">{lastTime ?? "—"}</span>
-        </div>
-      </div>
 
-      <div className="tracking-tip">
-        <Info size={16} />
-        <span>Mantén esta pantalla abierta mientras realizas la entrega. Tu ubicación se comparte con el cliente en tiempo real.</span>
+        {orderId && user?.id && (
+          <ChatWindow orderId={orderId} enabled currentUserId={Number(user.id)} />
+        )}
       </div>
-
-      {orderId && user?.id && (
-        <ChatWindow orderId={orderId} enabled currentUserId={Number(user.id)} />
-      )}
-    </div>
-    </DarkModeProvider>
+    </CourierLayout>
   );
 };
 
