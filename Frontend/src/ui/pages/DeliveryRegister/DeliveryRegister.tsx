@@ -13,17 +13,20 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useAuth } from "../../context/useAuth";
 import type { RegisterDeliveryRequest } from "../../../domain/types/auth.types";
+import { validateCedula } from "../../../domain/utils/cedula";
+import CedulaUploader from "../../components/verification/CedulaUploader";
 
 type Step = "form" | "verification" | "result";
 
 const DeliveryRegister = () => {
   const navigate = useNavigate();
-  const { registerDelivery, verifyDocument, isLoading, error: contextError } = useAuth();
+  const { registerDelivery, verifyDocument, login, isLoading, error: contextError } = useAuth();
 
   const [step, setStep] = useState<Step>("form");
   const [apiError, setApiError] = useState<string>("");
   const [isVerifying, setIsVerifying] = useState(false);
-  const [documentImages, setDocumentImages] = useState<File[]>([]);
+  const [frontImage, setFrontImage] = useState<File | null>(null);
+  const [backImage, setBackImage] = useState<File | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState<string>("");
   const [isVerified, setIsVerified] = useState(false);
@@ -59,13 +62,15 @@ const DeliveryRegister = () => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setDocumentImages(files);
-      setVerificationMessage("");
-      setIsVerified(false);
-    }
+  const handleFrontChange = (file: File | null) => {
+    setFrontImage(file);
+    setVerificationMessage("");
+    setIsVerified(false);
+  };
+  const handleBackChange = (file: File | null) => {
+    setBackImage(file);
+    setVerificationMessage("");
+    setIsVerified(false);
   };
 
   const validateForm = () => {
@@ -77,7 +82,8 @@ const DeliveryRegister = () => {
     if (!form.cellphone) newErrors.cellphone = "Requerido";
     if (!form.address) newErrors.address = "Requerido";
     if (!form.gender) newErrors.gender = "Requerido";
-    if (!form.document_number) newErrors.document_number = "Requerido";
+    const cedulaCheck = validateCedula(form.document_number || "");
+    if (!cedulaCheck.valid) newErrors.document_number = cedulaCheck.reason ?? "Inválido";
     if (!form.vehicle_type) newErrors.vehicle_type = "Requerido";
     if (!form.vehicle_plate) newErrors.vehicle_plate = "Requerido";
     if (!form.soat_number) newErrors.soat_number = "Requerido";
@@ -97,13 +103,12 @@ const DeliveryRegister = () => {
   };
 
   const handleVerifyAndRegister = async () => {
-    if (documentImages.length === 0) {
-      setApiError("Debes subir las fotos de tu cédula (frontal y reverso) para continuar");
+    if (!frontImage) {
+      setApiError("Subí la cara frontal de tu cédula");
       return;
     }
-
-    if (documentImages.length < 2) {
-      setApiError("Debes subir las dos caras de tu cédula (frontal y reverso)");
+    if (!backImage) {
+      setApiError("Ahora subí la cara trasera de tu cédula");
       return;
     }
 
@@ -112,7 +117,7 @@ const DeliveryRegister = () => {
       setVerificationMessage("");
       setIsVerifying(true);
 
-      const verificationResult = await verifyDocument(documentImages, {
+      const verificationResult = await verifyDocument([frontImage, backImage], {
         cedula: form.document_number || "",
         firstName: form.firstName,
         firstLastName: form.firstLastName,
@@ -143,9 +148,16 @@ const DeliveryRegister = () => {
     }
   };
 
-  const handleSuccessConfirm = () => {
+  const handleSuccessConfirm = async () => {
     setShowSuccess(false);
-    navigate("/dashboard");
+    // Auto-login con las credenciales recién registradas para entrar al panel de domiciliario.
+    try {
+      await login(form.user_email, form.user_password);
+      navigate("/courier/dashboard");
+    } catch {
+      // Si el auto-login falla (por lo que sea) lo mandamos al login con su email pre-cargado.
+      navigate("/login");
+    }
   };
 
   return (
@@ -164,7 +176,7 @@ const DeliveryRegister = () => {
             <h3>¡Registro exitoso!</h3>
             <p>Tu identidad fue verificada correctamente. Cuenta creada exitosamente.</p>
             <button className="delivery-success-btn" onClick={handleSuccessConfirm}>
-              Ir al Panel de Control
+              Ir a mi Panel de Domiciliario
             </button>
           </div>
         </div>
@@ -358,37 +370,23 @@ const DeliveryRegister = () => {
 
               <div className="verification-section">
                 <p className="verification-info-text">
-                  Para garantizar la seguridad de nuestra plataforma, validaremos tus datos contra tu cédula de ciudadanía. Sube las dos caras del documento.
+                  Para garantizar la seguridad de nuestra plataforma validaremos tus datos contra tu cédula de ciudadanía. Subí <strong>primero la cara frontal</strong> y después la <strong>cara trasera</strong>.
                 </p>
 
-                <div className="file-upload-wrapper">
-                  <label htmlFor="cedula-upload" className="file-upload-label">
-                    {documentImages.length > 0 
-                      ? `📸 ${documentImages.map(f => f.name).join(", ")}` 
-                      : "📸 Subir las dos caras de la Cédula"}
-                  </label>
-                  <input
-                    id="cedula-upload"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageChange}
-                    className="file-upload-input"
-                  />
-                </div>
-                
-        {documentImages.length > 0 && documentImages.length < 2 && (
-          <p className="error-message" style={{ marginTop: "8px" }}>
-            Debes subir las dos caras del documento
-          </p>
-        )}
+                <CedulaUploader
+                  frontImage={frontImage}
+                  backImage={backImage}
+                  onFrontChange={handleFrontChange}
+                  onBackChange={handleBackChange}
+                  disabled={isVerifying || isLoading}
+                />
 
-        {verificationMessage && (
-          <div className={`doc-result ${isVerified ? 'verified' : 'rejected'}`}>
-            {verificationMessage}
-          </div>
-        )}
-      </div>
+                {verificationMessage && (
+                  <div className={`doc-result ${isVerified ? 'verified' : 'rejected'}`} style={{ marginTop: 12 }}>
+                    {verificationMessage}
+                  </div>
+                )}
+              </div>
 
       <div className="button-group">
                 <button 
@@ -398,10 +396,11 @@ const DeliveryRegister = () => {
                 >
                   Volver
                 </button>
-                <button 
-                  onClick={handleVerifyAndRegister} 
+                <button
+                  onClick={handleVerifyAndRegister}
                   className="delivery-register-btn"
-                  disabled={isVerifying || isLoading}
+                  disabled={isVerifying || isLoading || !frontImage || !backImage}
+                  title={!frontImage ? "Subí primero la cara frontal" : !backImage ? "Falta la cara trasera" : ""}
                 >
                   {isVerifying ? "Verificando con IA..." : (isLoading ? "Registrando..." : "Confirmar y Registrar")}
                 </button>
