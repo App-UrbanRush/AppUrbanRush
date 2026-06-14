@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import { BarChart3, Download, Loader2, Calendar, DollarSign, Package, TrendingUp, XCircle } from "lucide-react";
 import { vendorReportsApi, type VendorReportData } from "../../../infrastructure/api/vendorReportsApi";
@@ -43,7 +44,7 @@ const VendorReports = () => {
       const result = await vendorReportsApi.getData(from || undefined, to || undefined);
       setData(result);
     } catch (error) {
-      console.error("Error loading report data:", error);
+      toast.error("Error al cargar los datos del reporte");
     } finally {
       setLoading(false);
     }
@@ -54,7 +55,7 @@ const VendorReports = () => {
     try {
       await vendorReportsApi.downloadPdf(from || undefined, to || undefined);
     } catch (error) {
-      console.error("Error exporting PDF:", error);
+      toast.error("Error al descargar el PDF de pedidos");
     } finally {
       setExportingPdf(false);
     }
@@ -65,7 +66,7 @@ const VendorReports = () => {
     try {
       await vendorReportsApi.downloadExcel(from || undefined, to || undefined);
     } catch (error) {
-      console.error("Error exporting Excel:", error);
+      toast.error("Error al descargar el Excel de pedidos");
     } finally {
       setExportingExcel(false);
     }
@@ -76,7 +77,7 @@ const VendorReports = () => {
     try {
       await vendorReportsApi.downloadSummaryPdf();
     } catch (error) {
-      console.error("Error exporting summary PDF:", error);
+      toast.error("Error al descargar el resumen PDF");
     } finally {
       setExportingSummary(false);
     }

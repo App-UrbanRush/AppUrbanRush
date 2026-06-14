@@ -32,7 +32,6 @@ const CourierSidebar = ({ collapsed, onToggle }: CourierSidebarProps) => {
     <aside className={`courier-sidebar ${collapsed ? "collapsed" : ""}`}>
       <div className="courier-sidebar-logo">
         <img src="/Logo-png.png" alt="UrbanRush" className="courier-sidebar-logo-img" />
-        {!collapsed && <h1>UrbanRush</h1>}
       </div>
 
       <button

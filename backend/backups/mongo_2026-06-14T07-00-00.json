@@ -1,0 +1,481 @@
+{
+  "store_verifications": [],
+  "courier_earnings": [
+    {
+      "_id": "6a2d2d734ec21315d63956e5",
+      "courier_id": 2,
+      "order_id": "6a2d29182a6b48275dc8749a",
+      "delivery_fee": 3000,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-13T10:14:11.783Z",
+      "updatedAt": "2026-06-13T10:14:11.783Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2d49afe56d5f801f440745",
+      "courier_id": 2,
+      "order_id": "6a2d492fe56d5f801f440742",
+      "delivery_fee": 3000,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-13T12:14:39.706Z",
+      "updatedAt": "2026-06-13T12:14:39.706Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2d5fbf7db968bdd509c949",
+      "courier_id": 2,
+      "order_id": "6a2d5e847db968bdd509c946",
+      "delivery_fee": 3000,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-13T13:48:47.758Z",
+      "updatedAt": "2026-06-13T13:48:47.758Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2de70f9e26549c82f213b4",
+      "courier_id": 2,
+      "order_id": "6a2de12accad4dd3ba62dca9",
+      "delivery_fee": 3000,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-13T23:26:07.428Z",
+      "updatedAt": "2026-06-13T23:26:07.428Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2dea459e26549c82f213b5",
+      "courier_id": 2,
+      "order_id": "6a2de6599e26549c82f213b1",
+      "delivery_fee": 3000,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-13T23:39:49.467Z",
+      "updatedAt": "2026-06-13T23:39:49.467Z",
+      "__v": 0
+    }
+  ],
+  "vendor_liquidations": [
+    {
+      "_id": "6a2de194ccad4dd3ba62dcab",
+      "vendor_id": 2,
+      "order_id": "6a2de12accad4dd3ba62dca9",
+      "subtotal": 30000,
+      "platform_commission": 4500,
+      "vendor_net": 25500,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-13T23:02:44.144Z",
+      "updatedAt": "2026-06-13T23:02:44.144Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2de68d9e26549c82f213b3",
+      "vendor_id": 2,
+      "order_id": "6a2de6599e26549c82f213b1",
+      "subtotal": 50000,
+      "platform_commission": 7500,
+      "vendor_net": 42500,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-13T23:23:57.275Z",
+      "updatedAt": "2026-06-13T23:23:57.275Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2deabc9e26549c82f213b8",
+      "vendor_id": 2,
+      "order_id": "6a2dea939e26549c82f213b6",
+      "subtotal": 50000,
+      "platform_commission": 7500,
+      "vendor_net": 42500,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-13T23:41:48.268Z",
+      "updatedAt": "2026-06-13T23:41:48.268Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e333cbdbb3c0038e63452",
+      "vendor_id": 2,
+      "order_id": "6a2e330fbdbb3c0038e63450",
+      "subtotal": 4000,
+      "platform_commission": 600,
+      "vendor_net": 3400,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-14T04:51:08.202Z",
+      "updatedAt": "2026-06-14T04:51:08.202Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e336ebdbb3c0038e63455",
+      "vendor_id": 2,
+      "order_id": "6a2e3353bdbb3c0038e63453",
+      "subtotal": 50000,
+      "platform_commission": 7500,
+      "vendor_net": 42500,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-14T04:51:58.794Z",
+      "updatedAt": "2026-06-14T04:51:58.794Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e3e485416b2814a35a4bd",
+      "vendor_id": 2,
+      "order_id": "6a2e3e2d5416b2814a35a4bb",
+      "subtotal": 50000,
+      "platform_commission": 7500,
+      "vendor_net": 42500,
+      "status": "PENDING",
+      "paid_at": null,
+      "createdAt": "2026-06-14T05:38:16.870Z",
+      "updatedAt": "2026-06-14T05:38:16.870Z",
+      "__v": 0
+    }
+  ],
+  "payments": [
+    {
+      "_id": "6a2de193ccad4dd3ba62dcaa",
+      "order_id": "6a2de12accad4dd3ba62dca9",
+      "user_id": 1,
+      "vendor_id": 2,
+      "wompi_transaction_id": "12107284-1781391754-80883",
+      "amount": 3750000,
+      "currency": "COP",
+      "status": "APPROVED",
+      "payment_method": "CARD",
+      "reference": "urbanrush-6a2de12accad4dd3ba62dca9-1781391716806",
+      "customer_email": "usuario@gmail.com",
+      "createdAt": "2026-06-13T23:02:43.943Z",
+      "updatedAt": "2026-06-13T23:02:44.120Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2de68c9e26549c82f213b2",
+      "order_id": "6a2de6599e26549c82f213b1",
+      "user_id": 1,
+      "vendor_id": 2,
+      "wompi_transaction_id": "12107284-1781393023-97370",
+      "amount": 6050000,
+      "currency": "COP",
+      "status": "APPROVED",
+      "payment_method": "CARD",
+      "reference": "urbanrush-6a2de6599e26549c82f213b1-1781392990598",
+      "customer_email": "usuario@gmail.com",
+      "createdAt": "2026-06-13T23:23:56.772Z",
+      "updatedAt": "2026-06-13T23:23:57.204Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2deabc9e26549c82f213b7",
+      "order_id": "6a2dea939e26549c82f213b6",
+      "user_id": 1,
+      "vendor_id": 2,
+      "wompi_transaction_id": "12107284-1781394101-85646",
+      "amount": 6050000,
+      "currency": "COP",
+      "status": "APPROVED",
+      "payment_method": "CARD",
+      "reference": "urbanrush-6a2dea939e26549c82f213b6-1781394071082",
+      "customer_email": "usuario@gmail.com",
+      "createdAt": "2026-06-13T23:41:48.049Z",
+      "updatedAt": "2026-06-13T23:41:48.220Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e333cbdbb3c0038e63451",
+      "order_id": "6a2e330fbdbb3c0038e63450",
+      "user_id": 1,
+      "vendor_id": 2,
+      "wompi_transaction_id": "12107284-1781412651-87401",
+      "amount": 760000,
+      "currency": "COP",
+      "status": "APPROVED",
+      "payment_method": "CARD",
+      "reference": "urbanrush-6a2e330fbdbb3c0038e63450-1781412626691",
+      "customer_email": "usuario@gmail.com",
+      "createdAt": "2026-06-14T04:51:08.104Z",
+      "updatedAt": "2026-06-14T04:51:08.152Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e336ebdbb3c0038e63454",
+      "order_id": "6a2e3353bdbb3c0038e63453",
+      "user_id": 1,
+      "vendor_id": 2,
+      "wompi_transaction_id": "12107284-1781412711-59684",
+      "amount": 6050000,
+      "currency": "COP",
+      "status": "APPROVED",
+      "payment_method": "CARD",
+      "reference": "urbanrush-6a2e3353bdbb3c0038e63453-1781412698980",
+      "customer_email": "usuario@gmail.com",
+      "createdAt": "2026-06-14T04:51:58.749Z",
+      "updatedAt": "2026-06-14T04:51:58.776Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e3e485416b2814a35a4bc",
+      "order_id": "6a2e3e2d5416b2814a35a4bb",
+      "user_id": 1,
+      "vendor_id": 2,
+      "wompi_transaction_id": "12107284-1781415489-43535",
+      "amount": 6050000,
+      "currency": "COP",
+      "status": "APPROVED",
+      "payment_method": "CARD",
+      "reference": "urbanrush-6a2e3e2d5416b2814a35a4bb-1781415475361",
+      "customer_email": "usuario@gmail.com",
+      "createdAt": "2026-06-14T05:38:16.771Z",
+      "updatedAt": "2026-06-14T05:38:16.825Z",
+      "__v": 0
+    }
+  ],
+  "categories": [
+    {
+      "_id": "6a2c778d456312de92de547f",
+      "vendor_id": 2,
+      "name": "COCTELES",
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299083/urbanrush/vendors/logos/vendor-logo-2-90d79f12-1fbe-4d8d-9b54-f0d7d4b20679.webp",
+      "createdAt": "2026-06-12T21:18:05.071Z",
+      "updatedAt": "2026-06-12T21:18:05.071Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2c789c456312de92de5484",
+      "vendor_id": 2,
+      "name": "HAMBURGUESAS",
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299354/urbanrush/vendors/logos/vendor-logo-2-576eee6e-7624-4e31-8803-c7caef16520d.webp",
+      "createdAt": "2026-06-12T21:22:36.232Z",
+      "updatedAt": "2026-06-12T21:22:36.232Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2c78c4456312de92de5485",
+      "vendor_id": 2,
+      "name": "BEBIDAS ALCOHOLICAS",
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299394/urbanrush/vendors/logos/vendor-logo-2-dadb1cc0-5aaa-4446-92a2-4ff943f0f28d.webp",
+      "createdAt": "2026-06-12T21:23:16.295Z",
+      "updatedAt": "2026-06-12T21:23:16.295Z",
+      "__v": 0
+    }
+  ],
+  "messages": [],
+  "vendor_photos": [
+    {
+      "_id": "6a2c77b7456312de92de5480",
+      "vendor_id": 2,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299126/urbanrush/vendors/photos/vendor-photo-2-1c38ef46-c6e0-4fbb-a508-6746dc44d5f4.jpg",
+      "public_id": "urbanrush/vendors/photos/vendor-photo-2-1c38ef46-c6e0-4fbb-a508-6746dc44d5f4",
+      "order": 0,
+      "type": "storefront",
+      "createdAt": "2026-06-12T21:18:47.539Z",
+      "updatedAt": "2026-06-12T21:18:47.539Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2c77bb456312de92de5481",
+      "vendor_id": 2,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299130/urbanrush/vendors/photos/vendor-photo-2-c295af06-94d0-43d0-8ffc-c3c4b3a0e2e1.webp",
+      "public_id": "urbanrush/vendors/photos/vendor-photo-2-c295af06-94d0-43d0-8ffc-c3c4b3a0e2e1",
+      "order": 1,
+      "type": "storefront",
+      "createdAt": "2026-06-12T21:18:51.775Z",
+      "updatedAt": "2026-06-12T21:18:51.775Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2c77c0456312de92de5482",
+      "vendor_id": 2,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299135/urbanrush/vendors/photos/vendor-photo-2-fde265a8-02d1-4542-ba34-75f9f3ae5b37.webp",
+      "public_id": "urbanrush/vendors/photos/vendor-photo-2-fde265a8-02d1-4542-ba34-75f9f3ae5b37",
+      "order": 2,
+      "type": "storefront",
+      "createdAt": "2026-06-12T21:18:56.489Z",
+      "updatedAt": "2026-06-12T21:18:56.489Z",
+      "__v": 0
+    }
+  ],
+  "audit_logs": [],
+  "payout_transactions": [],
+  "products": [
+    {
+      "_id": "6a2c7812456312de92de5483",
+      "name": "ALISIOS DE PASIÓN",
+      "description": "3 cl de Ron Bacardi Superior\n2 cl de Cacao blanco\n2 cl de Pisang\n7 cl de Zumo de piña\n8 cl de Zumo de mango – maracuya",
+      "price": 50000,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299218/urbanrush/products/product-6a2c7812456312de92de5483-0ba06718-d288-49b5-a1e7-70492b95e9b9.webp",
+      "category": "COCTELES",
+      "is_available": false,
+      "stock": 0,
+      "vendor_id": 2,
+      "createdAt": "2026-06-12T21:20:18.459Z",
+      "updatedAt": "2026-06-14T05:37:49.261Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2c78f9456312de92de5486",
+      "name": "AMERICANO",
+      "description": "3 cl de Campari\n3 cl de Vermouth Rojo",
+      "price": 4000,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299449/urbanrush/products/product-6a2c78f9456312de92de5486-85d95eee-898b-49f8-a888-d3260ae21c9f.jpg",
+      "category": "COCTELES",
+      "is_available": true,
+      "stock": 11,
+      "vendor_id": 2,
+      "createdAt": "2026-06-12T21:24:09.585Z",
+      "updatedAt": "2026-06-14T04:50:23.173Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2c799f456312de92de5487",
+      "name": "Hamburguesa Clásica con Queso",
+      "description": "Carne de res, queso cheddar fundido, lechuga fresca, rodajas de tomate, cebolla (cruda o picada), pepinillos, cátsup y mostaza.",
+      "price": 30000,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299615/urbanrush/products/product-6a2c799f456312de92de5487-565bb74d-ebf9-4af5-92a5-cd496cb0e726.webp",
+      "category": "HAMBURGUESAS",
+      "is_available": false,
+      "stock": 0,
+      "vendor_id": 2,
+      "createdAt": "2026-06-12T21:26:55.782Z",
+      "updatedAt": "2026-06-13T23:02:44.059Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2c79e1456312de92de5488",
+      "name": "Cerveza Aguila",
+      "description": "Cerveza Aguila",
+      "price": 4000,
+      "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299681/urbanrush/products/product-6a2c79e1456312de92de5488-f27c1c67-e6c5-4261-a496-aac27c5d6c7c.jpg",
+      "category": "BEBIDAS ALCOHOLICAS",
+      "is_available": false,
+      "stock": 0,
+      "vendor_id": 2,
+      "createdAt": "2026-06-12T21:28:01.209Z",
+      "updatedAt": "2026-06-13T12:08:59.247Z",
+      "__v": 0
+    }
+  ],
+  "orders": [
+    {
+      "_id": "6a2dea939e26549c82f213b6",
+      "user_id": 1,
+      "vendor_id": 2,
+      "courier_id": 2,
+      "status": "READY",
+      "delivery_address": "1.149265,-76.665511",
+      "subtotal": 50000,
+      "delivery_fee": 3000,
+      "platform_commission": 7500,
+      "total": 60500,
+      "items": [
+        {
+          "product_id": "6a2c7812456312de92de5483",
+          "product_name": "ALISIOS DE PASIÓN",
+          "quantity": 1,
+          "unit_price": 50000,
+          "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299218/urbanrush/products/product-6a2c7812456312de92de5483-0ba06718-d288-49b5-a1e7-70492b95e9b9.webp"
+        }
+      ],
+      "delivery_code": "9743",
+      "delivery_attempts": 0,
+      "delivery_blocked": false,
+      "customer_lat": 1.149265,
+      "customer_lng": -76.665511,
+      "createdAt": "2026-06-13T23:41:07.912Z",
+      "updatedAt": "2026-06-14T05:48:26.088Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e330fbdbb3c0038e63450",
+      "user_id": 1,
+      "vendor_id": 2,
+      "courier_id": 2,
+      "status": "READY",
+      "delivery_address": "1.155072, -76.654041",
+      "subtotal": 4000,
+      "delivery_fee": 3000,
+      "platform_commission": 600,
+      "total": 7600,
+      "items": [
+        {
+          "product_id": "6a2c78f9456312de92de5486",
+          "product_name": "AMERICANO",
+          "quantity": 1,
+          "unit_price": 4000,
+          "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299449/urbanrush/products/product-6a2c78f9456312de92de5486-85d95eee-898b-49f8-a888-d3260ae21c9f.jpg"
+        }
+      ],
+      "delivery_code": "9079",
+      "delivery_attempts": 0,
+      "delivery_blocked": false,
+      "customer_lat": 4.711,
+      "customer_lng": -74.0721,
+      "createdAt": "2026-06-14T04:50:23.090Z",
+      "updatedAt": "2026-06-14T05:59:05.694Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e3353bdbb3c0038e63453",
+      "user_id": 1,
+      "vendor_id": 2,
+      "courier_id": 2,
+      "status": "READY",
+      "delivery_address": "1.155072, -76.654041",
+      "subtotal": 50000,
+      "delivery_fee": 3000,
+      "platform_commission": 7500,
+      "total": 60500,
+      "items": [
+        {
+          "product_id": "6a2c7812456312de92de5483",
+          "product_name": "ALISIOS DE PASIÓN",
+          "quantity": 1,
+          "unit_price": 50000,
+          "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299218/urbanrush/products/product-6a2c7812456312de92de5483-0ba06718-d288-49b5-a1e7-70492b95e9b9.webp"
+        }
+      ],
+      "delivery_code": "2631",
+      "delivery_attempts": 0,
+      "delivery_blocked": false,
+      "customer_lat": 4.711,
+      "customer_lng": -74.0721,
+      "createdAt": "2026-06-14T04:51:31.413Z",
+      "updatedAt": "2026-06-14T06:17:03.455Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a2e3e2d5416b2814a35a4bb",
+      "user_id": 1,
+      "vendor_id": 2,
+      "courier_id": 2,
+      "status": "READY",
+      "delivery_address": "4.713597, -74.064886",
+      "subtotal": 50000,
+      "delivery_fee": 3000,
+      "platform_commission": 7500,
+      "total": 60500,
+      "items": [
+        {
+          "product_id": "6a2c7812456312de92de5483",
+          "product_name": "ALISIOS DE PASIÓN",
+          "quantity": 1,
+          "unit_price": 50000,
+          "image_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781299218/urbanrush/products/product-6a2c7812456312de92de5483-0ba06718-d288-49b5-a1e7-70492b95e9b9.webp"
+        }
+      ],
+      "delivery_code": "7261",
+      "delivery_attempts": 0,
+      "delivery_blocked": false,
+      "customer_lat": 4.713597029991319,
+      "customer_lng": -74.0648862719536,
+      "createdAt": "2026-06-14T05:37:49.202Z",
+      "updatedAt": "2026-06-14T06:07:15.299Z",
+      "__v": 0
+    }
+  ]
+}

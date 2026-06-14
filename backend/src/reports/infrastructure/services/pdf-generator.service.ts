@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import * as path from 'path';
 const PdfPrinter = require('pdfmake');
+const vfsFonts = require('pdfmake/build/vfs_fonts');
 
 @Injectable()
 export class PdfGeneratorService {
   private readonly printer: any;
 
   constructor() {
-    const fontsDir = path.resolve('./node_modules/pdfmake/fonts/Roboto');
+    const vfs = vfsFonts.pdfMake?.vfs ?? {};
     const fontFiles = {
       Roboto: {
-        normal: path.join(fontsDir, 'Roboto-Regular.ttf'),
-        bold: path.join(fontsDir, 'Roboto-Medium.ttf'),
-        italics: path.join(fontsDir, 'Roboto-Italic.ttf'),
-        bolditalics: path.join(fontsDir, 'Roboto-MediumItalic.ttf'),
+        normal: Buffer.from(vfs['Roboto-Regular.ttf'], 'base64'),
+        bold: Buffer.from(vfs['Roboto-Medium.ttf'], 'base64'),
+        italics: Buffer.from(vfs['Roboto-Italic.ttf'], 'base64'),
+        bolditalics: Buffer.from(vfs['Roboto-MediumItalic.ttf'], 'base64'),
       },
     };
     this.printer = new PdfPrinter(fontFiles);
