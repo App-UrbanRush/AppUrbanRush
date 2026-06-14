@@ -88,4 +88,20 @@ export const NotificationTemplates = {
     channel: 'SOCKET',
     targetUserIds: [],
   }),
+
+  vendorOrderUpdate: new Notification({
+    title: 'Estado del pedido actualizado',
+    body: 'El pedido cambió de estado.',
+    level: 'INFO',
+    channel: 'SOCKET',
+    targetUserIds: [],
+  }),
+
+  customerOrderUpdate: new Notification({
+    title: 'Tu pedido fue actualizado',
+    body: 'El estado de tu pedido ha cambiado.',
+    level: 'INFO',
+    channel: 'SOCKET',
+    targetUserIds: [],
+  }),
 };

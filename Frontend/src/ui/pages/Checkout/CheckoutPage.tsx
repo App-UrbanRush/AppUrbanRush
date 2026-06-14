@@ -15,13 +15,18 @@ const PLATFORM_COMMISSION_RATE = 0.15;
 
 interface LocationMarkerProps {
   onMove: (lat: number, lng: number) => void;
+  onDblClick?: (lat: number, lng: number) => void;
 }
 
-const LocationMarker = ({ onMove }: LocationMarkerProps) => {
+const LocationMarker = ({ onMove, onDblClick }: LocationMarkerProps) => {
   useMapEvents({
     dragend: (e) => {
       const { lat, lng } = e.target.getCenter();
       onMove(lat, lng);
+    },
+    dblclick: (e) => {
+      const { lat, lng } = e.latlng;
+      onDblClick?.(lat, lng);
     },
   });
   return null;
@@ -43,6 +48,7 @@ const CheckoutPage = () => {
   const [step, setStep] = useState(0);
   const [address, setAddress] = useState(myProfile?.address || "");
   const [coords, setCoords] = useState({ lat: 4.711, lng: -74.0721 });
+  const [markerCoords, setMarkerCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [locating, setLocating] = useState(false);
 
@@ -66,6 +72,18 @@ const CheckoutPage = () => {
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  }, []);
+
+  const updateLocation = useCallback((lat: number, lng: number) => {
+    setCoords({ lat, lng });
+    setAddress(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+    setMarkerCoords(null);
+  }, []);
+
+  const handleDblClick = useCallback((lat: number, lng: number) => {
+    setCoords({ lat, lng });
+    setAddress(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+    setMarkerCoords({ lat, lng });
   }, []);
 
   // Geocodificar dirección o parsear coordenadas
@@ -281,8 +299,8 @@ const CheckoutPage = () => {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <Marker position={[coords.lat, coords.lng]} draggable />
-              <LocationMarker onMove={(lat, lng) => setCoords({ lat, lng })} />
+              <LocationMarker onMove={updateLocation} onDblClick={handleDblClick} />
+              {markerCoords && <Marker position={[markerCoords.lat, markerCoords.lng]} />}
               <RecenterMap lat={coords.lat} lng={coords.lng} />
             </MapContainer>
           </div>

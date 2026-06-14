@@ -17,10 +17,6 @@ export interface LiveNotification {
   read: boolean;
 }
 
-/**
- * Hook que se suscribe al namespace `/notifications` y mantiene una
- * cola local de notificaciones. Observer pattern del lado cliente.
- */
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<LiveNotification[]>([]);
   const [connected, setConnected] = useState(false);

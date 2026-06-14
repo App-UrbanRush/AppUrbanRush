@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { useAuth } from "../context/useAuth";
 import Login from "../pages/Login/Login";
 import GoogleCallback from "../pages/Login/GoogleCallback";
@@ -67,6 +68,23 @@ const HomeRedirect = () => {
 const AppRouter = () => {
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 2500,
+          style: {
+            borderRadius: "12px",
+            background: "#1f232b",
+            color: "#fff",
+            fontWeight: 600,
+            fontSize: "14px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+          },
+          success: {
+            iconTheme: { primary: "#ff6a00", secondary: "#fff" },
+          },
+        }}
+      />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
