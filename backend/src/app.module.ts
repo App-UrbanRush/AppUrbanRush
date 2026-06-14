@@ -35,6 +35,7 @@ import { CourierVendorRequestModule } from './courier-vendor-request/courier-ven
 import { LiquidationModule } from './liquidation/liquidation.module';
 import { TrackingModule } from './tracking/tracking.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 
 @Module({
@@ -104,6 +105,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     LiquidationModule,
     TrackingModule,
     NotificationsModule,
+    ChatbotModule,
   ],
   providers: [
     // Aplica rate limiting global a todos los endpoints

@@ -100,7 +100,7 @@ export class SearchIndexService implements OnModuleInit {
 
   private async fetchVendors(): Promise<SearchEntry[]> {
     const rows: { vendor_id: number; business_name: string }[] = await this.dataSource.query(
-      `SELECT vendor_id, business_name FROM vendor WHERE business_name IS NOT NULL`,
+      `SELECT vendor_id, business_name FROM vendors WHERE business_name IS NOT NULL`,
     );
     return rows.map((r) => ({
       id: r.vendor_id,
@@ -114,7 +114,7 @@ export class SearchIndexService implements OnModuleInit {
     try {
       const rows: { product_id: string; name: string; vendor_id: number }[] =
         await this.dataSource.query(
-          `SELECT product_id, name, vendor_id FROM product WHERE name IS NOT NULL AND is_available = true`,
+          `SELECT product_id, name, vendor_id FROM products WHERE name IS NOT NULL AND is_available = true`,
         );
       return rows.map((r) => ({
         id: r.product_id,
