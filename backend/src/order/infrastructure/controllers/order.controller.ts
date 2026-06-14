@@ -1,9 +1,12 @@
 import { Controller, Get, Post, Put, Body, Param, Req, UseGuards, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Request } from 'express';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
 import { Roles, UserRole } from 'src/auth/infrastructure/decorators/roles.decorator';
+import { VendorEntity } from 'src/vendor/infrastructure/persistence/entities/vendor.entity';
 import { CreateOrderUseCase } from '../../application/use-cases/create-order.use-case';
 import { GetOrdersByUserUseCase } from '../../application/use-cases/get-orders-by-user.use-case';
 import { GetOrdersByVendorUseCase } from '../../application/use-cases/get-orders-by-vendor.use-case';
@@ -43,6 +46,7 @@ export class OrderController {
     private readonly getCourierActiveOrders: GetCourierActiveOrdersUseCase,
     private readonly getVendorRecentOrders: GetVendorRecentOrdersUseCase,
     @Inject('IOrderRepository') private readonly orderRepository: IOrderRepository,
+    @InjectRepository(VendorEntity) private readonly vendorRepo: Repository<VendorEntity>,
   ) {}
 
   // Usuario crea el pedido (el dueño recibe su código de entrega)
@@ -112,7 +116,7 @@ export class OrderController {
   // Detalle de un pedido. El código solo se expone al dueño, al courier
   // asignado en IN_DELIVERY, o al admin.
   @Get(':id')
-  @Roles(UserRole.USER, UserRole.DOMICILIARIO, UserRole.ADMIN)
+  @Roles(UserRole.USER, UserRole.DOMICILIARIO, UserRole.ADMIN, UserRole.BUSINESS)
   @ApiOperation({ summary: 'Detalle de un pedido' })
   async getOrderById(@Param('id') id: string, @Req() req: Request) {
     const user = req.user as AuthUser;
@@ -162,7 +166,13 @@ export class OrderController {
     @Req() req: Request,
   ) {
     const user = req.user as AuthUser;
-    
+
+    // Validar que el courier no tenga ya un pedido activo
+    const courierOrders = await this.orderRepository.findByCourier(user.user_id);
+    if (courierOrders.some(o => o.status === 'IN_DELIVERY')) {
+      throw new BadRequestException('Ya tienes un pedido en entrega. Finalízalo antes de aceptar otro.');
+    }
+
     // Validar que el pedido esté READY
     const order = await this.orderRepository.findById(id);
     if (!order) {
@@ -238,6 +248,8 @@ export class OrderController {
   @ApiOperation({ summary: 'Pedidos recientes para el dashboard del vendor' })
   async fetchVendorRecentOrders(@Req() req: Request) {
     const user = req.user as AuthUser;
-    return this.getVendorRecentOrders.execute(user.user_id);
+    const vendor = await this.vendorRepo.findOne({ where: { user_id: user.user_id } });
+    if (!vendor) return [];
+    return this.getVendorRecentOrders.execute(vendor.vendor_id);
   }
 }

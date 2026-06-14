@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Search, User, LogOut, Moon, Sun } from "lucide-react";
+import { Bell, User, LogOut, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/useAuth";
 import { useDarkMode } from "../../../context/useDarkMode";
@@ -17,7 +17,7 @@ const VendorHeader = () => {
 
   useEffect(() => {
     loadPendingOrders();
-    const interval = setInterval(loadPendingOrders, 15000);
+    const interval = setInterval(loadPendingOrders, 7000);
     return () => clearInterval(interval);
   }, []);
 
@@ -74,16 +74,7 @@ const VendorHeader = () => {
     <header className="vendor-header">
       <div className="vendor-header-left"></div>
 
-      <div className="vendor-header-center">
-        <div className="vendor-header-search">
-          <Search size={18} className="vendor-header-search-icon" />
-          <input
-            type="text"
-            placeholder="Buscar..."
-            className="vendor-header-search-input"
-          />
-        </div>
-      </div>
+      <div className="vendor-header-center" />
 
       <div className="vendor-header-right">
         <button

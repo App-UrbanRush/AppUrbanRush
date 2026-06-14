@@ -370,52 +370,52 @@
 }
 
 /* Dark mode */
-body.dark .vendor-reports h1,
-body.dark .chart-card h2,
-body.dark .summary-value {
+.dark-mode-wrapper.dark-mode .vendor-reports h1,
+.dark-mode-wrapper.dark-mode .chart-card h2,
+.dark-mode-wrapper.dark-mode .summary-value {
   color: #f0f0f0;
 }
 
-body.dark .reports-filters {
+.dark-mode-wrapper.dark-mode .reports-filters {
   background: #2d2d44;
 }
 
-body.dark .reports-filters label {
+.dark-mode-wrapper.dark-mode .reports-filters label {
   color: #aaa;
 }
 
-body.dark .reports-filters input[type="date"] {
+.dark-mode-wrapper.dark-mode .reports-filters input[type="date"] {
   background: #3d3d5c;
   border-color: #4d4d6c;
   color: #f0f0f0;
 }
 
-body.dark .summary-card {
+.dark-mode-wrapper.dark-mode .summary-card {
   background: #2d2d44;
 }
 
-body.dark .chart-card {
+.dark-mode-wrapper.dark-mode .chart-card {
   background: #2d2d44;
 }
 
-body.dark .status-bar-track {
+.dark-mode-wrapper.dark-mode .status-bar-track {
   background: #3d3d5c;
 }
 
-body.dark .status-name {
+.dark-mode-wrapper.dark-mode .status-name {
   color: #ccc;
 }
 
-body.dark .products-header {
+.dark-mode-wrapper.dark-mode .products-header {
   background: #3d3d5c;
   color: #aaa;
 }
 
-body.dark .products-row {
+.dark-mode-wrapper.dark-mode .products-row {
   background: #2d2d44;
   border-color: #3d3d5c;
 }
 
-body.dark .product-name {
+.dark-mode-wrapper.dark-mode .product-name {
   color: #f0f0f0;
 }

@@ -25,5 +25,7 @@ export class OrderModel {
     public delivery_code: string | null = null,
     public delivery_attempts: number = 0,
     public delivery_blocked: boolean = false,
+    public customer_lat: number | null = null,
+    public customer_lng: number | null = null,
   ) {}
 }

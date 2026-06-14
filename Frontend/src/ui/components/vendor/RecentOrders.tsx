@@ -30,7 +30,7 @@ const RecentOrders = () => {
     try {
       setLoading(true);
       const data = await recentOrdersApi.getRecentOrders();
-      setOrders(data.slice(0, 5)); // Mostrar solo los primeros 5
+      setOrders(data.slice(0, 3)); // Mostrar solo los primeros 3
     } catch (error) {
       console.error("Error loading recent orders:", error);
       setOrders([]);

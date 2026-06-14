@@ -95,6 +95,11 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+.dark-mode-wrapper.dark-mode .dashboard-stats-loading .spinner {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-top-color: #a78bfa;
+}
+
 .dark-mode-wrapper.dark-mode .dashboard-stats-error {
   background: rgba(220, 38, 38, 0.1);
   border-color: rgba(220, 38, 38, 0.2);

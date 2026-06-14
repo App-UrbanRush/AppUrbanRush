@@ -3,4 +3,5 @@ export interface VendorCourierDTO {
   name: string;
   photo_url: string | null;
   status: string;
+  vehicle_type: string | null;
 }

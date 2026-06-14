@@ -114,3 +114,14 @@
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
+
+.dark-mode-wrapper.dark-mode .confirm-icon {
+  background: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+}
+
+.dark-mode-wrapper.dark-mode .confirm-cancel-btn {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+}

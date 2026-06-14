@@ -25,8 +25,9 @@ export class GetCourierLocationUseCase {
     const isOwner = order.user_id === requesterUserId;
     const isAssignedCourier =
       requesterRolIds.includes(3) && order.courier_id !== null;
+    const isBusiness = requesterRolIds.includes(4);
 
-    if (!isOwner && !isAssignedCourier && !isAdmin) {
+    if (!isOwner && !isAssignedCourier && !isAdmin && !isBusiness) {
       throw new ForbiddenException('No autorizado a ver el tracking de este pedido');
     }
 
