@@ -45,6 +45,7 @@ import AdminLiquidations from "../pages/AdminDashboard/AdminLiquidations";
 import AdminBackups from "../pages/AdminDashboard/AdminBackups";
 import AdminFiles from "../pages/AdminDashboard/AdminFiles";
 import AdminSearchIndex from "../pages/AdminDashboard/AdminSearchIndex";
+import ChatbotWidget from "../components/chatbot/ChatbotWidget";
 
 const HomeRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -331,6 +332,7 @@ const AppRouter = () => {
           }
         />
       </Routes>
+      <ChatbotWidget />
     </BrowserRouter>
   );
 };
