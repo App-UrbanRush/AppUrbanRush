@@ -9,9 +9,10 @@ import { DecryptFileUseCase } from './application/use-cases/decrypt-file.use-cas
 import { ListMyFilesUseCase } from './application/use-cases/list-my-files.use-case';
 import { DeleteFileUseCase } from './application/use-cases/delete-file.use-case';
 import { EncryptedFileController } from './infrastructure/controllers/encrypted-file.controller';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EncryptedFileEntity])],
+  imports: [TypeOrmModule.forFeature([EncryptedFileEntity]), NotificationsModule],
   controllers: [EncryptedFileController],
   providers: [
     TypeormEncryptedFileRepository,
