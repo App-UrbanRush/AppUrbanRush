@@ -21,6 +21,9 @@ import { GetVendorRecentOrdersUseCase } from '../../application/use-cases/get-ve
 import { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { CreateOrderDto } from '../../application/dtos/create-order.dto';
 import { OrderResponseMapper } from '../mappers/order-response.mapper';
+import { NotificationBridge } from 'src/notifications/infrastructure/services/notification-bridge';
+import { OrderStateMachine } from '../../domain/state/order-state-machine';
+import { OrderStatus, Actor } from '../../domain/state/order-state';
 
 interface AuthUser {
   user_id: number;
@@ -47,7 +50,31 @@ export class OrderController {
     private readonly getVendorRecentOrders: GetVendorRecentOrdersUseCase,
     @Inject('IOrderRepository') private readonly orderRepository: IOrderRepository,
     @InjectRepository(VendorEntity) private readonly vendorRepo: Repository<VendorEntity>,
+    private readonly notificationBridge: NotificationBridge,
+    private readonly stateMachine: OrderStateMachine,
   ) {}
+
+  /** Endpoint que expone State pattern: acciones disponibles según rol. */
+  @Get(':id/available-actions')
+  @Roles(UserRole.USER, UserRole.BUSINESS, UserRole.DOMICILIARIO, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Acciones disponibles para el pedido según el actor (State pattern)' })
+  async availableActions(@Param('id') id: string, @Req() req: Request) {
+    const order = await this.orderRepository.findById(id);
+    if (!order) throw new NotFoundException('Pedido no encontrado');
+
+    const user = req.user as AuthUser;
+    const actor: Actor = user.rolIds.includes(UserRole.BUSINESS)
+      ? 'VENDOR'
+      : user.rolIds.includes(UserRole.DOMICILIARIO)
+        ? 'COURIER'
+        : 'CUSTOMER';
+
+    return {
+      currentStatus: order.status as OrderStatus,
+      isFinal: this.stateMachine.isFinal(order.status as OrderStatus),
+      actions: this.stateMachine.availableActions(order.status as OrderStatus, actor),
+    };
+  }
 
   // Usuario crea el pedido (el dueño recibe su código de entrega)
   @Post()
@@ -55,6 +82,27 @@ export class OrderController {
   @ApiOperation({ summary: 'Crear pedido (usuario)' })
   async create(@Body() dto: CreateOrderDto) {
     const order = await this.createOrder.execute(dto);
+
+    // Notificar al vendor (best-effort, no bloquea respuesta).
+    if (order && (order as any).vendor_id) {
+      this.vendorRepo
+        .findOne({ where: { vendor_id: (order as any).vendor_id } })
+        .then((vendor) => {
+          if (!vendor?.user_id) return;
+          return this.notificationBridge.notify(
+            'adminAlert',
+            [vendor.user_id],
+            'SOCKET',
+            {
+              body: `Tienes un nuevo pedido. Revísalo en tu panel.`,
+              data: { orderId: (order as any)._id?.toString() },
+              level: 'INFO',
+            },
+          );
+        })
+        .catch(() => undefined);
+    }
+
     return OrderResponseMapper.toResponse(order as any, { includeCode: true });
   }
 
@@ -173,20 +221,29 @@ export class OrderController {
       throw new BadRequestException('Ya tienes un pedido en entrega. Finalízalo antes de aceptar otro.');
     }
 
-    // Validar que el pedido esté READY
+    // Validar transición usando State pattern (PendingState.canTransitionTo etc.).
     const order = await this.orderRepository.findById(id);
     if (!order) {
       throw new NotFoundException('Pedido no encontrado');
     }
-    if (order.status !== 'READY') {
-      throw new BadRequestException('El pedido no está disponible para aceptar');
-    }
+    this.stateMachine.assertCanTransition(order.status as OrderStatus, 'IN_DELIVERY', 'COURIER');
     // Validar que no esté ya asignado a otro courier (race condition)
     if (order.courier_id !== null && order.courier_id !== user.user_id) {
       throw new BadRequestException('El pedido ya fue aceptado por otro domiciliario');
     }
     
     const updated = await this.updateStatus.execute(id, 'IN_DELIVERY', user.user_id);
+
+    // Notificar al cliente que su pedido fue aceptado (best-effort, no bloquea respuesta).
+    if (updated?.user_id) {
+      this.notificationBridge
+        .notify('orderAccepted', [updated.user_id], 'SOCKET', {
+          body: `Un domiciliario está en camino. Pedido #${id.slice(-6).toUpperCase()}.`,
+          data: { orderId: id, courierId: user.user_id },
+        })
+        .catch(() => undefined);
+    }
+
     return updated ? OrderResponseMapper.toCourierResponse(updated, user.user_id) : null;
   }
 
@@ -239,6 +296,17 @@ export class OrderController {
     @Body() body: { delivery_code: string; courier_id: number },
   ) {
     const order = await this.confirmDelivery.execute(id, body.delivery_code, body.courier_id);
+
+    // Notificar al cliente que su pedido fue entregado (best-effort).
+    if (order?.user_id) {
+      this.notificationBridge
+        .notify('orderDelivered', [order.user_id], 'SOCKET', {
+          body: `Tu pedido #${id.slice(-6).toUpperCase()} fue entregado. ¡Buen provecho!`,
+          data: { orderId: id },
+        })
+        .catch(() => undefined);
+    }
+
     return order ? OrderResponseMapper.toResponse(order) : null;
   }
 

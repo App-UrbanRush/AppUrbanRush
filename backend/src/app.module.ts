@@ -34,6 +34,7 @@ import { VendorPhotosModule } from './vendor-photos/vendor-photos.module';
 import { CourierVendorRequestModule } from './courier-vendor-request/courier-vendor-request.module';
 import { LiquidationModule } from './liquidation/liquidation.module';
 import { TrackingModule } from './tracking/tracking.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 
 @Module({
@@ -102,6 +103,7 @@ import { TrackingModule } from './tracking/tracking.module';
     CourierVendorRequestModule,
     LiquidationModule,
     TrackingModule,
+    NotificationsModule,
   ],
   providers: [
     // Aplica rate limiting global a todos los endpoints

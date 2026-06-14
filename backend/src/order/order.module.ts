@@ -15,11 +15,13 @@ import { GetAllVendorOrdersUseCase } from './application/use-cases/get-all-vendo
 import { GetCourierActiveOrdersUseCase } from './application/use-cases/get-courier-active-orders.use-case';
 import { GetVendorRecentOrdersUseCase } from './application/use-cases/get-vendor-recent-orders.use-case';
 import { OrderAutoCancelService } from './infrastructure/services/order-auto-cancel.service';
+import { OrderStateMachine } from './domain/state/order-state-machine';
 import { OrderController } from './infrastructure/controllers/order.controller';
 import { ProductModule } from 'src/product/product.module';
 import { LiquidationModule } from 'src/liquidation/liquidation.module';
 import { TrackingModule } from 'src/tracking/tracking.module';
 import { EmailModule } from 'src/email/email.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 import { VendorEntity } from 'src/vendor/infrastructure/persistence/entities/vendor.entity';
 import { PeopleEntity } from 'src/people/infrastructure/persistence/entities/people.entity';
 import { CourierEntity } from 'src/courier/infrastructure/persistence/entities/courier.entity';
@@ -32,6 +34,7 @@ import { CourierEntity } from 'src/courier/infrastructure/persistence/entities/c
     forwardRef(() => LiquidationModule),
     forwardRef(() => TrackingModule),
     EmailModule,
+    NotificationsModule,
   ],
   controllers: [OrderController],
   providers: [
@@ -49,6 +52,7 @@ import { CourierEntity } from 'src/courier/infrastructure/persistence/entities/c
     GetCourierActiveOrdersUseCase,
     GetVendorRecentOrdersUseCase,
     OrderAutoCancelService,
+    OrderStateMachine,
   ],
   exports: ['IOrderRepository'],
 })

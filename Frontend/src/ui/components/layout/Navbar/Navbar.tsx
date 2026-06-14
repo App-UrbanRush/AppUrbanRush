@@ -5,6 +5,7 @@ import { useCart } from "../../../context/CartContext";
 import { useCartDrawer } from "../../../context/CartDrawerContext";
 import { User, ShoppingBag, CreditCard, LogOut } from "lucide-react";
 import CartDrawer from "./CartDrawer";
+import NotificationBell from "../../ui/NotificationBell";
 import "./Navbar.css";
 
 const Navbar = () => {
@@ -113,6 +114,7 @@ const Navbar = () => {
           )}
 
           <div className="icons-desktop" style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
+            {isAuthenticated && <NotificationBell />}
             <button onClick={() => openCart()} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }}>
               <svg width="22" height="22" fill="none" stroke="#e8500a" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 6M7 13l-1.4-6M17 13l1.4 6M9 19a1 1 0 100 2 1 1 0 000-2zM17 19a1 1 0 100 2 1 1 0 000-2z"/>

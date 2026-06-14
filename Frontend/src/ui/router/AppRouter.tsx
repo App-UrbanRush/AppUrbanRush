@@ -44,6 +44,7 @@ import AdminAuditLogs from "../pages/AdminDashboard/AdminAuditLogs";
 import AdminLiquidations from "../pages/AdminDashboard/AdminLiquidations";
 import AdminBackups from "../pages/AdminDashboard/AdminBackups";
 import AdminFiles from "../pages/AdminDashboard/AdminFiles";
+import AdminSearchIndex from "../pages/AdminDashboard/AdminSearchIndex";
 
 const HomeRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -292,6 +293,7 @@ const AppRouter = () => {
         <Route path="/admin/dashboard/reportes" element={<PrivateRoute allowedRoles={[1, 5]}><AdminReports /></PrivateRoute>} />
         <Route path="/admin/dashboard/backups" element={<PrivateRoute allowedRoles={[1, 5]}><AdminBackups /></PrivateRoute>} />
         <Route path="/admin/dashboard/archivos" element={<PrivateRoute allowedRoles={[1, 5]}><AdminFiles /></PrivateRoute>} />
+        <Route path="/admin/dashboard/indice" element={<PrivateRoute allowedRoles={[1, 5]}><AdminSearchIndex /></PrivateRoute>} />
 
         {/* Checkout (solo usuario) */}
         <Route

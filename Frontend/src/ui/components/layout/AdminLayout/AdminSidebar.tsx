@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Users, ShieldCheck, ScrollText, Wallet, BarChart3, DatabaseBackup, Lock,
+  LayoutDashboard, Users, ShieldCheck, ScrollText, Wallet, BarChart3, DatabaseBackup, Lock, Search,
 } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
 import "./AdminSidebar.css";
@@ -21,6 +21,7 @@ const menuItems: MenuItem[] = [
   { label: "Reportes", path: "/admin/dashboard/reportes", icon: <BarChart3 size={24} /> },
   { label: "Backups", path: "/admin/dashboard/backups", icon: <DatabaseBackup size={24} /> },
   { label: "Archivos cifrados", path: "/admin/dashboard/archivos", icon: <Lock size={24} /> },
+  { label: "Índice de búsqueda", path: "/admin/dashboard/indice", icon: <Search size={24} /> },
 ];
 
 const AdminSidebar = () => {

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { vendorApi } from "../../../infrastructure/api/vendorApi";
+import { searchApi } from "../../../infrastructure/api/searchApi";
 import type { Store } from "../../../domain/types/store.types";
 import StoreCard from "../../components/ui/StoreCard/StoreCard";
 import { Search } from "lucide-react";
@@ -30,6 +31,7 @@ const Stores = () => {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [avlVendorIds, setAvlVendorIds] = useState<Set<number> | null>(null);
 
   useEffect(() => {
     const loadStores = async () => {
@@ -46,12 +48,39 @@ const Stores = () => {
     loadStores();
   }, []);
 
-  const filteredStores = searchQuery
-    ? stores.filter(s =>
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (s.address && s.address.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : stores;
+  // Búsqueda contra el índice AVL del backend (debounce 250ms).
+  // Si falla por red/auth, dejamos avlVendorIds = null y el filtro local actúa como fallback.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) { setAvlVendorIds(null); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchApi.search(q, 50);
+        const ids = new Set<number>();
+        results.forEach((r) => {
+          if (r.type === "VENDOR" && typeof r.id === "number") ids.add(r.id);
+          if (r.type === "PRODUCT" && typeof r.vendorId === "number") ids.add(r.vendorId);
+        });
+        setAvlVendorIds(ids);
+      } catch {
+        setAvlVendorIds(null); // fallback al filtro local
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const filteredStores = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return stores;
+    if (avlVendorIds && avlVendorIds.size > 0) {
+      return stores.filter((s) => avlVendorIds.has(s.id));
+    }
+    // Fallback local si AVL no respondió
+    return stores.filter((s) =>
+      s.name.toLowerCase().includes(q) ||
+      (s.address && s.address.toLowerCase().includes(q))
+    );
+  }, [stores, searchQuery, avlVendorIds]);
 
   if (loading) {
     return <Loading text="Cargando tiendas…" />;

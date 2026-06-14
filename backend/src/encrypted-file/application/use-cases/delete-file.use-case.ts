@@ -2,6 +2,7 @@ import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } fro
 import { IEncryptedFileRepository } from '../../domain/repositories/encrypted-file.repository.interface';
 import { CloudinaryService } from '../../infrastructure/services/cloudinary.service';
 import { UserRole } from 'src/auth/infrastructure/decorators/roles.decorator';
+import { NotificationBridge } from 'src/notifications/infrastructure/services/notification-bridge';
 
 @Injectable()
 export class DeleteFileUseCase {
@@ -11,6 +12,7 @@ export class DeleteFileUseCase {
     @Inject('IEncryptedFileRepository')
     private readonly fileRepository: IEncryptedFileRepository,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly notificationBridge: NotificationBridge,
   ) {}
 
   async execute(fileId: number, userId: number, userRoles: number[]): Promise<{ message: string }> {
@@ -27,15 +29,19 @@ export class DeleteFileUseCase {
     // Borramos de BD primero — es la fuente de verdad.
     await this.fileRepository.delete(fileId);
 
-    // Cloudinary: best-effort. Si falla (timeout, ya no existe, etc.) no rompemos
-    // la operación; el archivo queda huérfano en Cloudinary y se loguea.
-    try {
-      await this.cloudinaryService.delete(file.cloudinary_public_id);
-    } catch (err) {
-      this.logger.warn(
-        `Cloudinary delete falló para ${file.cloudinary_public_id}: ${(err as Error).message}`,
-      );
-    }
+    // Cloudinary + notificación en paralelo. Si uno falla no rompe la operación.
+    await Promise.allSettled([
+      this.cloudinaryService.delete(file.cloudinary_public_id).catch((err) => {
+        this.logger.warn(
+          `Cloudinary delete falló para ${file.cloudinary_public_id}: ${(err as Error).message}`,
+        );
+      }),
+      this.notificationBridge.notify('fileDeleted', [file.owner_id], 'SOCKET', {
+        body: `Se eliminó el archivo "${file.original_filename}".`,
+      }).catch((err) => {
+        this.logger.warn(`Notificación fileDeleted falló: ${(err as Error).message}`);
+      }),
+    ]);
 
     return { message: 'Archivo eliminado correctamente' };
   }
