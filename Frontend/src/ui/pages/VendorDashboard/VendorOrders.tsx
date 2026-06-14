@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, User, Package, MapPin, ChefHat, CheckCircle, Truck, XCircle, Search } from "lucide-react";
+import { Clock, User, Package, ChefHat, CheckCircle, Truck, XCircle, Search } from "lucide-react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
 import { useAuth } from "../../context/useAuth";
 import type { RecentOrder } from "../../../domain/types/recent-orders.types";
@@ -182,8 +182,6 @@ const VendorOrders = () => {
           ) : null}
           {filteredOrders.map((order) => {
             const statusConfig = STATUS_CONFIG[order.status] || { color: 'gray', label: order.status, icon: <Package size={14} /> };
-            const isInDelivery = order.status === 'IN_DELIVERY';
-
             return (
               <div key={order.order_id} className="vendor-order-item">
                 <div className="order-main-info">
@@ -235,15 +233,7 @@ const VendorOrders = () => {
                       </button>
                     )}
 
-                    {isInDelivery && (
-                      <button
-                        className="track-btn"
-                        onClick={() => navigate(`/tracking/${order.order_id}`)}
-                      >
-                        <MapPin size={14} /> Ruta
-                      </button>
-                    )}
-
+                    
                     <button
                       className="details-btn"
                       onClick={() => handleDetailsClick(order)}

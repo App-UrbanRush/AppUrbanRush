@@ -31,6 +31,16 @@ interface AuthUser {
   rolIds: number[];
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Pendiente',
+  ACCEPTED: 'Aceptado',
+  PREPARING: 'En preparación',
+  READY: 'Listo',
+  IN_DELIVERY: 'En delivery',
+  DELIVERED: 'Entregado',
+  CANCELLED: 'Cancelado',
+};
+
 @ApiTags('Orders')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -85,17 +95,20 @@ export class OrderController {
 
     // Notificar al vendor (best-effort, no bloquea respuesta).
     if (order && (order as any).vendor_id) {
+      const orderId = (order as any)._id?.toString() || (order as any).order_id;
+      const orderShortId = (orderId || '').slice(-6).toUpperCase();
+
       this.vendorRepo
         .findOne({ where: { vendor_id: (order as any).vendor_id } })
         .then((vendor) => {
           if (!vendor?.user_id) return;
           return this.notificationBridge.notify(
-            'adminAlert',
+            'vendorOrderUpdate',
             [vendor.user_id],
             'SOCKET',
             {
-              body: `Tienes un nuevo pedido. Revísalo en tu panel.`,
-              data: { orderId: (order as any)._id?.toString() },
+              body: `Nuevo pedido #${orderShortId} — Pendiente`,
+              data: { orderId, newStatus: 'PENDING' },
               level: 'INFO',
             },
           );
@@ -188,6 +201,12 @@ export class OrderController {
     @Body() body: { status: 'ACCEPTED' | 'PREPARING' | 'READY' | 'CANCELLED' },
   ) {
     const order = await this.updateStatus.execute(id, body.status);
+
+    if (order) {
+      this.notifyVendorOnStatusChange(id, body.status);
+      this.notifyCustomerOnStatusChange(id, body.status);
+    }
+
     return order ? OrderResponseMapper.toResponse(order) : null;
   }
 
@@ -244,6 +263,9 @@ export class OrderController {
         .catch(() => undefined);
     }
 
+    // Notificar al vendor que cambi� el estado
+    this.notifyVendorOnStatusChange(id, 'IN_DELIVERY');
+
     return updated ? OrderResponseMapper.toCourierResponse(updated, user.user_id) : null;
   }
 
@@ -271,6 +293,12 @@ export class OrderController {
     
     // Devolver a READY sin courier_id
     const updated = await this.updateStatus.execute(id, 'READY', undefined);
+
+    if (updated) {
+      this.notifyVendorOnStatusChange(id, 'READY');
+      this.notifyCustomerOnStatusChange(id, 'READY');
+    }
+
     return updated ? OrderResponseMapper.toResponse(updated) : null;
   }
 
@@ -284,6 +312,12 @@ export class OrderController {
     @Body() body: { status: 'IN_DELIVERY'; courier_id: number },
   ) {
     const order = await this.updateStatus.execute(id, body.status, body.courier_id);
+
+    if (order) {
+      this.notifyVendorOnStatusChange(id, 'IN_DELIVERY');
+      this.notifyCustomerOnStatusChange(id, 'IN_DELIVERY');
+    }
+
     return order ? OrderResponseMapper.toCourierResponse(order, body.courier_id) : null;
   }
 
@@ -307,6 +341,11 @@ export class OrderController {
         .catch(() => undefined);
     }
 
+    // Notificar al vendor que cambi� el estado
+    if (order) {
+      this.notifyVendorOnStatusChange(id, 'DELIVERED');
+    }
+
     return order ? OrderResponseMapper.toResponse(order) : null;
   }
 
@@ -319,5 +358,54 @@ export class OrderController {
     const vendor = await this.vendorRepo.findOne({ where: { user_id: user.user_id } });
     if (!vendor) return [];
     return this.getVendorRecentOrders.execute(vendor.vendor_id);
+  }
+
+  private async notifyVendorOnStatusChange(orderId: string, newStatus: string): Promise<void> {
+    try {
+      const order = await this.orderRepository.findById(orderId);
+      if (!order) return;
+
+      const vendor = await this.vendorRepo.findOne({ where: { vendor_id: order.vendor_id } });
+      if (!vendor?.user_id) return;
+
+      const statusLabel = STATUS_LABELS[newStatus] || newStatus;
+      const orderShortId = orderId.slice(-6).toUpperCase();
+
+      await this.notificationBridge.notify(
+        'vendorOrderUpdate',
+        [vendor.user_id],
+        'SOCKET',
+        {
+          body: `Pedido #${orderShortId} → ${statusLabel}`,
+          data: { orderId, newStatus },
+          level: 'INFO',
+        },
+      );
+    } catch {
+      // Best-effort, no bloquea la respuesta
+    }
+  }
+
+  private async notifyCustomerOnStatusChange(orderId: string, newStatus: string): Promise<void> {
+    try {
+      const order = await this.orderRepository.findById(orderId);
+      if (!order?.user_id) return;
+
+      const statusLabel = STATUS_LABELS[newStatus] || newStatus;
+      const orderShortId = orderId.slice(-6).toUpperCase();
+
+      await this.notificationBridge.notify(
+        'customerOrderUpdate',
+        [order.user_id],
+        'SOCKET',
+        {
+          body: `Pedido #${orderShortId} → ${statusLabel}`,
+          data: { orderId, newStatus },
+          level: 'INFO',
+        },
+      );
+    } catch {
+      // Best-effort, no bloquea la respuesta
+    }
   }
 }

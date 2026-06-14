@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, X, Check } from "lucide-react";
 import { useNotifications, type LiveNotification } from "../../hooks/useNotifications";
 import "./NotificationBell.css";
@@ -10,8 +11,16 @@ const levelColor: Record<LiveNotification["level"], string> = {
   SUCCESS: "#22c55e",
 };
 
+const levelIcon: Record<LiveNotification["level"], string> = {
+  INFO: "🔔",
+  WARN: "⚠️",
+  CRITICAL: "🚨",
+  SUCCESS: "✅",
+};
+
 const NotificationBell = () => {
   const { notifications, unreadCount, connected, markAllRead, clearOne } = useNotifications();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -63,23 +72,37 @@ const NotificationBell = () => {
           ) : (
             <ul className="notification-bell-list">
               {notifications.map((n) => (
-                <li key={n.id} className={`notification-bell-item ${n.read ? "" : "unread"}`}>
-                  <span
-                    className="notification-bell-dot"
-                    style={{ background: levelColor[n.level] }}
-                  />
+                <li
+                  key={n.id}
+                  className={`notification-bell-item ${n.read ? "" : "unread"}`}
+                  onClick={() => {
+                    const orderId = n.data?.orderId as string | undefined;
+                    if (orderId) navigate(`/tracking/${orderId}`);
+                  }}
+                >
+                  <div
+                    className="notification-bell-item-icon"
+                    style={{ background: `${levelColor[n.level]}18` }}
+                  >
+                    {levelIcon[n.level]}
+                  </div>
                   <div className="notification-bell-content">
                     <div className="notification-bell-title">{n.title}</div>
                     <p className="notification-bell-body">{n.body}</p>
-                    <span className="notification-bell-time">
-                      {new Date(n.createdAt).toLocaleTimeString("es-CO", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                    <div className="notification-bell-item-footer">
+                      <span className="notification-bell-time">
+                        {new Date(n.createdAt).toLocaleTimeString("es-CO", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
                   </div>
                   <button
-                    onClick={() => clearOne(n.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearOne(n.id);
+                    }}
                     className="notification-bell-close"
                     aria-label="Quitar"
                   >
