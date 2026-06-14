@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Store } from "../../../domain/types/store.types";
 import DeliveryMap from "../DeliveryMap/DeliveryMap";
 import MapModal from "../DeliveryMap/MapModal";
 import "./NearbyStores.css";
+
+const MOCOA: [number, number] = [1.1481, -76.6475];
 
 interface NearbyStoresProps {
   stores: Store[];
@@ -11,7 +13,17 @@ interface NearbyStoresProps {
 
 const NearbyStores = ({ stores }: NearbyStoresProps) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
+      () => {},
+      { enableHighAccuracy: false, timeout: 5000 },
+    );
+  }, []);
 
   const mapLocations = stores.map((s) => ({
     id: String(s.id),
@@ -19,7 +31,13 @@ const NearbyStores = ({ stores }: NearbyStoresProps) => {
     lng: s.lng,
     address: s.address || s.name,
     status: "pending" as const,
+    name: s.name,
+    image: s.logo_url || s.image || '',
+    businessType: s.business_type,
   }));
+
+  const mapCenter = userLocation ?? MOCOA;
+  const zoom = userLocation ? 13 : 12;
 
   return (
     <section style={{ marginTop: '28px', marginBottom: '32px' }}>
@@ -43,12 +61,13 @@ const NearbyStores = ({ stores }: NearbyStoresProps) => {
       </div>
 
       <div className="nearby-container" style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-        <div className="map-wrapper" style={{ flexShrink: 0, width: '220px' }}>
+        <div className="map-wrapper" style={{ flexShrink: 0, width: '440px' }}>
           <DeliveryMap
-            center={[1.1481, -76.6475]}
-            zoom={14}
-            height="220px"
+            center={mapCenter}
+            zoom={zoom}
+            height="360px"
             locations={mapLocations}
+            userPosition={userLocation}
             showMyLocation
           />
           <button
@@ -121,9 +140,10 @@ const NearbyStores = ({ stores }: NearbyStoresProps) => {
       <MapModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        center={[1.1481, -76.6475]}
-        zoom={14}
+        center={mapCenter}
+        zoom={zoom}
         locations={mapLocations}
+        userPosition={userLocation}
       />
       <style>{`
         @media (max-width: 980px) {

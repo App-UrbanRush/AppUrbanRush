@@ -15,6 +15,8 @@ export class VendorMapper {
       entity.logo_url ?? null,
       entity.storefront_image_url ?? null,
       entity.business_hours ?? null,
+      entity.latitude ? Number(entity.latitude) : null,
+      entity.longitude ? Number(entity.longitude) : null,
     );
   }
 
@@ -31,6 +33,8 @@ export class VendorMapper {
       logo_url: domain.logo_url,
       storefront_image_url: domain.storefront_image_url,
       business_hours: domain.business_hours,
+      latitude: domain.latitude,
+      longitude: domain.longitude,
     };
   }
 }

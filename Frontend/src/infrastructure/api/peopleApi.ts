@@ -14,6 +14,8 @@ export interface UpdateProfilePayload {
   address?: string;
   gender?: string;
   avatarUrl?: string | null;
+  latitude?: number;
+  longitude?: number;
 }
 
 export const peopleApi = {

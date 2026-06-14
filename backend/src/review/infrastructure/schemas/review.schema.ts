@@ -20,6 +20,12 @@ export class Review {
   @Prop({ required: true })
   comment: string;
 
+  @Prop({ type: [{ name: String, image_url: { type: String, default: null } }], default: [] })
+  items: { name: string; image_url: string | null }[];
+
+  @Prop({ default: 0 })
+  total: number;
+
   @Prop({ type: Date, default: Date.now })
   created_at: Date;
 }

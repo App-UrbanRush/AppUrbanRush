@@ -111,9 +111,14 @@ const StoreCard = ({ store, variant = "recommended", onClick }: StoreCardProps) 
         </span>
       </div>
       <div style={{ padding: '12px 14px 14px' }}>
-        <div style={{ fontWeight: 800, fontSize: '15px', color: '#1a1a1a', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ fontWeight: 800, fontSize: '15px', color: '#1a1a1a', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {store.name}
         </div>
+        {store.business_type && (
+          <div style={{ fontSize: '12px', color: '#e8500a', fontWeight: 600, marginBottom: '6px' }}>
+            {store.business_type}
+          </div>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Stars rating={store.rating ?? 0} />
           <span style={{ color: '#ccc', fontSize: '12px' }}>{'\u2022'}</span>

@@ -78,12 +78,9 @@ const VendorSidebar = () => {
   return (
     <aside className="vendor-sidebar">
       <div className="vendor-sidebar-logo">
-        <svg width="40" height="40" viewBox="0 0 34 34" fill="none">
-          <circle cx="17" cy="17" r="17" fill="#e8500a"/>
-          <path d="M9 21 Q17 11 25 21" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round"/>
-          <circle cx="17" cy="21" r="3.5" fill="white"/>
-        </svg>
-        <h1>UrbanRush</h1>
+        <div className="vendor-sidebar-logo-wrap">
+          <img src="/Logo-cor.png" alt="UrbanRush" className="vendor-sidebar-logo-img" />
+        </div>
       </div>
 
       <nav className="vendor-sidebar-nav">

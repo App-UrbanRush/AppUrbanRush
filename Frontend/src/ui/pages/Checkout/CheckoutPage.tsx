@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/useAuth";
 import { ordersApi } from "../../../infrastructure/api/ordersApi";
+import { authLocalStorage } from "../../../infrastructure/persistence/authLocalStorage";
 import "./CheckoutPage.css";
 
 const STEPS = ["Carrito", "Dirección", "Pago", "Factura"];
@@ -42,7 +43,7 @@ function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
 
 const CheckoutPage = () => {
   const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCart();
-  const { myProfile, user } = useAuth();
+  const { myProfile, user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
@@ -137,6 +138,25 @@ const CheckoutPage = () => {
     }
 
     setSubmitting(true);
+
+    // Verificar que la sesión no haya expirado
+    const token = authLocalStorage.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp * 1000 < Date.now()) {
+          toast.error("Tu sesión ha expirado. Inicia sesión nuevamente.");
+          logout();
+          navigate('/');
+          return;
+        }
+      } catch {
+        logout();
+        navigate('/');
+        return;
+      }
+    }
+
     try {
       const userId = Number(user.id);
       const productIds = [...new Set(items.map((i) => i.product.vendor_id))];

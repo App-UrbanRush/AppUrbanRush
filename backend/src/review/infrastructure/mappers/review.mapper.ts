@@ -17,6 +17,8 @@ export class ReviewMapper {
       comment: review.comment,
       created_at: review.created_at!,
       time_ago: ReviewMapper.calculateTimeAgo(review.created_at!),
+      items: review.items || [],
+      total: review.total || 0,
     };
   }
 

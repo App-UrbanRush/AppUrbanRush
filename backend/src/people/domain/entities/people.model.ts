@@ -8,5 +8,7 @@ export class People {
       public gender: string,
       public userId: number | null,
       public avatarUrl: string | null = null,
+      public latitude: number | null = null,
+      public longitude: number | null = null,
     ) {}
   }

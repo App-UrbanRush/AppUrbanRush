@@ -33,7 +33,7 @@ export class GetVendorReportDataUseCase {
     const orders = await this.orderModel.find(query).exec();
 
     const total_orders = orders.length;
-    const total_revenue = orders.reduce((sum, o) => sum + o.total, 0);
+    const total_revenue = orders.reduce((sum, o) => sum + o.subtotal, 0);
     const delivered_orders = orders.filter(o => o.status === 'DELIVERED').length;
     const cancelled_orders = orders.filter(o => o.status === 'CANCELLED').length;
     const pending_orders = orders.filter(o => o.status === 'PENDING').length;
@@ -48,7 +48,7 @@ export class GetVendorReportDataUseCase {
       const date = new Date((order as any).createdAt).toISOString().split('T')[0];
       const existing = dayMap.get(date) || { count: 0, revenue: 0 };
       existing.count += 1;
-      existing.revenue += order.total;
+      existing.revenue += order.subtotal;
       dayMap.set(date, existing);
     }
     const orders_by_day = Array.from(dayMap.entries())

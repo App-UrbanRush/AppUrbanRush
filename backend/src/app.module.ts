@@ -36,6 +36,7 @@ import { LiquidationModule } from './liquidation/liquidation.module';
 import { TrackingModule } from './tracking/tracking.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { ReviewModule } from './review/review.module';
 
 
 @Module({
@@ -106,6 +107,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
     TrackingModule,
     NotificationsModule,
     ChatbotModule,
+    ReviewModule,
   ],
   providers: [
     // Aplica rate limiting global a todos los endpoints

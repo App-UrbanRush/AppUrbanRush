@@ -1,5 +1,6 @@
 import "./VendorRegister.css";
 import PasswordInput from "../../components/ui/PasswordInput";
+import FormField from "../../components/ui/FormField/FormField";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -264,20 +265,17 @@ const VendorRegister = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             {step === 1 && (
               <div key="step1">
-                <div className="input-group">
+                <FormField label="Correo electrónico" error={errors.user_email?.message}>
                   <input {...register("user_email")} type="email" placeholder="Correo electrónico" />
-                  {errors.user_email && <span className="error">{errors.user_email.message}</span>}
-                </div>
+                </FormField>
 
-                <div className="input-group">
+                <FormField label="Contraseña" error={errors.user_password?.message}>
                   <PasswordInput {...register("user_password")} placeholder="Contraseña" />
-                  {errors.user_password && <span className="error">{errors.user_password.message}</span>}
-                </div>
+                </FormField>
 
-                <div className="input-group">
+                <FormField label="Confirmar contraseña" error={errors.confirm_password?.message}>
                   <PasswordInput {...register("confirm_password")} placeholder="Confirmar contraseña" />
-                  {errors.confirm_password && <span className="error">{errors.confirm_password.message}</span>}
-                </div>
+                </FormField>
 
                 <button type="button" className="next-btn" onClick={nextStep1}>
                   Siguiente →
@@ -288,47 +286,39 @@ const VendorRegister = () => {
             {step === 2 && (
               <div key="step2">
                 <div className="register-row">
-                  <div className="input-group" style={{ flex: 1, marginRight: "10px" }}>
+                  <FormField label="Nombre" error={errors.firstName?.message}>
                     <input {...register("firstName")} placeholder="Nombre" />
-                    {errors.firstName && <span className="error">{errors.firstName.message}</span>}
-                  </div>
-                  <div className="input-group" style={{ flex: 1 }}>
+                  </FormField>
+                  <FormField label="Apellido" error={errors.firstLastName?.message}>
                     <input {...register("firstLastName")} placeholder="Apellido" />
-                    {errors.firstLastName && <span className="error">{errors.firstLastName.message}</span>}
-                  </div>
+                  </FormField>
                 </div>
 
                 <div className="register-row">
-                  <div className="input-group" style={{ flex: 1, marginRight: "10px" }}>
+                  <FormField label="Documento" error={errors.document_number?.message}>
                     <input {...register("document_number")} placeholder="Número de documento" />
-                    {errors.document_number && <span className="error">{errors.document_number.message}</span>}
-                  </div>
-                  <div className="input-group" style={{ flex: 1 }}>
+                  </FormField>
+                  <FormField label="Fecha exp." error={errors.expedition_date?.message}>
                     <input {...register("expedition_date")} type="date" placeholder="Fecha de Expedición" />
-                    {errors.expedition_date && <span className="error">{errors.expedition_date.message}</span>}
-                  </div>
+                  </FormField>
                 </div>
 
-                <div className="input-group">
+                <FormField label="Ciudad de expedición" error={errors.city?.message}>
                   <input {...register("city")} placeholder="Ciudad de expedición" />
-                  {errors.city && <span className="error">{errors.city.message}</span>}
-                </div>
-                
+                </FormField>
 
                 <div className="register-row">
-                  <div className="input-group" style={{ flex: 1, marginRight: "10px" }}>
+                  <FormField label="Celular" error={errors.cellphone?.message}>
                     <input {...register("cellphone")} placeholder="Celular" />
-                    {errors.cellphone && <span className="error">{errors.cellphone.message}</span>}
-                  </div>
-                  <div className="input-group" style={{ flex: 1 }}>
+                  </FormField>
+                  <FormField label="Género" error={errors.gender?.message}>
                     <select {...register("gender")} defaultValue="">
                       <option value="" disabled>Seleccione Género</option>
                       <option value="M">Masculino</option>
                       <option value="F">Femenino</option>
                       <option value="Otro">Otro</option>
                     </select>
-                    {errors.gender && <span className="error">{errors.gender.message}</span>}
-                  </div>
+                  </FormField>
                 </div>
 
                 <button type="button" className="next-btn" onClick={nextStep2}>
@@ -379,12 +369,11 @@ const VendorRegister = () => {
 
 {step === 4 && (
               <div key="step4">
-                <div className="input-group">
+                <FormField label="Nombre del negocio" error={errors.business_name?.message}>
                   <input {...register("business_name")} placeholder="Nombre del negocio" />
-                  {errors.business_name && <span className="error">{errors.business_name.message}</span>}
-                </div>
+                </FormField>
 
-                <div className="input-group">
+                <FormField label="Tipo de negocio" error={errors.business_type?.message}>
                   <select {...register("business_type")} defaultValue="">
                     <option value="" disabled>Seleccione tipo de negocio</option>
                     <option value="Restaurante">Restaurante</option>
@@ -395,32 +384,29 @@ const VendorRegister = () => {
                     <option value="Bar">Bar</option>
                     <option value="Otro">Otro</option>
                   </select>
-                  {errors.business_type && <span className="error">{errors.business_type.message}</span>}
-                </div>
+                </FormField>
 
-                <div className="input-group">
+                <FormField label="Dirección del negocio" error={errors.business_address?.message}>
                   <input {...register("business_address")} placeholder="Dirección del negocio" />
-                  {errors.business_address && <span className="error">{errors.business_address.message}</span>}
                   <LocationInput onAddressFound={handleBusinessLocationFound} />
-                </div>
+                </FormField>
 
                 <div className="register-row">
-                  <div className="input-group" style={{ flex: 1, marginRight: "10px" }}>
+                  <FormField label="Teléfono del negocio" error={errors.business_phone?.message}>
                     <input {...register("business_phone")} placeholder="Teléfono del negocio" />
-                    {errors.business_phone && <span className="error">{errors.business_phone.message}</span>}
-                  </div>
-                  <div className="input-group" style={{ flex: 1 }}>
+                  </FormField>
+                  <FormField label="NIT">
                     <input {...register("nit")} placeholder="NIT (opcional)" />
-                  </div>
+                  </FormField>
                 </div>
 
-                <div className="input-group">
+                <FormField label="Descripción">
                   <textarea {...register("description")} placeholder="Descripción del negocio (opcional)" rows={3} />
-                </div>
+                </FormField>
 
-                <div className="input-group">
+                <FormField label="Documento legal">
                   <input {...register("document_url")} placeholder="URL documento RUT/Cámara de Comercio (opcional)" />
-                </div>
+                </FormField>
 
                 <button type="submit" disabled={isLoading} className="next-btn">
                   {isLoading ? "Registrando..." : "Completar Registro"}

@@ -15,8 +15,8 @@ function mapVendorToStore(v: any): Store {
     rating: v.rating,
     deliveryTime: v.delivery_time,
     image: v.logo_url ?? v.storefront_image_url ?? v.image_url ?? '',
-    lat: v.lat ?? 0,
-    lng: v.lng ?? 0,
+    lat: v.latitude ?? v.lat ?? 0,
+    lng: v.longitude ?? v.lng ?? 0,
     address: v.address ?? '',
     products: [],
     business_type: v.business_type ?? '',
@@ -151,7 +151,7 @@ const Stores = () => {
           }}
         >
           {filteredStores.map((store) => (
-            <StoreCard key={store.id} store={store} variant="recommended" />
+            <StoreCard key={store.id} store={store} variant="recommended" onClick={() => navigate(`/store/${store.id}`)} />
           ))}
         </div>
       )}

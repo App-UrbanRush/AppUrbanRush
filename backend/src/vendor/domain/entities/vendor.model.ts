@@ -6,10 +6,12 @@ export class Vendor {
     public readonly address: string,
     public readonly phone: string,
     public readonly description: string | null,
-    public readonly status: string, // PENDING, ACTIVE, INACTIVE, REJECTED, VERIFIED
+    public readonly status: string,
     public readonly user_id: number,
     public readonly logo_url: string | null = null,
     public readonly storefront_image_url: string | null = null,
     public readonly business_hours: string | null = null,
+    public readonly latitude: number | null = null,
+    public readonly longitude: number | null = null,
   ) {}
 }

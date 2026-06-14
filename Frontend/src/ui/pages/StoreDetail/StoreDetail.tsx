@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Phone, Clock, Star, Eye, Package, Store } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Clock, Star, Eye, Package, Store, Send, Loader2, Trash2 } from "lucide-react";
 import { vendorsApi, type VendorListItem, type VendorPhotoItem } from "../../../infrastructure/api/vendorsApi";
 import { productApi } from "../../../infrastructure/api/productApi";
+import { reviewApi } from "../../../infrastructure/api/reviewApi";
+import { ordersApi } from "../../../infrastructure/api/ordersApi";
+import { authLocalStorage } from "../../../infrastructure/persistence/authLocalStorage";
 import type { Product } from "../../../domain/types/product.types";
+import type { Review, ReviewStats } from "../../../domain/types/review.types";
+import type { OrderDetail } from "../../../infrastructure/api/ordersApi";
 import Loading from "../../components/Loading/Loading";
 import ProductDetailModal from "../../components/ui/ProductDetailModal/ProductDetailModal";
+import ReviewModal from "../../components/store/ReviewModal/ReviewModal";
 import ImageViewer from "../../components/ui/ImageViewer/ImageViewer";
+import toast from "react-hot-toast";
 import "./StoreDetail.css";
 
 const StoreDetail = () => {
@@ -20,6 +27,15 @@ const StoreDetail = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [previewImages, setPreviewImages] = useState<{ images: string[]; index: number } | null>(null);
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
+  const [deliveredOrders, setDeliveredOrders] = useState<OrderDetail[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const isAuthenticated = !!authLocalStorage.getToken();
+  const tokenPayload = isAuthenticated ? JSON.parse(atob(authLocalStorage.getToken()!.split('.')[1])) : null;
+  const myUserId = tokenPayload?.user_id;
+
   useEffect(() => {
     loadStoreDetail();
   }, [storeId]);
@@ -28,6 +44,7 @@ const StoreDetail = () => {
     if (vendor) {
       loadPhotos();
       loadProducts();
+      refreshReviewsAndOrders();
     }
   }, [vendor]);
 
@@ -68,6 +85,66 @@ const StoreDetail = () => {
       // silently fail
     } finally {
       setLoadingProducts(false);
+    }
+  };
+
+  const loadReviews = async (): Promise<Review[]> => {
+    if (!vendor) return [];
+    try {
+      const [reviewList, stats] = await Promise.all([
+        reviewApi.getByStore(vendor.vendor_id),
+        reviewApi.getStatsByStore(vendor.vendor_id),
+      ]);
+      setReviews(reviewList);
+      setReviewStats(stats);
+      return reviewList;
+    } catch {
+      return [];
+    }
+  };
+
+  const loadDeliveredOrders = async (currentReviews: Review[]) => {
+    if (!vendor) return;
+    setLoadingOrders(true);
+    try {
+      const token = authLocalStorage.getToken();
+      if (!token) return;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.user_id;
+      const allOrders = await ordersApi.getByUser(userId);
+      const filtered = allOrders.filter(
+        (o) => o.vendor_id === vendor.vendor_id && o.status === 'DELIVERED',
+      );
+      const reviewedOrderIds = new Set(
+        currentReviews.filter((r) => r.order_id).map((r) => r.order_id),
+      );
+      const unreviewed = filtered.filter((o) => !reviewedOrderIds.has(o.order_id));
+      setDeliveredOrders(unreviewed);
+    } catch {
+      // silently fail
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const refreshReviewsAndOrders = async () => {
+    const reviewList = await loadReviews();
+    if (isAuthenticated) {
+      await loadDeliveredOrders(reviewList);
+    }
+  };
+
+  const handleReviewSubmitted = async () => {
+    await refreshReviewsAndOrders();
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    try {
+      await reviewApi.remove(reviewId);
+      toast.success("Reseña eliminada");
+      await refreshReviewsAndOrders();
+    } catch {
+      toast.error("Error al eliminar la reseña");
     }
   };
 
@@ -241,7 +318,122 @@ const StoreDetail = () => {
             </div>
           )}
         </div>
+
+        {/* Reseñas */}
+        <div className="sd-section">
+          <div className="sd-section-head">
+            <h3 className="sd-section-title">
+              <Star size={18} />
+              Reseñas
+            </h3>
+            {reviewStats && (
+              <span className="sd-section-count">
+                {reviewStats.average_rating > 0 ? (
+                  <>
+                    <span style={{ color: '#f59e0b' }}>
+                      {"\u2605".repeat(Math.round(reviewStats.average_rating))}
+                      {"\u2606".repeat(5 - Math.round(reviewStats.average_rating))}
+                    </span>
+                    {" "}{reviewStats.average_rating.toFixed(1)} ({reviewStats.total_reviews})
+                  </>
+                ) : (
+                  "Sin reseñas"
+                )}
+              </span>
+            )}
+            {isAuthenticated && deliveredOrders.length > 0 && (
+              <button className="sd-add-review-btn" onClick={() => setShowReviewModal(true)}>
+                ✍️ Agregar reseña
+              </button>
+            )}
+          </div>
+
+          {reviews.length > 0 && (
+            <div className="sd-reviews-list">
+              {reviews.map((review) => (
+                <div key={review.review_id} className="sd-review-card">
+                  <div className="sd-review-header">
+                    <div className="sd-review-avatar">
+                      {review.user_avatar ? (
+                        <img src={review.user_avatar} alt="" className="sd-review-avatar-img" />
+                      ) : (
+                        <span className="sd-review-avatar-letter">
+                          {review.user_name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="sd-review-meta">
+                      <span className="sd-review-name">{review.user_name}</span>
+                      <span className="sd-review-stars" style={{ color: '#f59e0b', fontSize: '13px' }}>
+                        {"\u2605".repeat(review.rating)}
+                        {"\u2606".repeat(5 - review.rating)}
+                      </span>
+                    </div>
+                    <span className="sd-review-date">{review.time_ago}</span>
+                  </div>
+                  {review.items && review.items.length > 0 && (
+                    <div className="sd-review-items">
+                      {(typeof review.items[0] === 'string'
+                        ? (review.items as string[]).map((name) => ({ name, image_url: null }))
+                        : review.items as { name: string; image_url: string | null }[]
+                      ).map((item, i) => (
+                        <button
+                          key={i}
+                          className="sd-review-item"
+                          onClick={() => {
+                            const product = products.find((p) => p.name === item.name);
+                            if (product) setSelectedProduct(product);
+                          }}
+                        >
+                          {item.image_url && (
+                            <img src={item.image_url} alt="" className="sd-review-item-img" />
+                          )}
+                          {item.name}
+                        </button>
+                      ))}
+                      {review.total > 0 && (
+                        <span className="sd-review-total">${review.total.toLocaleString()}</span>
+                      )}
+                    </div>
+                  )}
+                  {review.comment && (
+                    <p className="sd-review-comment">{review.comment}</p>
+                  )}
+                  {myUserId === review.user_id && (
+                    <button
+                      className="sd-review-delete"
+                      onClick={() => handleDeleteReview(review.review_id)}
+                      title="Eliminar reseña"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {reviews.length === 0 && (
+            <p className="sd-empty">No hay reseñas aún. ¡Sé el primero en calificar!</p>
+          )}
+
+          {isAuthenticated && !loadingOrders && deliveredOrders.length === 0 && (
+            <p className="sd-empty" style={{ fontSize: '13px', marginTop: '8px' }}>
+              No tienes pedidos entregados pendientes por calificar.
+            </p>
+          )}
+        </div>
       </div>
+
+      {showReviewModal && vendor && (
+        <ReviewModal
+          open={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          onReviewSubmitted={handleReviewSubmitted}
+          deliveredOrders={deliveredOrders}
+          vendorId={vendor.vendor_id}
+        />
+      )}
 
       {selectedProduct && (
         <ProductDetailModal

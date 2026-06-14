@@ -24,10 +24,22 @@ const LocationInput = ({ onAddressFound, disabled = false }: LocationInputProps)
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        
-        // Poner solo las coordenadas en el campo de dirección
-        const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-        onAddressFound(coords, latitude, longitude);
+
+        let address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            { headers: { 'User-Agent': 'AppUrbanRush/1.0' } },
+          );
+          const data = await res.json();
+          if (data.display_name) {
+            address = data.display_name;
+          }
+        } catch {
+          // fallback: coordenadas como dirección
+        }
+
+        onAddressFound(address, latitude, longitude);
         setSuccess(true);
         setLoading(false);
 

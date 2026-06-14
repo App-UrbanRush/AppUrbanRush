@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdatePeopleDto {
@@ -30,4 +30,14 @@ export class UpdatePeopleDto {
   @ApiPropertyOptional({ description: 'URL del avatar (enviar null para eliminar)' })
   @IsOptional()
   avatarUrl?: string | null;
+
+  @ApiPropertyOptional({ description: 'Latitud de la ubicación' })
+  @IsOptional()
+  @IsNumber({}, { message: 'La latitud debe ser un número' })
+  latitude?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud de la ubicación' })
+  @IsOptional()
+  @IsNumber({}, { message: 'La longitud debe ser un número' })
+  longitude?: number;
 }

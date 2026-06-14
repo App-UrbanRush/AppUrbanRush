@@ -5,6 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SERVER_PORT } from './config/constants';
+import { all } from 'node_modules/axios/index.cjs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

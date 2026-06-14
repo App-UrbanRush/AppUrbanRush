@@ -45,6 +45,8 @@ export class PeopleService {
     if (dto.address) persona.address = dto.address;
     if (dto.gender) persona.gender = dto.gender;
     if (dto.avatarUrl !== undefined) persona.avatarUrl = dto.avatarUrl;
+    if (dto.latitude !== undefined) persona.latitude = dto.latitude;
+    if (dto.longitude !== undefined) persona.longitude = dto.longitude;
 
     await this._peopleRepository.save(persona);
     return 'Información de la persona actualizada correctamente';

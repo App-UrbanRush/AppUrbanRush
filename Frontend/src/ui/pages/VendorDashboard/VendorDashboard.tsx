@@ -8,7 +8,7 @@ import DashboardStats from "../../components/vendor/DashboardStats";
 import "./VendorDashboard.css";
 
 const VendorDashboard = () => {
-  const { fetchMyProfile } = useAuth();
+  const { fetchMyProfile, vendorProfile } = useAuth();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -25,7 +25,13 @@ const VendorDashboard = () => {
         <RecentOrders />
         <div className="vendor-dashboard-row">
           <MenuPerformance />
-          <VendorCourierMap />
+          <VendorCourierMap
+            vendorLat={vendorProfile?.latitude}
+            vendorLng={vendorProfile?.longitude}
+            vendorName={vendorProfile?.business_name}
+            vendorAddress={vendorProfile?.address}
+            vendorLogo={vendorProfile?.logo_url}
+          />
         </div>
       </div>
     </VendorLayout>
