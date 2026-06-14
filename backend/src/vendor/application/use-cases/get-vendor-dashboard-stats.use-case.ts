@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { Repository, In } from 'typeorm';
 import { Order, OrderDocument } from '../../../order/infrastructure/schemas/order.schema';
 import { CourierEntity } from '../../../courier/infrastructure/persistence/entities/courier.entity';
 import { CourierVendorRequestEntity } from '../../../courier-vendor-request/infrastructure/persistence/entities/courier-vendor-request.entity';
+import { IReviewRepository } from '../../../review/domain/repositories/review.repository.interface';
 
 @Injectable()
 export class GetVendorDashboardStatsUseCase {
@@ -16,6 +17,8 @@ export class GetVendorDashboardStatsUseCase {
     private readonly courierRepo: Repository<CourierEntity>,
     @InjectRepository(CourierVendorRequestEntity)
     private readonly requestRepo: Repository<CourierVendorRequestEntity>,
+    @Inject('IReviewRepository')
+    private readonly reviewRepository: IReviewRepository,
   ) {}
 
   async execute(vendorId: number) {
@@ -33,8 +36,9 @@ export class GetVendorDashboardStatsUseCase {
     // 2. Pedidos totales
     const pedidosTotales = await this.orderModel.countDocuments({ vendor_id: vendorId });
 
-    // 3. Calificación promedio (no implementado yet)
-    const calificacionPromedio = 0;
+    // 3. Calificación promedio
+    const reviewStats = await this.reviewRepository.findStatsByVendorId(vendorId);
+    const calificacionPromedio = reviewStats.average_rating;
 
     // 4. Domiciliarios activos
     const inDeliveryCourierIds = await this.orderModel.distinct('courier_id', {

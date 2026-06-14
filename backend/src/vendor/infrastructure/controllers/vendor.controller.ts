@@ -86,42 +86,54 @@ export class VendorController {
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Reporte de pedidos en PDF' })
   async ordersPdf(@Request() req, @Query('from') from?: string, @Query('to') to?: string, @Res() res?: Response) {
-    const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
-    const buffer = await this.generateVendorOrdersPdfUseCase.execute(vendor.vendor_id!, from, to);
-    res?.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="reporte-pedidos-${vendor.vendor_id}.pdf"`,
-      'Content-Length': buffer.length,
-    });
-    res?.end(buffer);
+    try {
+      const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
+      const buffer = await this.generateVendorOrdersPdfUseCase.execute(vendor.vendor_id!, from, to);
+      res?.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="reporte-pedidos-${vendor.vendor_id}.pdf"`,
+        'Content-Length': buffer.length,
+      });
+      res?.end(buffer);
+    } catch (error) {
+      res?.status(500).json({ error: 'Error al generar el PDF de pedidos' });
+    }
   }
 
   @Get('reports/orders/excel')
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Reporte de pedidos en Excel' })
   async ordersExcel(@Request() req, @Query('from') from?: string, @Query('to') to?: string, @Res() res?: Response) {
-    const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
-    const buffer = await this.generateVendorOrdersExcelUseCase.execute(vendor.vendor_id!, from, to);
-    res?.set({
-      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="reporte-pedidos-${vendor.vendor_id}.xlsx"`,
-      'Content-Length': buffer.length,
-    });
-    res?.end(buffer);
+    try {
+      const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
+      const buffer = await this.generateVendorOrdersExcelUseCase.execute(vendor.vendor_id!, from, to);
+      res?.set({
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="reporte-pedidos-${vendor.vendor_id}.xlsx"`,
+        'Content-Length': buffer.length,
+      });
+      res?.end(buffer);
+    } catch (error) {
+      res?.status(500).json({ error: 'Error al generar el Excel de pedidos' });
+    }
   }
 
   @Get('reports/summary/pdf')
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Reporte resumen del negocio en PDF (datos + totales)' })
   async summaryPdf(@Request() req, @Res() res?: Response) {
-    const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
-    const buffer = await this.generateVendorReportUseCase.pdf(vendor.vendor_id!);
-    res?.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="resumen-negocio-${vendor.vendor_id}.pdf"`,
-      'Content-Length': buffer.length,
-    });
-    res?.end(buffer);
+    try {
+      const vendor = await this.getVendorProfileUseCase.execute(req.user.user_id);
+      const buffer = await this.generateVendorReportUseCase.pdf(vendor.vendor_id!);
+      res?.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="resumen-negocio-${vendor.vendor_id}.pdf"`,
+        'Content-Length': buffer.length,
+      });
+      res?.end(buffer);
+    } catch (error) {
+      res?.status(500).json({ error: 'Error al generar el PDF resumen' });
+    }
   }
 
   @Get('orders/pending')

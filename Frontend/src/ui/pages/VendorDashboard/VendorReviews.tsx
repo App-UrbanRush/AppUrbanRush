@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import VendorLayout from "../../components/layout/VendorLayout/VendorLayout";
-import ReviewSummary from "../../components/vendor/ReviewSummary";
+
 import ReviewCard from "../../components/vendor/ReviewCard";
 import type { Review, ReviewStats } from "../../../domain/types/review.types";
 import { GetVendorReviewsUseCase } from "../../../application/use-cases/GetVendorReviewsUseCase";
@@ -64,7 +64,7 @@ const VendorReviews = () => {
     <VendorLayout>
       <div className="vendor-reviews">
         <h1>Reseñas</h1>
-        <ReviewSummary stats={stats} />
+
         <div className="vendor-reviews-list">
           {reviews.map((review) => (
             <ReviewCard key={review.review_id} review={review} />

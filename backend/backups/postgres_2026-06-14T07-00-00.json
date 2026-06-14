@@ -1,0 +1,160 @@
+{
+  "courier_vendor_requests": [
+    {
+      "id": 1,
+      "courier_user_id": 2,
+      "vendor_id": 2,
+      "status": "accepted",
+      "created_at": "2026-06-12T21:47:16.558Z",
+      "updated_at": "2026-06-12T21:47:55.582Z"
+    }
+  ],
+  "people": [
+    {
+      "people_id": 1,
+      "firstName": "Steven",
+      "firstLastName": "Moreno",
+      "cellphone": "3144785881",
+      "address": "1.155072, -76.654041",
+      "gender": "M",
+      "document_number": null,
+      "expedition_date": null,
+      "expedition_place": null,
+      "latitude": "1.1550715",
+      "longitude": "-76.6540413",
+      "user_id": 1,
+      "avatar_url": null
+    },
+    {
+      "people_id": 2,
+      "firstName": "Alexander",
+      "firstLastName": "Moreno",
+      "cellphone": "3144785881",
+      "address": "Calle 34",
+      "gender": "M",
+      "document_number": "16927593",
+      "expedition_date": "1999-05-11T05:00:00.000Z",
+      "expedition_place": "cali",
+      "latitude": null,
+      "longitude": null,
+      "user_id": 2,
+      "avatar_url": null
+    },
+    {
+      "people_id": 4,
+      "firstName": "Graciela",
+      "firstLastName": "Estrada",
+      "cellphone": "12345678900",
+      "address": "1.155155, -76.654004",
+      "gender": "F",
+      "document_number": "41105927",
+      "expedition_date": "1981-12-14T06:00:00.000Z",
+      "expedition_place": "Orito",
+      "latitude": null,
+      "longitude": null,
+      "user_id": 4,
+      "avatar_url": null
+    }
+  ],
+  "users": [
+    {
+      "user_id": 1,
+      "user_email": "usuario@gmail.com",
+      "user_password": "$2b$10$13BiQzXRnGG0zUBdL15ZoeDJeuP6ME4CEjiTMdSlcQU/dCD09Ed0a",
+      "status": true,
+      "reset_password_code": null,
+      "reset_password_expires_at": null,
+      "google_id": null,
+      "verification_status": "verified"
+    },
+    {
+      "user_id": 2,
+      "user_email": "domicilio@gmail.com",
+      "user_password": "$2b$10$vT4XecAwcbM2jPqboINwYu.HojtC/i7Py9dqCJS/3/3NtlSnidH/e",
+      "status": true,
+      "reset_password_code": null,
+      "reset_password_expires_at": null,
+      "google_id": null,
+      "verification_status": "verified"
+    },
+    {
+      "user_id": 4,
+      "user_email": "negocio@gmail.com",
+      "user_password": "$2b$10$FxQ1JUz3y7vwauS0MLrV8eN5jdnoqZFRNzTRY95CVG0qq6HSK/KMi",
+      "status": true,
+      "reset_password_code": null,
+      "reset_password_expires_at": null,
+      "google_id": null,
+      "verification_status": "verified"
+    }
+  ],
+  "userroles": [
+    {
+      "userroles_id": 1,
+      "user_id": 1,
+      "rol_id": 2
+    },
+    {
+      "userroles_id": 2,
+      "user_id": 2,
+      "rol_id": 3
+    },
+    {
+      "userroles_id": 4,
+      "user_id": 4,
+      "rol_id": 4
+    }
+  ],
+  "rol": [
+    {
+      "rol_id": 1,
+      "rol_name": "Admin"
+    },
+    {
+      "rol_id": 2,
+      "rol_name": "User"
+    },
+    {
+      "rol_id": 3,
+      "rol_name": "Domiciliario"
+    },
+    {
+      "rol_id": 4,
+      "rol_name": "Empresa"
+    },
+    {
+      "rol_id": 5,
+      "rol_name": "SuperAdmin"
+    }
+  ],
+  "couriers": [
+    {
+      "couriers_id": 1,
+      "vehicle_type": "motorcycle",
+      "vehicle_plate": "FR6-H7J",
+      "soat_number": "1234",
+      "photo_url": null,
+      "status": "ACTIVE",
+      "user_id": 2
+    }
+  ],
+  "vendors": [
+    {
+      "vendor_id": 2,
+      "business_name": "Humo",
+      "business_type": "Restaurante",
+      "address": "1.155155, -76.654004",
+      "phone": "2424435324",
+      "description": "El Mejor Restaurante de Comidas Rapidas",
+      "status": "PENDING",
+      "logo_url": "https://res.cloudinary.com/dq7wbffah/image/upload/v1781301956/urbanrush/vendors/logos/vendor-logo-2-db1b40c1-a28a-4038-ad16-2628e3db3256.webp",
+      "storefront_image_url": null,
+      "business_hours": "",
+      "latitude": null,
+      "longitude": null,
+      "user_id": 4
+    }
+  ],
+  "bank_accounts": [],
+  "encrypted_files": []
+}

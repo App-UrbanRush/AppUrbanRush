@@ -23,6 +23,7 @@ import { PeopleEntity } from '../people/infrastructure/persistence/entities/peop
 import { CourierVendorRequestEntity } from '../courier-vendor-request/infrastructure/persistence/entities/courier-vendor-request.entity';
 import { ReportsModule } from '../reports/reports.module';
 import { TrackingModule } from '../tracking/tracking.module';
+import { ReviewModule } from '../review/review.module';
 import { VendorStatsListener } from './infrastructure/listeners/vendor-stats.listener';
 
 @Module({
@@ -34,6 +35,7 @@ import { VendorStatsListener } from './infrastructure/listeners/vendor-stats.lis
     ]),
     ReportsModule,
     forwardRef(() => TrackingModule),
+    ReviewModule,
   ],
   controllers: [VendorController],
   providers: [

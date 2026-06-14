@@ -9,18 +9,22 @@ import { CreateReviewUseCase } from './application/use-cases/create-review.use-c
 import { DeleteReviewUseCase } from './application/use-cases/delete-review.use-case';
 import { ReviewController } from './infrastructure/controllers/review.controller';
 import { PeopleEntity } from 'src/people/infrastructure/persistence/entities/people.entity';
+import { VendorEntity } from 'src/vendor/infrastructure/persistence/entities/vendor.entity';
+import { TypeOrmVendorRepository } from 'src/vendor/infrastructure/persistence/repositories/typeorm-vendor.repository';
 import { OrderModule } from 'src/order/order.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Review.name, schema: ReviewSchema }]),
-    TypeOrmModule.forFeature([PeopleEntity]),
+    TypeOrmModule.forFeature([PeopleEntity, VendorEntity]),
     forwardRef(() => OrderModule),
   ],
   controllers: [ReviewController],
   providers: [
     MongoReviewRepository,
     { provide: 'IReviewRepository', useClass: MongoReviewRepository },
+    TypeOrmVendorRepository,
+    { provide: 'IVendorRepository', useClass: TypeOrmVendorRepository },
     GetVendorReviewsUseCase,
     GetVendorReviewStatsUseCase,
     CreateReviewUseCase,

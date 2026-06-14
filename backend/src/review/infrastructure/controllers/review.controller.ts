@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request, Inject, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { GetVendorReviewsUseCase } from '../../application/use-cases/get-vendor-reviews.use-case';
@@ -7,6 +7,7 @@ import { CreateReviewUseCase } from '../../application/use-cases/create-review.u
 import { DeleteReviewUseCase } from '../../application/use-cases/delete-review.use-case';
 import { ReviewMapper } from '../mappers/review.mapper';
 import { IReviewRepository } from '../../domain/repositories/review.repository.interface';
+import { IVendorRepository } from 'src/vendor/domain/repositories/vendor.repository';
 import { CreateReviewDto } from '../../application/dtos/create-review.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,6 +23,8 @@ export class ReviewController {
     private readonly deleteReviewUseCase: DeleteReviewUseCase,
     @Inject('IReviewRepository')
     private readonly reviewRepository: IReviewRepository,
+    @Inject('IVendorRepository')
+    private readonly vendorRepository: IVendorRepository,
     @InjectRepository(PeopleEntity)
     private readonly peopleRepository: Repository<PeopleEntity>,
   ) {}
@@ -76,10 +79,11 @@ export class ReviewController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener todas las reseñas del vendor' })
   async getReviews(@Request() req) {
-    const vendorId = req.user.user_id;
-    const reviews = await this.getVendorReviewsUseCase.execute(vendorId);
+    const vendor = await this.vendorRepository.findByUserId(req.user.user_id);
+    if (!vendor) throw new NotFoundException('Vendedor no encontrado');
 
-    // Obtener información de los usuarios (people) para cada review
+    const reviews = await this.getVendorReviewsUseCase.execute(vendor.vendor_id!);
+
     const reviewsWithUser = await Promise.all(
       reviews.map(async (review) => {
         const people = await this.peopleRepository.findOne({
@@ -88,8 +92,7 @@ export class ReviewController {
         const user_name = people
           ? `${people.firstName} ${people.firstLastName}`
           : 'Usuario';
-        // Por ahora no hay avatar_url en PeopleEntity, usamos null
-        const user_avatar = null;
+        const user_avatar = people?.avatar_url ?? null;
 
         return ReviewMapper.toResponse(review, user_name, user_avatar);
       }),
@@ -103,12 +106,13 @@ export class ReviewController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener estadísticas de reseñas del vendor' })
   async getStats(@Request() req) {
-    const vendorId = req.user.user_id;
-    const stats = await this.getVendorReviewStatsUseCase.execute(vendorId);
+    const vendor = await this.vendorRepository.findByUserId(req.user.user_id);
+    if (!vendor) throw new NotFoundException('Vendedor no encontrado');
 
-    // Calcular porcentaje de recomendadas (rating >= 4)
+    const stats = await this.getVendorReviewStatsUseCase.execute(vendor.vendor_id!);
+
     const total = stats.total_reviews;
-    const recommended = stats.rating_distribution[4] + stats.rating_distribution[5];
+    const recommended = (stats.rating_distribution[4] || 0) + (stats.rating_distribution[5] || 0);
     const recommended_percentage = total > 0 ? Math.round((recommended / total) * 100) : 0;
 
     return {
