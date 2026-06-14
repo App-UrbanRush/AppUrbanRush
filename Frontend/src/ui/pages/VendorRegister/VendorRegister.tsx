@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useAuth } from "../../context/useAuth";
 import type { RegisterVendorRequest } from "../../../domain/types/vendor.types";
 import LocationInput from "../../components/ui/LocationInput";
+import CedulaUploader from "../../components/verification/CedulaUploader";
 
 const schema = z.object({
   user_email: z.string().email("Email inválido"),
@@ -15,7 +16,15 @@ const schema = z.object({
   confirm_password: z.string().min(6, "Confirma tu contraseña"),
   firstName: z.string().min(2, "Nombre requerido"),
   firstLastName: z.string().min(2, "Apellido requerido"),
-  document_number: z.string().min(5, "Documento requerido"),
+  document_number: z
+    .string()
+    .refine(
+      (v) => {
+        const n = (v ?? "").replace(/[.\s\-_]/g, "");
+        return /^\d{6,10}$/.test(n) && !n.startsWith("0") && !/^(\d)\1+$/.test(n);
+      },
+      { message: "Cédula inválida: 6 a 10 dígitos sin letras" },
+    ),
   expedition_date: z.string().min(1, "Fecha de expedición requerida"),
   city: z.string().min(1, "Ciudad de expedición requerida"),
   cellphone: z.string().min(7, "Celular requerido"),
@@ -43,12 +52,13 @@ const stepTitles: Record<number, string> = {
 
 const VendorRegister = () => {
   const navigate = useNavigate();
-  const { verifyDocument: verifyDocumentApi, registerVendor, error: contextError } = useAuth();
+  const { verifyDocument: verifyDocumentApi, registerVendor, login, error: contextError } = useAuth();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-  const [docImages, setDocImages] = useState<File[]>([]);
+  const [docFront, setDocFront] = useState<File | null>(null);
+  const [docBack, setDocBack] = useState<File | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [docVerified, setDocVerified] = useState(false);
   const [docMessage, setDocMessage] = useState("");
@@ -78,28 +88,28 @@ const VendorRegister = () => {
     if (ok) setStep(2);
   };
 
-  const handleDocImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newImages: File[] = [];
-      
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
-          setApiError("Solo se permiten imágenes JPG, PNG o WEBP");
-          return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          setApiError("La imagen no debe superar los 5MB");
-          return;
-        }
-        newImages.push(file);
-      }
-      setDocImages(newImages);
-      setApiError("");
-      setDocVerified(false);
-      setDocMessage("");
-    }
+  const validateDocFile = (file: File | null): string | null => {
+    if (!file) return null;
+    if (!file.type.match(/^image\/(jpeg|png|webp)$/)) return "Solo se permiten imágenes JPG, PNG o WEBP";
+    if (file.size > 5 * 1024 * 1024) return "La imagen no debe superar los 5MB";
+    return null;
+  };
+
+  const handleFrontChange = (file: File | null) => {
+    const err = validateDocFile(file);
+    if (err) { setApiError(err); return; }
+    setDocFront(file);
+    setApiError("");
+    setDocVerified(false);
+    setDocMessage("");
+  };
+  const handleBackChange = (file: File | null) => {
+    const err = validateDocFile(file);
+    if (err) { setApiError(err); return; }
+    setDocBack(file);
+    setApiError("");
+    setDocVerified(false);
+    setDocMessage("");
   };
 
   const verifyDocument = async () => {
@@ -107,13 +117,12 @@ const VendorRegister = () => {
     const ok = await trigger(["firstName", "firstLastName", "document_number", "expedition_date", "city"]);
     if (!ok) return;
 
-    if (docImages.length === 0) {
-      setApiError("Debes subir las dos caras de tu cédula");
+    if (!docFront) {
+      setApiError("Subí la cara frontal de tu cédula");
       return;
     }
-
-    if (docImages.length < 2) {
-      setApiError("Debes subir las dos caras del documento");
+    if (!docBack) {
+      setApiError("Ahora subí la cara trasera de tu cédula");
       return;
     }
 
@@ -122,7 +131,7 @@ const VendorRegister = () => {
     setDocMessage("");
     try {
       const expeditionPlace = values.city || "";
-      const result = await verifyDocumentApi(docImages, {
+      const result = await verifyDocumentApi([docFront, docBack], {
         cedula: values.document_number,
         firstName: values.firstName,
         firstLastName: values.firstLastName,
@@ -192,9 +201,16 @@ const VendorRegister = () => {
     }
   };
 
-  const handleSuccessConfirm = () => {
+  const handleSuccessConfirm = async () => {
     setShowSuccess(false);
-    navigate("/vendor/dashboard");
+    // Auto-login con las credenciales recién registradas para entrar al panel del negocio.
+    try {
+      const values = getValues();
+      await login(values.user_email, values.user_password);
+      navigate("/vendor/dashboard");
+    } catch {
+      navigate("/login");
+    }
   };
 
   const stepTitle = stepTitles[step] || "";
@@ -215,7 +231,7 @@ const VendorRegister = () => {
             <h3>¡Registro exitoso!</h3>
             <p>Tu negocio ha sido registrado correctamente.</p>
             <button className="success-btn" onClick={handleSuccessConfirm}>
-              Ir al panel
+              Ir a mi Panel de Negocio
             </button>
           </div>
         </div>
@@ -324,34 +340,35 @@ const VendorRegister = () => {
             {step === 3 && (
               <div key="step3">
                 <div className="doc-upload-section">
-                  <label className="doc-label">📷 Foto de tu cédula (ambas caras)</label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    multiple
-                    onChange={handleDocImageChange}
-                    className="doc-input"
+                  <label className="doc-label">📷 Foto de tu cédula</label>
+                  <p className="doc-hint" style={{ marginBottom: 10 }}>
+                    Subí <strong>primero la cara frontal</strong> y después la <strong>cara trasera</strong>. JPG, PNG o WEBP, máx 5 MB cada una.
+                  </p>
+
+                  <CedulaUploader
+                    frontImage={docFront}
+                    backImage={docBack}
+                    onFrontChange={handleFrontChange}
+                    onBackChange={handleBackChange}
+                    disabled={verifying}
                   />
-                  {docImages.length > 0 && docImages.length < 2 && (
-                    <span className="error">Debes subir las dos caras del documento</span>
-                  )}
-                  {docImages.length >= 2 && !docVerified && (
+
+                  {docFront && docBack && !docVerified && (
                     <button
                       type="button"
                       className="verify-doc-btn"
                       onClick={verifyDocument}
                       disabled={verifying}
+                      style={{ marginTop: 12 }}
                     >
                       {verifying ? "⏳ Verificando..." : "🔍 Verificar documento"}
                     </button>
                   )}
                   {docMessage && (
-                    <div className={`doc-result ${docVerified ? "verified" : "rejected"}`}>
+                    <div className={`doc-result ${docVerified ? "verified" : "rejected"}`} style={{ marginTop: 10 }}>
                       {docMessage}
                     </div>
                   )}
-                  <span className="doc-hint">Sube una foto clara de tu cédula (JPG, PNG o WEBP, máx. 5MB)</span>
                 </div>
 
                 <button type="button" className="next-btn" onClick={() => docVerified && setStep(4)} disabled={!docVerified}>

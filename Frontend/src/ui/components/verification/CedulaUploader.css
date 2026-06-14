@@ -1,0 +1,145 @@
+.cedula-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.cedula-slot {
+  border: 1.5px dashed #ddd;
+  border-radius: 14px;
+  padding: 14px;
+  background: #fafafa;
+  transition: background 0.18s, border-color 0.18s;
+}
+.cedula-slot.complete {
+  border-color: #22c55e;
+  background: #f1fdf5;
+  border-style: solid;
+}
+.cedula-slot.locked {
+  opacity: 0.55;
+  background: #f3f3f3;
+  border-color: #e0e0e0;
+}
+
+.cedula-slot-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.cedula-slot-step {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ff6a00;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cedula-slot.complete .cedula-slot-step { background: #22c55e; }
+.cedula-slot.locked .cedula-slot-step  { background: #aaa; }
+
+.cedula-slot-head strong {
+  display: block;
+  font-size: 14.5px;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+}
+.cedula-slot-head p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #777;
+}
+
+.cedula-slot-check {
+  margin-left: auto;
+  color: #22c55e;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.cedula-slot-upload {
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid #ffd2b3;
+  color: #ff6a00;
+  padding: 18px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.cedula-slot-upload:hover:not(:disabled) {
+  background: #fff1e6;
+  border-color: #ff6a00;
+}
+.cedula-slot-upload:disabled { cursor: not-allowed; }
+.cedula-slot-upload-icon { font-size: 18px; }
+
+.cedula-slot-preview {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+.cedula-slot-preview img {
+  width: 80px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  flex-shrink: 0;
+}
+.cedula-slot-preview-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+.cedula-slot-filename {
+  font-size: 12.5px;
+  color: #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cedula-slot-actions {
+  display: flex;
+  gap: 6px;
+}
+.cedula-slot-btn {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+}
+.cedula-slot-btn:hover:not(:disabled) {
+  background: #f3f3f3;
+  color: #222;
+}
+.cedula-slot-btn-danger {
+  border-color: #ffd6d6;
+  color: #c0392b;
+}
+.cedula-slot-btn-danger:hover:not(:disabled) {
+  background: #ffeaea;
+  color: #a02519;
+}
+.cedula-slot-btn:disabled { opacity: 0.5; cursor: not-allowed; }
