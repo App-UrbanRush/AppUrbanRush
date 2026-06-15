@@ -16,14 +16,21 @@ export class LocalBackupRepository implements IBackupRepository {
 
   constructor(private readonly configService: ConfigService) {}
 
-  async backupPostgres(backupPath: string, timestamp: string): Promise<string> {
-    const pool = new Pool({
+  /** Config del Pool de Postgres con SSL para Neon en producción. */
+  private buildPgPool(): Pool {
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+    return new Pool({
       host:     this.configService.get<string>(DB_HOST),
       port:     Number(this.configService.get<string>(DB_PORT) ?? 5432),
       user:     this.configService.get<string>(DB_USER),
       password: this.configService.get<string>(DB_PASSWORD),
       database: this.configService.get<string>(DB_DATABASE),
+      ssl:      isProd ? { rejectUnauthorized: false } : undefined,
     });
+  }
+
+  async backupPostgres(backupPath: string, timestamp: string): Promise<string> {
+    const pool = this.buildPgPool();
 
     const fileName = `postgres_${timestamp}.json`;
     const filePath = path.join(backupPath, fileName);
@@ -104,13 +111,7 @@ export class LocalBackupRepository implements IBackupRepository {
 
   // Vuelca ambas bases en memoria (sin depender de archivos) para descarga directa
   async dumpDatabases(): Promise<{ generated_at: string; postgres: Record<string, any[]>; mongo: Record<string, any[]> }> {
-    const pool = new Pool({
-      host:     this.configService.get<string>(DB_HOST),
-      port:     Number(this.configService.get<string>(DB_PORT) ?? 5432),
-      user:     this.configService.get<string>(DB_USER),
-      password: this.configService.get<string>(DB_PASSWORD),
-      database: this.configService.get<string>(DB_DATABASE),
-    });
+    const pool = this.buildPgPool();
     const postgres: Record<string, any[]> = {};
     try {
       const tables = await pool.query(

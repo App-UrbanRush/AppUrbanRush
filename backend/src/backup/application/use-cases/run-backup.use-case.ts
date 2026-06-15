@@ -15,15 +15,19 @@ export class RunBackupUseCase {
   ) {}
 
   async execute(): Promise<{ success: boolean; files: string[] }> {
-    const backupPath = this.configService.get<string>(BACKUP_PATH) ?? './backups';
+    const backupPath = this.configService.get<string>(BACKUP_PATH) ?? '/tmp/backups';
     const retentionDays = Number(
       this.configService.get<string>(BACKUP_RETENTION_DAYS) ?? '7'
     );
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const files: string[] = [];
 
-    if (!fs.existsSync(backupPath)) {
-      fs.mkdirSync(backupPath, { recursive: true });
+    try {
+      if (!fs.existsSync(backupPath)) {
+        fs.mkdirSync(backupPath, { recursive: true });
+      }
+    } catch (err) {
+      this.logger.warn(`No se pudo crear backup dir (${(err as Error).message}). Continúo sin escritura a disco.`);
     }
 
     try {
