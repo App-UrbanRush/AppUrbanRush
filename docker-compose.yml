@@ -1,0 +1,79 @@
+services:
+  # --- BASES DE DATOS ---
+  postgres:
+    image: postgres:15
+    container_name: db_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: urbanrush
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - urban_network
+
+  mongo:
+    image: mongo:6
+    container_name: db_mongo
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - urban_network
+
+  redis:
+    image: redis:7
+    container_name: cache_redis
+    networks:
+      - urban_network
+
+  # --- BACKEND (NestJS) ---
+  backend:
+    build: ./backend
+    container_name: app_backend
+    env_file: 
+      - ./backend/.env
+    environment:
+      # Sobrescribimos los valores locales para que apunten a los servicios de Docker
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - MONGO_URI=mongodb://mongo:27017/urbanrush
+    ports:
+      - "3000:3000"
+    networks:
+      - urban_network
+    depends_on:
+      - postgres
+      - mongo
+      - redis
+
+  # --- FASTAPI ---
+  fastapi_service:
+    build: ./urbanrush-fastapi
+    container_name: app_fastapi
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/urbanrush
+      - NESTJS_BASE_URL=http://backend:3000
+    ports:
+      - "8000:8000"
+    networks:
+      - urban_network
+    depends_on:
+      - mongo
+      - backend
+
+  # --- FRONTEND (Vite/React) ---
+  frontend-web:
+    build: ./Frontend
+    container_name: app_frontend_web
+    ports:
+      - "80:80"
+    networks:
+      - urban_network
+
+networks:
+  urban_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:

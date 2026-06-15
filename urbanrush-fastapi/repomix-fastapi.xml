@@ -1,0 +1,1009 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+app/__init__.py
+app/analytics/__init__.py
+app/analytics/application/__init__.py
+app/analytics/application/use_cases/__init__.py
+app/analytics/application/use_cases/get_vendor_daily.py
+app/analytics/application/use_cases/get_vendor_summary.py
+app/analytics/domain/__init__.py
+app/analytics/domain/entities/__init__.py
+app/analytics/domain/entities/vendor_analytics.py
+app/analytics/domain/repositories/__init__.py
+app/analytics/domain/repositories/analytics_repository.py
+app/analytics/infrastructure/__init__.py
+app/analytics/infrastructure/repositories/__init__.py
+app/analytics/infrastructure/repositories/mongo_analytics_repository.py
+app/analytics/infrastructure/router.py
+app/analytics/infrastructure/schemas.py
+app/config.py
+app/database.py
+app/delivery_time/__init__.py
+app/delivery_time/application/__init__.py
+app/delivery_time/application/use_cases/__init__.py
+app/delivery_time/application/use_cases/estimate_delivery.py
+app/delivery_time/domain/__init__.py
+app/delivery_time/domain/entities/__init__.py
+app/delivery_time/domain/entities/delivery_estimate.py
+app/delivery_time/domain/repositories/__init__.py
+app/delivery_time/domain/repositories/delivery_repository.py
+app/delivery_time/infrastructure/__init__.py
+app/delivery_time/infrastructure/repositories/__init__.py
+app/delivery_time/infrastructure/repositories/mongo_delivery_repository.py
+app/delivery_time/infrastructure/router.py
+app/delivery_time/infrastructure/schemas.py
+app/fraud/__init__.py
+app/fraud/application/__init__.py
+app/fraud/application/use_cases/__init__.py
+app/fraud/application/use_cases/analyze_fraud.py
+app/fraud/domain/__init__.py
+app/fraud/domain/entities/__init__.py
+app/fraud/domain/entities/fraud_result.py
+app/fraud/domain/repositories/__init__.py
+app/fraud/domain/repositories/fraud_repository.py
+app/fraud/infrastructure/__init__.py
+app/fraud/infrastructure/repositories/__init__.py
+app/fraud/infrastructure/repositories/mongo_fraud_repository.py
+app/fraud/infrastructure/router.py
+app/fraud/infrastructure/schemas.py
+app/main.py
+app/requirements.txt
+app/sentiment/__init__.py
+app/sentiment/application/__init__.py
+app/sentiment/application/use_cases/__init__.py
+app/sentiment/application/use_cases/analyze_sentiment.py
+app/sentiment/application/use_cases/get_vendor_report.py
+app/sentiment/domain/__init__.py
+app/sentiment/domain/entities/__init__.py
+app/sentiment/domain/entities/sentiment_result.py
+app/sentiment/domain/repositories/__init__.py
+app/sentiment/domain/repositories/sentiment_repository.py
+app/sentiment/infrastructure/__init__.py
+app/sentiment/infrastructure/repositories/__init__.py
+app/sentiment/infrastructure/repositories/mongo_sentiment_repository.py
+app/sentiment/infrastructure/router.py
+app/sentiment/infrastructure/schemas.py
+render.yaml
+requirements.txt
+runtime.txt
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+# Entorno virtual
+venv/
+env/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+</file>
+
+<file path="app/__init__.py">
+
+</file>
+
+<file path="app/analytics/__init__.py">
+
+</file>
+
+<file path="app/analytics/application/__init__.py">
+
+</file>
+
+<file path="app/analytics/application/use_cases/__init__.py">
+
+</file>
+
+<file path="app/analytics/application/use_cases/get_vendor_daily.py">
+from app.analytics.domain.entities.vendor_analytics import DailyStats
+from app.analytics.domain.repositories.analytics_repository import IAnalyticsRepository
+from typing import List
+
+class GetVendorDailyUseCase:
+    def __init__(self, repository: IAnalyticsRepository):
+        self.repository = repository
+
+    async def execute(self, vendor_id: int, days: int) -> List[DailyStats]:
+        orders = await self.repository.get_orders_by_vendor_since(vendor_id, days)
+
+        daily: dict = {}
+        for o in orders:
+            created = o.get("createdAt") or o.get("created_at")
+            if not created:
+                continue
+            date_str = created.strftime("%Y-%m-%d")
+            if date_str not in daily:
+                daily[date_str] = {"orders": 0, "revenue": 0.0}
+            daily[date_str]["orders"] += 1
+            daily[date_str]["revenue"] += o.get("total", 0)
+
+        return [
+            DailyStats(date=date, orders=v["orders"], revenue=round(v["revenue"], 2))
+            for date, v in sorted(daily.items())
+        ]
+</file>
+
+<file path="app/analytics/application/use_cases/get_vendor_summary.py">
+from collections import Counter
+from app.analytics.domain.entities.vendor_analytics import VendorSummary, TopProduct
+from app.analytics.domain.repositories.analytics_repository import IAnalyticsRepository
+
+class GetVendorSummaryUseCase:
+    def __init__(self, repository: IAnalyticsRepository):
+        self.repository = repository
+
+    async def execute(self, vendor_id: int) -> VendorSummary:
+        orders = await self.repository.get_orders_by_vendor(vendor_id)
+
+        if not orders:
+            return VendorSummary(0, 0, 0, [], [], {})
+
+        total_orders = len(orders)
+        total_revenue = sum(o.get("total", 0) for o in orders)
+        avg_order_value = round(total_revenue / total_orders, 2)
+
+        hours = []
+        for o in orders:
+            created = o.get("createdAt") or o.get("created_at")
+            if created:
+                hours.append(created.hour)
+        peak_hours = [h for h, _ in Counter(hours).most_common(3)]
+
+        product_counts: Counter = Counter()
+        for o in orders:
+            for item in o.get("items", []):
+                pid = str(item.get("product_id", ""))
+                product_counts[pid] += item.get("quantity", 1)
+
+        top_products = [
+            TopProduct(product_id=pid, count=count)
+            for pid, count in product_counts.most_common(5)
+        ]
+
+        orders_by_status = dict(Counter(o.get("status", "UNKNOWN") for o in orders))
+
+        return VendorSummary(
+            total_orders=total_orders,
+            total_revenue=total_revenue,
+            avg_order_value=avg_order_value,
+            peak_hours=peak_hours,
+            top_products=top_products,
+            orders_by_status=orders_by_status
+        )
+</file>
+
+<file path="app/analytics/domain/__init__.py">
+
+</file>
+
+<file path="app/analytics/domain/entities/__init__.py">
+
+</file>
+
+<file path="app/analytics/domain/entities/vendor_analytics.py">
+from dataclasses import dataclass, field
+from typing import List, Dict
+
+@dataclass
+class TopProduct:
+    product_id: str
+    count: int
+
+@dataclass
+class VendorSummary:
+    total_orders: int
+    total_revenue: float
+    avg_order_value: float
+    peak_hours: List[int]
+    top_products: List[TopProduct]
+    orders_by_status: Dict[str, int]
+
+@dataclass
+class DailyStats:
+    date: str
+    orders: int
+    revenue: float
+</file>
+
+<file path="app/analytics/domain/repositories/__init__.py">
+
+</file>
+
+<file path="app/analytics/domain/repositories/analytics_repository.py">
+from abc import ABC, abstractmethod
+from typing import List
+
+class IAnalyticsRepository(ABC):
+    @abstractmethod
+    async def get_orders_by_vendor(self, vendor_id: int) -> List[dict]:
+        pass
+
+    @abstractmethod
+    async def get_orders_by_vendor_since(self, vendor_id: int, days: int) -> List[dict]:
+        pass
+</file>
+
+<file path="app/analytics/infrastructure/__init__.py">
+
+</file>
+
+<file path="app/analytics/infrastructure/repositories/__init__.py">
+
+</file>
+
+<file path="app/analytics/infrastructure/repositories/mongo_analytics_repository.py">
+from datetime import datetime, timedelta
+from typing import List
+from app.analytics.domain.repositories.analytics_repository import IAnalyticsRepository
+from app.database import get_db
+
+class MongoAnalyticsRepository(IAnalyticsRepository):
+    async def get_orders_by_vendor(self, vendor_id: int) -> List[dict]:
+        db = get_db()
+        return await db["orders"].find({"vendor_id": vendor_id}).to_list(length=None)
+
+    async def get_orders_by_vendor_since(self, vendor_id: int, days: int) -> List[dict]:
+        db = get_db()
+        since = datetime.utcnow() - timedelta(days=days)
+        return await db["orders"].find({
+            "vendor_id": vendor_id,
+            "createdAt": {"$gte": since}
+        }).to_list(length=None)
+</file>
+
+<file path="app/analytics/infrastructure/router.py">
+from fastapi import APIRouter, Query
+from typing import List
+from app.analytics.infrastructure.schemas import VendorSummarySchema, DailyStatsSchema
+from app.analytics.application.use_cases.get_vendor_summary import GetVendorSummaryUseCase
+from app.analytics.application.use_cases.get_vendor_daily import GetVendorDailyUseCase
+from app.analytics.infrastructure.repositories.mongo_analytics_repository import MongoAnalyticsRepository
+from dataclasses import asdict
+
+router = APIRouter()
+
+@router.get("/vendor/{vendor_id}/summary", response_model=VendorSummarySchema)
+async def summary(vendor_id: int):
+    repository = MongoAnalyticsRepository()
+    use_case = GetVendorSummaryUseCase(repository)
+    result = await use_case.execute(vendor_id)
+    return asdict(result)
+
+@router.get("/vendor/{vendor_id}/daily", response_model=List[DailyStatsSchema])
+async def daily(vendor_id: int, days: int = Query(default=30, ge=1, le=90)):
+    repository = MongoAnalyticsRepository()
+    use_case = GetVendorDailyUseCase(repository)
+    result = await use_case.execute(vendor_id, days)
+    return [asdict(r) for r in result]
+</file>
+
+<file path="app/analytics/infrastructure/schemas.py">
+from pydantic import BaseModel
+from typing import List, Dict
+
+class TopProductSchema(BaseModel):
+    product_id: str
+    count: int
+
+class VendorSummarySchema(BaseModel):
+    total_orders: int
+    total_revenue: float
+    avg_order_value: float
+    peak_hours: List[int]
+    top_products: List[TopProductSchema]
+    orders_by_status: Dict[str, int]
+
+class DailyStatsSchema(BaseModel):
+    date: str
+    orders: int
+    revenue: float
+</file>
+
+<file path="app/config.py">
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/urbanrush")
+FASTAPI_PORT = int(os.getenv("FASTAPI_PORT", 8000))
+NESTJS_BASE_URL = os.getenv("NESTJS_BASE_URL", "http://localhost:3000")
+</file>
+
+<file path="app/database.py">
+from motor.motor_asyncio import AsyncIOMotorClient
+from app.config import MONGO_URI
+
+client: AsyncIOMotorClient = None
+
+async def connect_db():
+    global client
+    client = AsyncIOMotorClient(MONGO_URI)
+    print("✅ Conectado a MongoDB")
+
+async def close_db():
+    global client
+    if client:
+        client.close()
+        print("❌ Desconectado de MongoDB")
+
+def get_db():
+    return client["urbanrush"]
+</file>
+
+<file path="app/delivery_time/__init__.py">
+
+</file>
+
+<file path="app/delivery_time/application/__init__.py">
+
+</file>
+
+<file path="app/delivery_time/application/use_cases/__init__.py">
+
+</file>
+
+<file path="app/delivery_time/application/use_cases/estimate_delivery.py">
+from datetime import datetime
+from app.delivery_time.domain.entities.delivery_estimate import DeliveryEstimate
+from app.delivery_time.domain.repositories.delivery_repository import IDeliveryRepository
+
+class EstimateDeliveryUseCase:
+    def __init__(self, repository: IDeliveryRepository):
+        self.repository = repository
+
+    async def execute(self, data: dict) -> DeliveryEstimate:
+        current_hour = datetime.now().hour
+        is_peak_hour = current_hour in [12, 13, 18, 19, 20]
+
+        active_orders = await self.repository.count_active_orders(data["vendor_id"])
+
+        base_time = 15
+        items_time = min(data["total_items"] * 2, 10)
+        load_time = min(active_orders * 3, 15)
+        peak_time = 10 if is_peak_hour else 0
+        delivery_time = 20
+
+        total = base_time + items_time + load_time + peak_time + delivery_time
+
+        if active_orders < 3 and not is_peak_hour:
+            confidence = "HIGH"
+        elif active_orders < 6:
+            confidence = "MEDIUM"
+        else:
+            confidence = "LOW"
+
+        return DeliveryEstimate(
+            estimated_minutes=total,
+            confidence=confidence,
+            breakdown={
+                "base_preparation": base_time,
+                "items_complexity": items_time,
+                "vendor_load": load_time,
+                "peak_hour_delay": peak_time,
+                "delivery_transit": delivery_time
+            }
+        )
+</file>
+
+<file path="app/delivery_time/domain/__init__.py">
+
+</file>
+
+<file path="app/delivery_time/domain/entities/__init__.py">
+
+</file>
+
+<file path="app/delivery_time/domain/entities/delivery_estimate.py">
+from dataclasses import dataclass
+from typing import Literal
+
+@dataclass
+class DeliveryEstimate:
+    estimated_minutes: int
+    confidence: Literal["HIGH", "MEDIUM", "LOW"]
+    breakdown: dict
+</file>
+
+<file path="app/delivery_time/domain/repositories/__init__.py">
+
+</file>
+
+<file path="app/delivery_time/domain/repositories/delivery_repository.py">
+from abc import ABC, abstractmethod
+
+class IDeliveryRepository(ABC):
+    @abstractmethod
+    async def count_active_orders(self, vendor_id: int) -> int:
+        pass
+</file>
+
+<file path="app/delivery_time/infrastructure/__init__.py">
+
+</file>
+
+<file path="app/delivery_time/infrastructure/repositories/__init__.py">
+
+</file>
+
+<file path="app/delivery_time/infrastructure/repositories/mongo_delivery_repository.py">
+from app.delivery_time.domain.repositories.delivery_repository import IDeliveryRepository
+from app.database import get_db
+
+class MongoDeliveryRepository(IDeliveryRepository):
+    async def count_active_orders(self, vendor_id: int) -> int:
+        db = get_db()
+        return await db["orders"].count_documents({
+            "vendor_id": vendor_id,
+            "status": {"$in": ["ACCEPTED", "PREPARING"]}
+        })
+</file>
+
+<file path="app/delivery_time/infrastructure/router.py">
+from fastapi import APIRouter
+from app.delivery_time.infrastructure.schemas import DeliveryTimeRequest, DeliveryTimeResponse
+from app.delivery_time.application.use_cases.estimate_delivery import EstimateDeliveryUseCase
+from app.delivery_time.infrastructure.repositories.mongo_delivery_repository import MongoDeliveryRepository
+
+router = APIRouter()
+
+@router.post("/estimate", response_model=DeliveryTimeResponse)
+async def estimate(data: DeliveryTimeRequest):
+    repository = MongoDeliveryRepository()
+    use_case = EstimateDeliveryUseCase(repository)
+    result = await use_case.execute(data.model_dump())
+    return result
+</file>
+
+<file path="app/delivery_time/infrastructure/schemas.py">
+from pydantic import BaseModel
+from typing import Literal
+
+class DeliveryTimeRequest(BaseModel):
+    order_id: str
+    vendor_id: int
+    delivery_address: str
+    total_items: int
+
+class DeliveryTimeResponse(BaseModel):
+    estimated_minutes: int
+    confidence: Literal["HIGH", "MEDIUM", "LOW"]
+    breakdown: dict
+</file>
+
+<file path="app/fraud/__init__.py">
+
+</file>
+
+<file path="app/fraud/application/__init__.py">
+
+</file>
+
+<file path="app/fraud/application/use_cases/__init__.py">
+
+</file>
+
+<file path="app/fraud/application/use_cases/analyze_fraud.py">
+from app.fraud.domain.entities.fraud_result import FraudResult
+from app.fraud.domain.repositories.fraud_repository import IFraudRepository
+
+class AnalyzeFraudUseCase:
+    def __init__(self, repository: IFraudRepository):
+        self.repository = repository
+
+    async def execute(self, data: dict) -> FraudResult:
+        reasons = []
+        risk_score = 0.0
+
+        # Regla 1: monto muy alto (> $500.000 COP)
+        if data["amount"] > 50_000_000:
+            risk_score += 0.3
+            reasons.append("Monto inusualmente alto")
+
+        # Regla 2: muchos pedidos en la última hora
+        recent_orders = await self.repository.count_recent_orders(data["user_id"], minutes=60)
+        if recent_orders >= 3:
+            risk_score += 0.3
+            reasons.append(f"Múltiples pedidos en poco tiempo ({recent_orders} en 1 hora)")
+
+        # Regla 3: primer pago del usuario
+        total_payments = await self.repository.count_total_payments(data["user_id"])
+        if total_payments == 0:
+            risk_score += 0.1
+            reasons.append("Primer pago del usuario")
+
+        # Regla 4: dirección nueva con historial previo
+        previous_addresses = await self.repository.get_previous_addresses(data["user_id"])
+        if data["delivery_address"] not in previous_addresses and total_payments > 2:
+            risk_score += 0.2
+            reasons.append("Dirección de entrega nueva para usuario con historial")
+
+        # Regla 5: tarjeta con monto alto
+        if data["payment_method"] == "CARD" and data["amount"] > 20_000_000:
+            risk_score += 0.1
+            reasons.append("Pago con tarjeta de monto elevado")
+
+        risk_score = min(round(risk_score, 2), 1.0)
+
+        return FraudResult(
+            is_suspicious=risk_score >= 0.5,
+            risk_score=risk_score,
+            reasons=reasons if reasons else ["Sin señales de riesgo detectadas"]
+        )
+</file>
+
+<file path="app/fraud/domain/__init__.py">
+
+</file>
+
+<file path="app/fraud/domain/entities/__init__.py">
+
+</file>
+
+<file path="app/fraud/domain/entities/fraud_result.py">
+from dataclasses import dataclass, field
+from typing import List
+
+@dataclass
+class FraudResult:
+    is_suspicious: bool
+    risk_score: float
+    reasons: List[str] = field(default_factory=list)
+</file>
+
+<file path="app/fraud/domain/repositories/__init__.py">
+
+</file>
+
+<file path="app/fraud/domain/repositories/fraud_repository.py">
+from abc import ABC, abstractmethod
+from typing import List
+
+class IFraudRepository(ABC):
+    @abstractmethod
+    async def count_recent_orders(self, user_id: int, minutes: int) -> int:
+        pass
+
+    @abstractmethod
+    async def count_total_payments(self, user_id: int) -> int:
+        pass
+
+    @abstractmethod
+    async def get_previous_addresses(self, user_id: int) -> List[str]:
+        pass
+</file>
+
+<file path="app/fraud/infrastructure/__init__.py">
+
+</file>
+
+<file path="app/fraud/infrastructure/repositories/__init__.py">
+
+</file>
+
+<file path="app/fraud/infrastructure/repositories/mongo_fraud_repository.py">
+from datetime import datetime, timedelta
+from typing import List
+from app.fraud.domain.repositories.fraud_repository import IFraudRepository
+from app.database import get_db
+
+class MongoFraudRepository(IFraudRepository):
+    async def count_recent_orders(self, user_id: int, minutes: int) -> int:
+        db = get_db()
+        since = datetime.utcnow() - timedelta(minutes=minutes)
+        return await db["orders"].count_documents({
+            "user_id": user_id,
+            "createdAt": {"$gte": since}
+        })
+
+    async def count_total_payments(self, user_id: int) -> int:
+        db = get_db()
+        return await db["payments"].count_documents({"user_id": user_id})
+
+    async def get_previous_addresses(self, user_id: int) -> List[str]:
+        db = get_db()
+        return await db["orders"].distinct("delivery_address", {"user_id": user_id})
+</file>
+
+<file path="app/fraud/infrastructure/router.py">
+from fastapi import APIRouter
+from app.fraud.infrastructure.schemas import FraudRequest, FraudResponse
+from app.fraud.application.use_cases.analyze_fraud import AnalyzeFraudUseCase
+from app.fraud.infrastructure.repositories.mongo_fraud_repository import MongoFraudRepository
+
+router = APIRouter()
+
+@router.post("/analyze", response_model=FraudResponse)
+async def analyze(data: FraudRequest):
+    repository = MongoFraudRepository()
+    use_case = AnalyzeFraudUseCase(repository)
+    result = await use_case.execute(data.model_dump())
+    return result
+</file>
+
+<file path="app/fraud/infrastructure/schemas.py">
+from pydantic import BaseModel
+from typing import List
+
+class FraudRequest(BaseModel):
+    user_id: int
+    order_id: str
+    amount: int
+    payment_method: str
+    delivery_address: str
+
+class FraudResponse(BaseModel):
+    is_suspicious: bool
+    risk_score: float
+    reasons: List[str]
+</file>
+
+<file path="app/main.py">
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from app.database import connect_db, close_db
+from app.delivery_time.infrastructure.router import router as delivery_router
+from app.fraud.infrastructure.router import router as fraud_router
+from app.analytics.infrastructure.router import router as analytics_router
+from app.sentiment.infrastructure.router import router as sentiment_router
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await connect_db()
+    yield
+    await close_db()
+
+app = FastAPI(
+    title="UrbanRush Intelligence API",
+    description="Microservicio de inteligencia y analytics para UrbanRush",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(delivery_router, prefix="/delivery-time", tags=["Delivery Time"])
+app.include_router(fraud_router, prefix="/fraud", tags=["Fraud Detection"])
+app.include_router(analytics_router, prefix="/analytics", tags=["Analytics"])
+app.include_router(sentiment_router, prefix="/sentiment", tags=["Sentiment"])
+
+@app.get("/", tags=["Health"])
+async def root():
+    return {"status": "ok", "service": "UrbanRush Intelligence API"}
+</file>
+
+<file path="app/requirements.txt">
+fastapi==0.115.0
+uvicorn==0.30.6
+motor==3.5.1
+pydantic==2.9.2
+python-dotenv==1.0.1
+httpx==0.27.2
+scikit-learn==1.5.2
+vaderSentiment==3.3.2
+geopy==2.4.1
+pymongo==4.8.0
+</file>
+
+<file path="app/sentiment/__init__.py">
+
+</file>
+
+<file path="app/sentiment/application/__init__.py">
+
+</file>
+
+<file path="app/sentiment/application/use_cases/__init__.py">
+
+</file>
+
+<file path="app/sentiment/application/use_cases/analyze_sentiment.py">
+from datetime import datetime
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from app.sentiment.domain.entities.sentiment_result import SentimentResult
+from app.sentiment.domain.repositories.sentiment_repository import ISentimentRepository
+
+analyzer = SentimentIntensityAnalyzer()
+
+class AnalyzeSentimentUseCase:
+    def __init__(self, repository: ISentimentRepository):
+        self.repository = repository
+
+    def _classify(self, score: float, rating: int) -> str:
+        text_sentiment = "POSITIVE" if score > 0.05 else "NEGATIVE" if score < -0.05 else "NEUTRAL"
+        rating_sentiment = "POSITIVE" if rating >= 4 else "NEGATIVE" if rating <= 2 else "NEUTRAL"
+        return text_sentiment if text_sentiment == rating_sentiment else rating_sentiment
+
+    async def execute(self, data: dict) -> SentimentResult:
+        scores = analyzer.polarity_scores(data["comment"])
+        compound = scores["compound"]
+        sentiment = self._classify(compound, data["rating"])
+
+        await self.repository.save_review({
+            "order_id": data["order_id"],
+            "vendor_id": data["vendor_id"],
+            "rating": data["rating"],
+            "comment": data["comment"],
+            "sentiment": sentiment,
+            "score": compound,
+            "created_at": datetime.utcnow()
+        })
+
+        return SentimentResult(
+            sentiment=sentiment,
+            score=round(compound, 4),
+            saved=True
+        )
+</file>
+
+<file path="app/sentiment/application/use_cases/get_vendor_report.py">
+from datetime import datetime
+from app.sentiment.domain.entities.sentiment_result import SentimentReport
+from app.sentiment.domain.repositories.sentiment_repository import ISentimentRepository
+
+class GetVendorReportUseCase:
+    def __init__(self, repository: ISentimentRepository):
+        self.repository = repository
+
+    async def execute(self, vendor_id: int) -> SentimentReport:
+        reviews = await self.repository.get_reviews_by_vendor(vendor_id)
+
+        if not reviews:
+            return SentimentReport(
+                avg_rating=0,
+                total_reviews=0,
+                sentiment_distribution={"POSITIVE": 0, "NEUTRAL": 0, "NEGATIVE": 0},
+                recent_comments=[]
+            )
+
+        total = len(reviews)
+        avg_rating = round(sum(r["rating"] for r in reviews) / total, 2)
+
+        distribution = {"POSITIVE": 0, "NEUTRAL": 0, "NEGATIVE": 0}
+        for r in reviews:
+            distribution[r.get("sentiment", "NEUTRAL")] += 1
+
+        recent = sorted(reviews, key=lambda r: r.get("created_at", datetime.min), reverse=True)[:5]
+        recent_comments = [
+            {
+                "comment": r["comment"],
+                "rating": r["rating"],
+                "sentiment": r["sentiment"],
+                "date": r.get("created_at", "").isoformat() if r.get("created_at") else ""
+            }
+            for r in recent
+        ]
+
+        return SentimentReport(
+            avg_rating=avg_rating,
+            total_reviews=total,
+            sentiment_distribution=distribution,
+            recent_comments=recent_comments
+        )
+</file>
+
+<file path="app/sentiment/domain/__init__.py">
+
+</file>
+
+<file path="app/sentiment/domain/entities/__init__.py">
+
+</file>
+
+<file path="app/sentiment/domain/entities/sentiment_result.py">
+from dataclasses import dataclass, field
+from typing import List, Literal, Dict
+
+@dataclass
+class SentimentResult:
+    sentiment: Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]
+    score: float
+    saved: bool
+
+@dataclass
+class SentimentReport:
+    avg_rating: float
+    total_reviews: int
+    sentiment_distribution: Dict[str, int]
+    recent_comments: List[dict] = field(default_factory=list)
+</file>
+
+<file path="app/sentiment/domain/repositories/__init__.py">
+
+</file>
+
+<file path="app/sentiment/domain/repositories/sentiment_repository.py">
+from abc import ABC, abstractmethod
+from typing import List
+
+class ISentimentRepository(ABC):
+    @abstractmethod
+    async def save_review(self, review: dict) -> None:
+        pass
+
+    @abstractmethod
+    async def get_reviews_by_vendor(self, vendor_id: int) -> List[dict]:
+        pass
+</file>
+
+<file path="app/sentiment/infrastructure/__init__.py">
+
+</file>
+
+<file path="app/sentiment/infrastructure/repositories/__init__.py">
+
+</file>
+
+<file path="app/sentiment/infrastructure/repositories/mongo_sentiment_repository.py">
+from typing import List
+from app.sentiment.domain.repositories.sentiment_repository import ISentimentRepository
+from app.database import get_db
+
+class MongoSentimentRepository(ISentimentRepository):
+    async def save_review(self, review: dict) -> None:
+        db = get_db()
+        await db["reviews"].insert_one(review)
+
+    async def get_reviews_by_vendor(self, vendor_id: int) -> List[dict]:
+        db = get_db()
+        return await db["reviews"].find({"vendor_id": vendor_id}).to_list(length=None)
+</file>
+
+<file path="app/sentiment/infrastructure/router.py">
+from fastapi import APIRouter
+from dataclasses import asdict
+from app.sentiment.infrastructure.schemas import SentimentRequest, SentimentResponse, SentimentReportSchema
+from app.sentiment.application.use_cases.analyze_sentiment import AnalyzeSentimentUseCase
+from app.sentiment.application.use_cases.get_vendor_report import GetVendorReportUseCase
+from app.sentiment.infrastructure.repositories.mongo_sentiment_repository import MongoSentimentRepository
+
+router = APIRouter()
+
+@router.post("/analyze", response_model=SentimentResponse)
+async def analyze(data: SentimentRequest):
+    repository = MongoSentimentRepository()
+    use_case = AnalyzeSentimentUseCase(repository)
+    result = await use_case.execute(data.model_dump())
+    return asdict(result)
+
+@router.get("/vendor/{vendor_id}/report", response_model=SentimentReportSchema)
+async def report(vendor_id: int):
+    repository = MongoSentimentRepository()
+    use_case = GetVendorReportUseCase(repository)
+    result = await use_case.execute(vendor_id)
+    return asdict(result)
+</file>
+
+<file path="app/sentiment/infrastructure/schemas.py">
+from pydantic import BaseModel, Field
+from typing import List, Literal, Dict
+
+class SentimentRequest(BaseModel):
+    order_id: str
+    vendor_id: int
+    rating: int = Field(ge=1, le=5)
+    comment: str
+
+class SentimentResponse(BaseModel):
+    sentiment: Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]
+    score: float
+    saved: bool
+
+class SentimentReportSchema(BaseModel):
+    avg_rating: float
+    total_reviews: int
+    sentiment_distribution: Dict[str, int]
+    recent_comments: List[dict]
+</file>
+
+<file path="render.yaml">
+services:
+  - type: web
+    name: urbanrush-fastapi
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: MONGO_URI
+        sync: false
+      - key: NESTJS_BASE_URL
+        sync: false
+</file>
+
+<file path="requirements.txt">
+fastapi==0.115.0
+uvicorn==0.30.6
+motor==3.5.1
+pydantic==2.9.2
+python-dotenv==1.0.1
+httpx==0.27.2
+scikit-learn==1.5.2
+vaderSentiment==3.3.2
+geopy==2.4.1
+pymongo==4.8.0
+</file>
+
+<file path="runtime.txt">
+python-3.12.7
+</file>
+
+</files>
