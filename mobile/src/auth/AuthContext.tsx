@@ -56,9 +56,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshProfile = useCallback(async () => {
     try {
-      const res = await nestApi.get("/people/me");
+      const res = await nestApi.get("/people/my-profile");
       setState((prev) => ({ ...prev, profile: res.data }));
-    } catch { /* silent */ }
+    } catch { /* silent — el people puede no existir todavía si la cuenta es nueva */ }
   }, []);
 
   useEffect(() => { if (state.token) refreshProfile(); }, [state.token, refreshProfile]);

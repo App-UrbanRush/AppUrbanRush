@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../../auth/AuthContext";
 import { intelligenceEndpoints, type DailyStat, type SentimentReport, type VendorSummary } from "../../api/intelligenceApi";
+import { nestEndpoints } from "../../api/nestApi";
 
 const VendorAnalyticsScreen = () => {
   const { user } = useAuth();
@@ -12,16 +13,21 @@ const VendorAnalyticsScreen = () => {
 
   useEffect(() => {
     if (!user) return;
-    Promise.allSettled([
-      intelligenceEndpoints.vendorSummary(user.id),
-      intelligenceEndpoints.vendorDaily(user.id, 7),
-      intelligenceEndpoints.sentimentReport(user.id),
-    ]).then(([s, d, sn]) => {
-      if (s.status === "fulfilled") setSummary(s.value);
-      if (d.status === "fulfilled") setDaily(d.value);
-      if (sn.status === "fulfilled") setSentiment(sn.value);
-      setLoading(false);
-    });
+    (async () => {
+      try {
+        // Sacar el vendor_id real, no es lo mismo que user.id
+        const profile = await nestEndpoints.vendorProfile();
+        const vendorId = profile.vendor_id;
+        const [s, d, sn] = await Promise.allSettled([
+          intelligenceEndpoints.vendorSummary(vendorId),
+          intelligenceEndpoints.vendorDaily(vendorId, 7),
+          intelligenceEndpoints.sentimentReport(vendorId),
+        ]);
+        if (s.status === "fulfilled") setSummary(s.value);
+        if (d.status === "fulfilled") setDaily(d.value);
+        if (sn.status === "fulfilled") setSentiment(sn.value);
+      } catch {} finally { setLoading(false); }
+    })();
   }, [user]);
 
   if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#ff6a00" /></View>;

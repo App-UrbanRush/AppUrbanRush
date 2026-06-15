@@ -11,10 +11,15 @@ const VendorProductsScreen = () => {
   const [form, setForm] = useState({ name: "", description: "", price: "", category: "", image_url: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  const [vendorId, setVendorId] = useState<number | null>(null);
+
   const load = useCallback(async () => {
     if (!user) return;
-    try { setProducts(await nestEndpoints.listProductsByVendor(user.id)); }
-    catch {} finally { setLoading(false); }
+    try {
+      const profile = await nestEndpoints.vendorProfile();
+      setVendorId(profile.vendor_id);
+      setProducts(await nestEndpoints.listProductsByVendor(profile.vendor_id));
+    } catch {} finally { setLoading(false); }
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
@@ -33,8 +38,9 @@ const VendorProductsScreen = () => {
 
   const save = async () => {
     if (!user || !form.name || !form.price) { Alert.alert("Faltan datos", "Nombre y precio son obligatorios"); return; }
+    if (!vendorId) { Alert.alert("Error", "No se pudo identificar tu negocio"); return; }
     const payload = {
-      vendor_id: user.id,
+      vendor_id: vendorId,
       name: form.name,
       description: form.description,
       price: parseFloat(form.price),

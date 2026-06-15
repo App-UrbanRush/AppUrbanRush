@@ -26,21 +26,16 @@ const CheckoutScreen = ({ navigation }: any) => {
 
     setSubmitting(true);
     try {
+      // El DTO del backend solo acepta: user_id, vendor_id, delivery_address,
+      // items:[{product_id, quantity}], customer_lat?, customer_lng?
       const order = await nestEndpoints.createOrder({
-        user_id: user.id,
+        user_id: Number(user.id),
         vendor_id: state.vendorId,
+        delivery_address: address,
         items: state.items.map((i) => ({
           product_id: i.product.product_id,
-          name: i.product.name,
           quantity: i.quantity,
-          price: i.product.price,
-          image_url: i.product.image_url,
         })),
-        total: finalTotal,
-        delivery_address: address,
-        delivery_phone: phone,
-        note,
-        payment_method: method,
       });
       clear();
       Alert.alert("🎉 ¡Pedido creado!", `Tu código de entrega es ${order.delivery_code ?? "—"}.\nDáselo al domiciliario cuando llegue.`, [

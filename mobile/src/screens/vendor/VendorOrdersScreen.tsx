@@ -28,9 +28,9 @@ const VendorOrdersScreen = () => {
   const load = useCallback(async () => {
     if (!user) return;
     try {
-      // El vendor_id se obtiene del backend (a partir del user_id). Aquí simplificamos:
-      // usamos el user.id y dejamos que el endpoint /orders/vendor/:id resuelva.
-      const data = await nestEndpoints.vendorOrders(user.id);
+      // El backend identifica al vendor por JWT en /vendor/profile.
+      const profile = await nestEndpoints.vendorProfile();
+      const data = await nestEndpoints.vendorOrders(profile.vendor_id);
       setOrders(data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     } catch {} finally { setLoading(false); setRefreshing(false); }
   }, [user]);
