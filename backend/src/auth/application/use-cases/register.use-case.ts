@@ -59,13 +59,11 @@ export class RegisterUseCase {
       rolIds: [rol.rol_id]
     };
 
-    // Enviar email de bienvenida
-    try {
-      await this.emailService.sendWelcomeEmail(userData.user_email, userData.firstName);
-    } catch (emailError) {
-      // El registro fue exitoso, solo logueamos el fallo del email
-      console.warn('Email de bienvenida no enviado:', emailError.message);
-    }
+    // Enviar email de bienvenida sin bloquear la respuesta — si SMTP es lento
+    // o falla en producción, el registro NO debe demorarse por eso.
+    this.emailService
+      .sendWelcomeEmail(userData.user_email, userData.firstName)
+      .catch((err) => console.warn('Email de bienvenida no enviado:', err?.message));
     
     return {
       message: 'Usuario registrado exitosamente',

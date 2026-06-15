@@ -19,6 +19,10 @@ export class EmailService {
         user: this.configService.get<string>('SMTP_USER'),
         pass: this.configService.get<string>('SMTP_PASS'),
       },
+      // Timeouts cortos para que SMTP no cuelgue la API en producción.
+      connectionTimeout: 10000, // 10s para conectar
+      greetingTimeout: 10000,   // 10s para greeting
+      socketTimeout: 15000,     // 15s para socket
     });
   }
 

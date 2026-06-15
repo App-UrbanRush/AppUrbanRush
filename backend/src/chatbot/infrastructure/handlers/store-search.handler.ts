@@ -63,7 +63,7 @@ export class StoreSearchHandler extends BaseIntentHandler {
         reply: `No encontré coincidencias para "${tokens.join(' ')}". ¿Probás otra palabra?`,
         intent: this.intent,
         confidence: 0.4,
-        actions: [{ label: 'Ver todas las tiendas', type: 'NAVIGATE', target: '/tiendas' }],
+        actions: [{ label: 'Ver todas las tiendas', type: 'NAVIGATE', target: '/stores' }],
       };
     }
 
@@ -75,7 +75,7 @@ export class StoreSearchHandler extends BaseIntentHandler {
       reply: `Encontré esto para vos:\n${list}`,
       intent: this.intent,
       confidence: 0.9,
-      actions: [{ label: 'Ver tiendas', type: 'NAVIGATE', target: '/tiendas' }],
+      actions: [{ label: 'Ver tiendas', type: 'NAVIGATE', target: '/stores' }],
       data: { results: merged },
     };
   }

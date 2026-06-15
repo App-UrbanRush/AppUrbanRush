@@ -48,7 +48,7 @@ const HeroBanner = ({ data }: HeroBannerProps) => {
       <div className="hero-content">
         <h1 className="hero-title">{title}</h1>
         <p className="hero-subtitle">{subtitle}</p>
-        <button className="hero-banner-cta" onClick={() => navigate("/tiendas")}>{buttonText}</button>
+        <button className="hero-banner-cta" onClick={() => navigate("/stores")}>{buttonText}</button>
       </div>
 
       {/* Indicadores */}

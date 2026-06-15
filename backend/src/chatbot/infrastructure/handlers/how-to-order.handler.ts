@@ -29,7 +29,7 @@ export class HowToOrderHandler extends BaseIntentHandler {
         { label: '¿Cómo pago?', value: '¿Cómo pago?' },
       ],
       actions: [
-        { label: 'Ir a tiendas', type: 'NAVIGATE', target: '/tiendas' },
+        { label: 'Ir a tiendas', type: 'NAVIGATE', target: '/stores' },
       ],
     };
   }

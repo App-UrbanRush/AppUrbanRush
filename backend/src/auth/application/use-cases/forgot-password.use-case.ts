@@ -34,8 +34,11 @@ export class ForgotPasswordUseCase {
     // 4. Guardar el código en la base de datos
     await this._userRepo.saveResetCode(user.user_id!, resetCode, expiresAt);
 
-    // 5. Despachar el correo electrónico usando el EmailService
-    await this._emailService.sendPasswordResetEmail(user.user_email, displayName, resetCode);
+    // 5. Despachar el correo en background — si SMTP es lento (común con
+    //    Gmail en producción) la respuesta no se queda colgada esperando.
+    this._emailService
+      .sendPasswordResetEmail(user.user_email, displayName, resetCode)
+      .catch((err) => console.warn('Email de reset no enviado:', err?.message));
 
     return {
       success: true,

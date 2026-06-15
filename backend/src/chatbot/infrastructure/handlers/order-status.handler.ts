@@ -50,7 +50,7 @@ export class OrderStatusHandler extends BaseIntentHandler {
           reply: 'No tenés pedidos activos. ¿Querés explorar tiendas?',
           intent: this.intent,
           confidence: 0.9,
-          actions: [{ label: 'Ver tiendas', type: 'NAVIGATE', target: '/tiendas' }],
+          actions: [{ label: 'Ver tiendas', type: 'NAVIGATE', target: '/stores' }],
         };
       }
 
