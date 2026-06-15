@@ -77,7 +77,11 @@ const ProfileScreen = ({ navigation }: any) => {
           </View>
           <Text style={styles.changePhoto}>📷 Cambiar foto</Text>
         </TouchableOpacity>
-        <Text style={styles.name}>{profile ? `${profile.firstName} ${profile.firstLastName}` : "Usuario"}</Text>
+        <Text style={styles.name}>
+          {profile?.firstName
+            ? `${profile.firstName} ${profile.firstLastName ?? ""}`.trim()
+            : user?.email?.split("@")[0] ?? "Mi cuenta"}
+        </Text>
         <Text style={styles.email}>{user?.email}</Text>
         <View style={styles.rolePill}><Text style={styles.roleText}>{user?.role}</Text></View>
       </View>

@@ -64,18 +64,7 @@ const LoginScreen = ({ navigation }: any) => {
           {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Entrar</Text>}
         </TouchableOpacity>
 
-        {/* Separador "o" */}
-        <View style={styles.orRow}>
-          <View style={styles.orLine} />
-          <Text style={styles.orText}>o</Text>
-          <View style={styles.orLine} />
-        </View>
-
-        {/* Google */}
-        <TouchableOpacity style={styles.googleBtn} onPress={onGoogle}>
-          <FontAwesome name="google" size={18} color="#DB4437" />
-          <Text style={styles.googleText}>Continuar con Google</Text>
-        </TouchableOpacity>
+        {/* Nota: el login con Google solo está disponible en la versión web por ahora. */}
 
         <View style={styles.divider} />
 
@@ -95,7 +84,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: "#fff", borderRadius: 18, padding: 22, shadowColor: "#000", shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 },
   title: { fontSize: 20, fontWeight: "700", color: "#1a1a1a", marginBottom: 16 },
   label: { fontSize: 13, fontWeight: "600", color: "#444", marginBottom: 6, marginTop: 10 },
-  input: { backgroundColor: "#f6f6f8", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: "#222" },
+  input: { backgroundColor: "#f6f6f8", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 16, fontSize: 16, color: "#222", minHeight: 52 },
   passWrap: { position: "relative", justifyContent: "center" },
   eye: { position: "absolute", right: 12, padding: 4 },
   btn: { marginTop: 22, backgroundColor: "#ff6a00", paddingVertical: 14, borderRadius: 12, alignItems: "center" },

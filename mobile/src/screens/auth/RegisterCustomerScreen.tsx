@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: "800", color: "#1a1a1a" },
   subtitle: { fontSize: 13, color: "#777", marginTop: 4, marginBottom: 18 },
   label: { fontSize: 12, fontWeight: "600", color: "#444", marginTop: 10, marginBottom: 4 },
-  input: { backgroundColor: "#f6f6f8", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: "#222" },
+  input: { backgroundColor: "#f6f6f8", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 14, fontSize: 16, color: "#222", minHeight: 50 },
   genderRow: { flexDirection: "row", gap: 8, marginTop: 4 },
   genderChip: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center", backgroundColor: "#f6f6f8" },
   genderChipActive: { backgroundColor: "#ff6a00" },

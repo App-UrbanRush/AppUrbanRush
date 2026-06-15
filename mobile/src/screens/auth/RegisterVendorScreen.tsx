@@ -11,7 +11,7 @@ const RegisterVendorScreen = ({ navigation }: any) => (
     <Text style={styles.text}>
       Una vez aprobado el negocio, podés gestionar pedidos y productos desde esta app.
     </Text>
-    <TouchableOpacity style={styles.btn} onPress={() => Linking.openURL("http://localhost:5173/vendor-register")}>
+    <TouchableOpacity style={styles.btn} onPress={() => Linking.openURL("https://app-urban-rush.vercel.app/vendor-register")}>
       <Text style={styles.btnText}>Abrir versión web</Text>
     </TouchableOpacity>
     <TouchableOpacity onPress={() => navigation.goBack()}>

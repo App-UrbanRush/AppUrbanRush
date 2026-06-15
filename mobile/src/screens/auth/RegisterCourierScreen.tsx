@@ -11,7 +11,7 @@ const RegisterCourierScreen = ({ navigation }: any) => (
     <Text style={styles.text}>
       Por ahora completá ese paso desde la versión web. Una vez aprobada tu cuenta, ya podés usar la app móvil con tu correo y contraseña.
     </Text>
-    <TouchableOpacity style={styles.btn} onPress={() => Linking.openURL("http://localhost:5173/delivery-register")}>
+    <TouchableOpacity style={styles.btn} onPress={() => Linking.openURL("https://app-urban-rush.vercel.app/delivery-register")}>
       <Text style={styles.btnText}>Abrir versión web</Text>
     </TouchableOpacity>
     <TouchableOpacity onPress={() => navigation.goBack()}>
