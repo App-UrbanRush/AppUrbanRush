@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "UrbanRush",
+    "slug": "urbanrush-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "urbanrush",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/logo-icon.png",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ff6a00"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.urbanrush.mobile"
+    },
+    "android": {
+      "package": "com.urbanrush.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo-icon.png",
+        "backgroundColor": "#ff6a00"
+      }
+    },
+    "web": { "favicon": "./assets/logo-icon.png" }
+  }
+}
