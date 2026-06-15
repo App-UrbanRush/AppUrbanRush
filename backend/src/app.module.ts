@@ -68,6 +68,10 @@ import { ReviewModule } from './review/review.module';
         autoLoadEntities: true,
         synchronize: true,
         logging: false,
+        // Neon (y la mayoría de Postgres cloud) requieren SSL.
+        ssl: configService.get<string>('NODE_ENV') === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
       }),
     }),
 
