@@ -1,29 +1,24 @@
-import { Platform } from "react-native";
-
 /**
  * URLs de los dos backends de UrbanRush.
  *
- * - NEST_API  → backend 1 (NestJS, lógica de negocio) en :3000
- * - FAST_API  → backend 2 (FastAPI, analítica / inteligencia) en :8000
+ * En desarrollo (Expo Go local) → IP LAN de tu PC.
+ * En producción (APK compilado con EAS) → URLs públicas de Railway/Render.
  *
- * En emulador Android `localhost` apunta al emulador, no al PC. Por eso
- * en Android usamos `10.0.2.2`. En iOS sim sí funciona `localhost`. En
- * un CELULAR físico con Expo Go hay que poner la IP de tu PC en la red
- * local (ej. `192.168.1.42`). Cambiá `LAN_IP` abajo si vas a probar en
- * un celular real.
+ * `__DEV__` es una variable global de React Native: es `true` con `expo start`
+ * y `false` cuando el código viene de un build de producción de EAS.
  */
 
-const LAN_IP = "192.168.100.7"; // IP de tu PC en Wi-Fi (ipconfig)
+const LAN_IP = "192.168.100.7"; // IP de tu PC en Wi-Fi (ipconfig) para dev
 
-// Si probás en celular físico con Expo Go, usamos la IP LAN para que
-// alcance los backends en tu PC. En emulador iOS usaría "localhost" y
-// en emulador Android "10.0.2.2", pero la LAN_IP funciona para los 3.
-const host = LAN_IP;
+// Producción
+const PROD_NEST_API = "https://appurbanrush-production.up.railway.app";
+const PROD_FAST_API = "https://urbanrush-fastapi.onrender.com";
 
-// Alternativa solo para emuladores:
-// const host = Platform.select({ android: "10.0.2.2", ios: "localhost", default: "localhost" });
+// Desarrollo
+const DEV_NEST_API = `http://${LAN_IP}:3000`;
+const DEV_FAST_API = `http://${LAN_IP}:8000`;
 
-export const NEST_API = `http://${host}:3000`;
-export const FAST_API = `http://${host}:8000`;
+export const NEST_API = __DEV__ ? DEV_NEST_API : PROD_NEST_API;
+export const FAST_API = __DEV__ ? DEV_FAST_API : PROD_FAST_API;
 
 export const LAN_HINT = LAN_IP;
