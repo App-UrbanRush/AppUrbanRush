@@ -19,7 +19,7 @@ Para levantar todo el entorno de servicios de forma unificada:
 1. Asegúrate de tener los archivos `.env` configurados en cada carpeta.
 2. Ejecuta desde la raíz:
    ```bash
-   docker-compose -f docker-compose.apps.yml up -d --build
+   docker-compose up -d --build
 
 
 ### Ejecución en desarrollo local
