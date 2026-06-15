@@ -5,7 +5,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SERVER_PORT } from './config/constants';
-import { all } from 'node_modules/axios/index.cjs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -62,8 +61,9 @@ async function bootstrap() {
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.set('trust proxy', 1);
 
-  const port = +(configService.get<number>(SERVER_PORT) ?? 3000);
-  await app.listen(port);
+  // Railway / Render inyectan PORT automáticamente. En local usamos SERVER_PORT.
+  const port = +(process.env.PORT ?? configService.get<number>(SERVER_PORT) ?? 3000);
+  await app.listen(port, '0.0.0.0');
   logger.log(`UrbanRush corriendo en puerto ${port} [${nodeEnv}]`);
 }
 bootstrap();
