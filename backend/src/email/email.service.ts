@@ -19,10 +19,16 @@ export class EmailService {
         user: this.configService.get<string>('SMTP_USER'),
         pass: this.configService.get<string>('SMTP_PASS'),
       },
+      // Forzar IPv4 — Railway no tiene IPv6 y el DNS de Gmail
+      // a veces resuelve a IPv6 causando ENETUNREACH.
+      family: 4,
       // Timeouts cortos para que SMTP no cuelgue la API en producción.
       connectionTimeout: 10000, // 10s para conectar
       greetingTimeout: 10000,   // 10s para greeting
       socketTimeout: 15000,     // 15s para socket
+      tls: {
+        rejectUnauthorized: false,
+      },
     });
   }
 
