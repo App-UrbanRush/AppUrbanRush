@@ -34,8 +34,7 @@ const AdminSidebar = () => {
   return (
     <aside className="admin-sidebar">
       <div className="admin-sidebar-logo">
-        <img src="/Logo-png.png" alt="UrbanRush" className="admin-sidebar-logo-img" />
-        <h1>UrbanRush</h1>
+        <img src="/Logo-cor.png" alt="UrbanRush" className="admin-sidebar-logo-img" />
         <span className="admin-sidebar-badge">Panel Admin</span>
       </div>
 

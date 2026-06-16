@@ -130,6 +130,16 @@
   gap: 12px;
   color: #6b7280;
 }
+.product-modal-field--clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border-radius: 8px;
+}
+.product-modal-field--clickable:hover .product-modal-value {
+  color: #ff6a00;
+}
 
 .product-modal-field div {
   display: flex;

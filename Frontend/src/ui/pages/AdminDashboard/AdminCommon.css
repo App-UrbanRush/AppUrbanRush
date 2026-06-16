@@ -137,7 +137,7 @@
 .admin-chip.role-2 { background: #e0f2fe; color: #0369a1; }
 .admin-chip.role-3 { background: #fef3c7; color: #b45309; }
 .admin-chip.role-4 { background: #dcfce7; color: #15803d; }
-.admin-chip.role-5 { background: #fee2e2; color: #b91c1c; }
+.admin-chip.role-5 { background: #ff6a00; color: #fff; }
 .admin-chip.on { background: #dcfce7; color: #15803d; }
 .admin-chip.off { background: #f3f4f6; color: #6b7280; }
 
@@ -175,7 +175,7 @@
 }
 .admin-btn.primary { background: #ff6a00; color: #fff; }
 .admin-btn.ghost { background: #f1f3f5; color: #444; }
-.admin-btn.danger { background: #fde8e8; color: #c0392b; }
+.admin-btn.danger { background: #ff6a00; color: #fff; }
 .admin-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .admin-row-actions { display: flex; gap: 8px; }
 .admin-icon-btn {
@@ -187,7 +187,7 @@
   color: #555;
   display: inline-flex;
 }
-.admin-icon-btn.danger { color: #c0392b; border-color: #f3c0c0; }
+.admin-icon-btn.danger { background: #ff6a00; color: #fff; border-color: #ff6a00; }
 .admin-icon-btn:hover { background: #f7f8fa; }
 
 .admin-loading, .admin-empty {

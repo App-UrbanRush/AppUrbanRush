@@ -35,7 +35,7 @@
 .admin-sidebar-badge {
   font-size: 0.68rem;
   font-weight: 700;
-  color: #ff8c00;
+  color: #fff;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -56,7 +56,7 @@
   padding: 12px 20px;
   margin: 0 10px;
   border-radius: 12px;
-  color: #cfd2dc;
+  color: #fff;
   text-decoration: none;
   font-weight: 700;
   font-size: 15px;
@@ -98,6 +98,10 @@
   width: 32px;
   height: 32px;
   transition: transform 0.25s ease;
+}
+
+.admin-sidebar-link > span {
+  color: #fff;
 }
 
 .dark-mode-wrapper.dark-mode .admin-sidebar {

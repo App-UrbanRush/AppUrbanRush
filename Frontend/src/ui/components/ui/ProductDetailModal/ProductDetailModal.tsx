@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Store, Package, ShoppingCart, CreditCard } from "lucide-react";
 import toast from "react-hot-toast";
 import { vendorsApi, type VendorListItem } from "../../../../infrastructure/api/vendorsApi";
@@ -14,6 +15,7 @@ interface ProductDetailModalProps {
 }
 
 const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
+  const navigate = useNavigate();
   const { addItem } = useCart();
   const { openCart } = useCartDrawer();
   const [vendor, setVendor] = useState<VendorListItem | null>(null);
@@ -49,6 +51,11 @@ const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
     onClose();
     openCart();
   }, [addItem, product, onClose, openCart]);
+
+  const handleGoToStore = useCallback(() => {
+    onClose();
+    navigate(`/store/${product.vendor_id}`);
+  }, [onClose, navigate, product.vendor_id]);
 
   return (
     <div className="product-modal-overlay" onClick={onClose}>
@@ -87,7 +94,7 @@ const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
             <h3>Información del Producto</h3>
             <div className="product-modal-fields">
               {vendor && (
-                <div className="product-modal-field">
+                <div className="product-modal-field product-modal-field--clickable" onClick={handleGoToStore}>
                   <Store size={16} />
                   <div>
                     <span className="product-modal-label">Negocio</span>

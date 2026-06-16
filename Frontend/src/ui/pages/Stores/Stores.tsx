@@ -23,6 +23,8 @@ function mapVendorToStore(v: any): Store {
     logo_url: v.logo_url ?? null,
     storefront_image_url: v.storefront_image_url ?? null,
     business_hours: v.business_hours ?? null,
+    averageRating: v.average_rating ?? 0,
+    productCount: v.product_count ?? 0,
   };
 }
 
@@ -145,13 +147,13 @@ const Stores = () => {
         <div
           style={{
             display: 'grid',
-            gap: '18px',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '16px',
+            gridTemplateColumns: 'repeat(4, 1fr)',
             justifyItems: 'center',
           }}
         >
           {filteredStores.map((store) => (
-            <StoreCard key={store.id} store={store} variant="recommended" onClick={() => navigate(`/store/${store.id}`)} />
+            <StoreCard key={store.id} store={store} variant="grid" onClick={() => navigate(`/store/${store.id}`)} />
           ))}
         </div>
       )}

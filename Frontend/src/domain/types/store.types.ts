@@ -23,6 +23,8 @@ export interface Store {
   logo_url?: string | null;
   storefront_image_url?: string | null;
   business_hours?: string | null;
+  averageRating?: number;
+  productCount?: number;
 }
 
 export interface HeroBanner {
