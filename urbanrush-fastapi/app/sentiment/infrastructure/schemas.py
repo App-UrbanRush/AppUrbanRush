@@ -12,6 +12,15 @@ class SentimentResponse(BaseModel):
     score: float
     saved: bool
 
+class CongruenceCheckRequest(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    comment: str
+
+class CongruenceCheckResponse(BaseModel):
+    congruent: bool
+    text_sentiment: Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]
+    rating_sentiment: Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]
+
 class SentimentReportSchema(BaseModel):
     avg_rating: float
     total_reviews: int

@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { IUserRepository } from '../../../user/domain/repositories/user.repository.interface';
+import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
 import { CreateFullUserDto } from '../dtos/register/create-full-user.dto';
 import { User } from '../../../user/domain/entities/user.model';
 import { EmailService } from 'src/email/email.service';
@@ -11,6 +12,8 @@ export class RegisterUseCase {
   constructor(
     @Inject('IUserRepository') 
     private readonly _userRepository: IUserRepository,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: ISessionRepository,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
   ) {}
@@ -59,6 +62,10 @@ export class RegisterUseCase {
       rolIds: [rol.rol_id]
     };
 
+    // Generar Token y guardar sesión en Redis
+    const token = this.jwtService.sign(payload);
+    await this.sessionRepository.save(newUser.user_id!, token, 1800);
+
     // Enviar email de bienvenida sin bloquear la respuesta — si SMTP es lento
     // o falla en producción, el registro NO debe demorarse por eso.
     this.emailService
@@ -67,7 +74,7 @@ export class RegisterUseCase {
     
     return {
       message: 'Usuario registrado exitosamente',
-      token: this.jwtService.sign(payload)
+      token,
     };
   }
 }

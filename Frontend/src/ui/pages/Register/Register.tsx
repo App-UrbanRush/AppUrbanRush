@@ -4,7 +4,7 @@ import FormField from "../../components/ui/FormField/FormField";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -25,11 +25,18 @@ const registerSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const Register = () => {
-  const { register: registerUser, isLoading, error: contextError } = useAuth();
+  const { register: registerUser, isLoading, isAuthenticated, error: contextError } = useAuth();
   const navigate = useNavigate();
   const [apiError, setApiError] = useState<string>("");
-  const [showSuccess, setShowSuccess] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [registered, setRegistered] = useState(false);
+
+  useEffect(() => {
+    if (registered && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [registered, isAuthenticated, navigate]);
 
   const {
     register,
@@ -62,11 +69,6 @@ const Register = () => {
     }
   };
 
-  const handleSuccessConfirm = () => {
-    setShowSuccess(false);
-    navigate("/dashboard");
-  };
-
   return (
     <div className="register-container">
       <button
@@ -82,13 +84,12 @@ const Register = () => {
             <div className="register-success-icon">✓</div>
             <h3>¡Registro exitoso!</h3>
             <p>Tu cuenta ha sido creada correctamente.</p>
-            <button className="register-success-btn" onClick={handleSuccessConfirm}>
+            <button className="register-success-btn" onClick={() => { setShowSuccess(false); setRegistered(true); }}>
               Ir al panel
             </button>
           </div>
         </div>
       )}
-
       <div className="register-left">
         <motion.div
           className="register-card"

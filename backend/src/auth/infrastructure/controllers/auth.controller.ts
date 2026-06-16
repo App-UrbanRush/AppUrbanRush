@@ -14,8 +14,10 @@ import { RegisterVendorUseCase } from 'src/auth/application/use-cases/register-v
 import { RegisterVendorDto } from 'src/auth/application/dtos/register/register-vendor.dto';
 import { ResetPasswordDto } from 'src/auth/application/dtos/reset-password/reset-password.dto';
 import { ForgotPasswordDto } from 'src/auth/application/dtos/reset-password/forgot-password.dto';
+import { VerifyCodeDto } from 'src/auth/application/dtos/reset-password/verify-code.dto';
 import { ForgotPasswordUseCase } from 'src/auth/application/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from 'src/auth/application/use-cases/reset-password.use-case';
+import { VerifyCodeUseCase } from 'src/auth/application/use-cases/verify-code.use-case';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { GoogleLoginUseCase } from 'src/auth/application/use-cases/google-login.use-case';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -33,6 +35,7 @@ export class AuthController {
     private readonly _registerVendorUseCase: RegisterVendorUseCase,
     private readonly _forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly _resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly _verifyCodeUseCase: VerifyCodeUseCase,
     private readonly googleLoginUseCase: GoogleLoginUseCase,
     private readonly setPasswordUseCase: SetPasswordUseCase,
     @Inject('ISessionRepository')
@@ -96,6 +99,14 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Código inválido o expirado.' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this._resetPasswordUseCase.execute(dto);
+  }
+
+  @Post('verify-code')
+  @ApiOperation({ summary: 'Validar código de verificación' })
+  @ApiResponse({ status: 200, description: 'Código válido.' })
+  @ApiResponse({ status: 400, description: 'Código inválido o expirado.' })
+  async verifyCode(@Body() dto: VerifyCodeDto) {
+    return this._verifyCodeUseCase.execute(dto);
   }
 
   @Post('set-password')

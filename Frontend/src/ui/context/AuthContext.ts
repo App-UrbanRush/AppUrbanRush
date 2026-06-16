@@ -17,6 +17,7 @@ export interface AuthContextType extends AuthState {
   registerVendor: (data: RegisterVendorRequest) => Promise<VendorRegisterResponse>;
   forgotPassword: (email: string) => Promise<ForgotPasswordResponse>;
   resetPassword: (data: { user_email: string; code: string; new_password: string }) => Promise<ResetPasswordResponse>;
+  verifyCode: (email: string, code: string) => Promise<{ valid: boolean }>;
   verifyDocument: (images: File[], data: VerifyDocumentRequest) => Promise<VerificationResult>;
 
   logout: () => Promise<void>;

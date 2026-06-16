@@ -2,7 +2,7 @@ import type { IAuthRepository, UserProfile, UpdateProfileData } from "../../doma
 import { ROLE_MAP } from "../../domain/types/auth.types";
 import type { AuthResponse, LoginRequest, RegisterRequest, RegisterDeliveryRequest, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from "../../domain/types/auth.types";
 import type { RegisterVendorRequest, VendorRegisterResponse } from "../../domain/types/vendor.types";
-import { loginApi, registerApi, registerDeliveryApi, registerVendorApi, getMyProfileApi, forgotPasswordApi, resetPasswordApi } from "../api/authApi";
+import { loginApi, registerApi, registerDeliveryApi, registerVendorApi, getMyProfileApi, forgotPasswordApi, resetPasswordApi, verifyCodeApi } from "../api/authApi";
 import { peopleApi } from "../api/peopleApi";
 import { authLocalStorage } from "../persistence/authLocalStorage";
 import { decodeJwt } from "../utils/jwtDecoder";
@@ -99,7 +99,7 @@ export class AuthRepositoryImpl implements IAuthRepository {
 
       return response;
     } catch (error) {
-      throw new Error("Error en registro: " + (error instanceof Error ? error.message : "Unknown error"));
+      throw error;
     }
   }
 
@@ -114,6 +114,11 @@ export class AuthRepositoryImpl implements IAuthRepository {
 
   async resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse> {
     const response = await resetPasswordApi(data);
+    return response;
+  }
+
+  async verifyCode(email: string, code: string): Promise<{ valid: boolean }> {
+    const response = await verifyCodeApi(email, code);
     return response;
   }
 
