@@ -12,4 +12,5 @@ export interface IOrderRepository {
   updateCourier(id: string, courierId: number): Promise<OrderModel | null>;
   incrementDeliveryAttempts(id: string): Promise<OrderModel | null>;
   block(id: string): Promise<void>;
+  resetCreatedAt(id: string): Promise<OrderModel | null>;
 }

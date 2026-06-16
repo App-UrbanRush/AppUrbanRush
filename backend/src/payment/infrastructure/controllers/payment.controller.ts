@@ -5,6 +5,7 @@ import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
 import { Roles, UserRole } from 'src/auth/infrastructure/decorators/roles.decorator';
 import { CreatePaymentUseCase } from '../../application/use-cases/create-payment.use-case';
 import { ConfirmPaymentUseCase } from '../../application/use-cases/confirm-payment.use-case';
+import { RetryPaymentUseCase } from '../../application/use-cases/retry-payment.use-case';
 import { GetPaymentByOrderUseCase } from '../../application/use-cases/get-payment-by-order.use-case';
 import { GetPaymentsByUserUseCase } from '../../application/use-cases/get-payments-by-user.use-case';
 import { GetPaymentsByVendorUseCase } from '../../application/use-cases/get-payments-by-vendor.use-case';
@@ -18,6 +19,7 @@ export class PaymentController {
   constructor(
     private readonly createPayment: CreatePaymentUseCase,
     private readonly confirmPayment: ConfirmPaymentUseCase,
+    private readonly retryPayment: RetryPaymentUseCase,
     private readonly getPaymentByOrder: GetPaymentByOrderUseCase,
     private readonly getPaymentsByUser: GetPaymentsByUserUseCase,
     private readonly getPaymentsByVendor: GetPaymentsByVendorUseCase,
@@ -43,6 +45,15 @@ export class PaymentController {
   @ApiOperation({ summary: 'Crear pago para un pedido (usuario)' })
   create(@Body() dto: CreatePaymentDto, @Request() req) {
     return this.createPayment.execute(dto, req.user.user_id); // ← pasar user_id del token
+  }
+
+  @Post('retry/:orderId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reintentar pago para un pedido pendiente o cancelado' })
+  retry(@Param('orderId') orderId: string, @Request() req) {
+    return this.retryPayment.execute(orderId, req.user.user_id);
   }
 
   @Post('webhook')

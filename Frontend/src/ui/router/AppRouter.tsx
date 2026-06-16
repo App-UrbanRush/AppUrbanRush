@@ -10,6 +10,7 @@ import RegisterSelect from "../pages/RegisterSelect/RegisterSelect";
 import VendorRegister from "../pages/VendorRegister/VendorRegister";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword/ResetPassword";
+import CompleteRegistration from "../pages/CompleteRegistration/CompleteRegistration";
 import PrivateRoute from "../components/PrivateRoute";
 import Layout from "../components/layout/Layout/Layout";
 import VendorDashboard from "../pages/VendorDashboard/VendorDashboard";
@@ -94,6 +95,14 @@ const AppRouter = () => {
         <Route path="/register-vendor" element={<VendorRegister />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route
+          path="/complete-registration"
+          element={
+            <PrivateRoute>
+              <CompleteRegistration />
+            </PrivateRoute>
+          }
+        />
         <Route path="/" element={<HomeRedirect />} />
         <Route
           path="/dashboard"
