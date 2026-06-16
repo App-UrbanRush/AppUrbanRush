@@ -43,6 +43,9 @@ export class WompiService {
   }
 
   async getCheckoutConfig(reference: string, amountInCents: number, currency: string = 'COP') {
+    if (!this.publicKey) {
+      throw new InternalServerErrorException('WOMPI_PUBLIC_KEY no está configurada');
+    }
     const signature = this.generateSignature(reference, amountInCents, currency);
     return { publicKey: this.publicKey, signature };
   }
@@ -114,13 +117,20 @@ export class WompiService {
   }
 
   private async getAcceptanceTokens(): Promise<{ acceptance_token: string; personal_auth_token: string }> {
+    if (!this.publicKey) {
+      throw new InternalServerErrorException('WOMPI_PUBLIC_KEY no está configurada');
+    }
     const response = await axios.get(
-      `${this.baseUrl}/merchants/${this.configService.get<string>(WOMPI_PUBLIC_KEY)}`,
+      `${this.baseUrl}/merchants/${this.publicKey}`,
     );
-    const data = response.data.data;
+    const data = response.data?.data;
+    if (!data?.presigned_acceptance?.acceptance_token) {
+      this.logger.error(`Respuesta inesperada de Wompi: ${JSON.stringify(response.data)}`);
+      throw new InternalServerErrorException('No se pudieron obtener los tokens de aceptación de Wompi');
+    }
     return {
       acceptance_token: data.presigned_acceptance.acceptance_token,
-      personal_auth_token: data.presigned_personal_data_auth.acceptance_token,
+      personal_auth_token: data.presigned_personal_data_auth?.acceptance_token ?? '',
     };
   }
 }

@@ -108,4 +108,11 @@ async updateStatus(id: string, status: string, courierId?: number): Promise<Orde
   async block(id: string): Promise<void> {
     await this.orderModel.findByIdAndUpdate(id, { delivery_blocked: true }).exec();
   }
+
+  async resetCreatedAt(id: string): Promise<OrderModel | null> {
+    const updated = await this.orderModel
+      .findByIdAndUpdate(id, { createdAt: new Date() }, { returnDocument: 'after' })
+      .exec();
+    return updated ? OrderMapper.toDomain(updated) : null;
+  }
 }

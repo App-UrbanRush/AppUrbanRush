@@ -5,6 +5,7 @@ import { MongoPaymentRepository } from './infrastructure/repositories/mongo-paym
 import { WompiService } from './infrastructure/services/wompi.service';
 import { CreatePaymentUseCase } from './application/use-cases/create-payment.use-case';
 import { ConfirmPaymentUseCase } from './application/use-cases/confirm-payment.use-case';
+import { RetryPaymentUseCase } from './application/use-cases/retry-payment.use-case';
 import { GetPaymentByOrderUseCase } from './application/use-cases/get-payment-by-order.use-case';
 import { GetPaymentsByUserUseCase } from './application/use-cases/get-payments-by-user.use-case';
 import { GetPaymentsByVendorUseCase } from './application/use-cases/get-payments-by-vendor.use-case';
@@ -27,6 +28,7 @@ import { ProductModule } from 'src/product/product.module';
     WompiService,
     CreatePaymentUseCase,
     ConfirmPaymentUseCase,
+    RetryPaymentUseCase,
     GetPaymentByOrderUseCase,
     GetPaymentsByUserUseCase,    
     GetPaymentsByVendorUseCase, 

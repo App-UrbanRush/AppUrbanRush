@@ -26,4 +26,9 @@ export const paymentApi = {
     const response = await authApi.get(`/payments/checkout-config/${reference}/${amount}`);
     return response.data;
   },
+
+  retry: async (orderId: string): Promise<{ success: boolean; status: string }> => {
+    const response = await authApi.post(`/payments/retry/${orderId}`);
+    return response.data;
+  },
 };

@@ -22,7 +22,7 @@ export class CreatePaymentUseCase {
     const order = await this.orderRepository.findById(dto.order_id);
     if (!order) throw new NotFoundException('Pedido no encontrado');
     if (order.status !== 'PENDING') {
-      throw new BadRequestException('El pedido no está en estado PENDING');
+      throw new BadRequestException(`El pedido no está en estado PENDING (estado actual: ${order.status}). Reactiva el pedido antes de pagar.`);
     }
 
     const existing = await this.paymentRepository.findByOrderId(dto.order_id);

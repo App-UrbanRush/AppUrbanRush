@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  ShoppingBag, MapPin, Package, ArrowRight,
+  ShoppingBag, MapPin, Package, ArrowRight, CreditCard,
   Clock, CheckCircle, XCircle, Truck, PackageCheck, UtensilsCrossed,
 } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
@@ -71,6 +71,7 @@ const FILTERS = [
 
 const MyOrders = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -222,6 +223,15 @@ const MyOrders = () => {
                   </div>
 
                   <div className="myorders-card-actions">
+                    {(order.status === 'PENDING' || order.status === 'CANCELLED') && (
+                      <button
+                        className="myorders-card-action-btn myorders-card-action-btn--pay"
+                        onClick={() => navigate(`/payment/${order.order_id}`)}
+                      >
+                        <CreditCard size={14} />
+                        {order.status === 'CANCELLED' ? 'Pagar ahora' : 'Pagar ahora'}
+                      </button>
+                    )}
                     <Link
                       to={`/tracking/${order.order_id}`}
                       className="myorders-card-action-btn myorders-card-action-btn--primary"
