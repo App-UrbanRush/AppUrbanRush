@@ -1,16 +1,14 @@
 from fastapi import APIRouter
 from dataclasses import asdict
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from app.sentiment.infrastructure.schemas import (
     SentimentRequest, SentimentResponse, SentimentReportSchema,
     CongruenceCheckRequest, CongruenceCheckResponse,
 )
-from app.sentiment.application.use_cases.analyze_sentiment import AnalyzeSentimentUseCase
+from app.sentiment.application.use_cases.analyze_sentiment import AnalyzeSentimentUseCase, combined_text_score
 from app.sentiment.application.use_cases.get_vendor_report import GetVendorReportUseCase
 from app.sentiment.infrastructure.repositories.mongo_sentiment_repository import MongoSentimentRepository
 
 router = APIRouter()
-analyzer = SentimentIntensityAnalyzer()
 
 @router.post("/analyze", response_model=SentimentResponse)
 async def analyze(data: SentimentRequest):
@@ -21,8 +19,8 @@ async def analyze(data: SentimentRequest):
 
 @router.post("/check-congruence", response_model=CongruenceCheckResponse)
 async def check_congruence(data: CongruenceCheckRequest):
-    scores = analyzer.polarity_scores(data.comment)
-    text_sentiment = "POSITIVE" if scores["compound"] > 0.05 else "NEGATIVE" if scores["compound"] < -0.05 else "NEUTRAL"
+    compound = combined_text_score(data.comment)
+    text_sentiment = "POSITIVE" if compound > 0.05 else "NEGATIVE" if compound < -0.05 else "NEUTRAL"
     rating_sentiment = "POSITIVE" if data.rating >= 4 else "NEGATIVE" if data.rating <= 2 else "NEUTRAL"
     congruent = text_sentiment == rating_sentiment or text_sentiment == "NEUTRAL"
     return CongruenceCheckResponse(
