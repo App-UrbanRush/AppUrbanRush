@@ -6,13 +6,13 @@ client: AsyncIOMotorClient = None
 async def connect_db():
     global client
     client = AsyncIOMotorClient(MONGO_URI)
-    print("✅ Conectado a MongoDB")
+    print("[OK] Conectado a MongoDB")
 
 async def close_db():
     global client
     if client:
         client.close()
-        print("❌ Desconectado de MongoDB")
+        print("[OK] Desconectado de MongoDB")
 
 def get_db():
     return client["urbanrush"]

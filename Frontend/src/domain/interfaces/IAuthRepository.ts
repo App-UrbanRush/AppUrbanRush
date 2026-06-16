@@ -62,4 +62,5 @@ export interface IAuthRepository {
   logout(): Promise<void>;
   forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse>;
   resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse>;
+  verifyCode(email: string, code: string): Promise<{ valid: boolean }>;
 }

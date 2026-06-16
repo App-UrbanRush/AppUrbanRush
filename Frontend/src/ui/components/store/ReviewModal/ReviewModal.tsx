@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Send, X, Loader2 } from "lucide-react";
 import { reviewApi } from "../../../../infrastructure/api/reviewApi";
+import { intelligenceApi } from "../../../../infrastructure/api/intelligenceApi";
 import type { OrderDetail } from "../../../infrastructure/api/ordersApi";
 import toast from "react-hot-toast";
 import "./ReviewModal.css";
@@ -18,6 +19,7 @@ const ReviewModal = ({ open, onClose, onReviewSubmitted, deliveredOrders, vendor
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [checkingCongruence, setCheckingCongruence] = useState(false);
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -47,6 +49,19 @@ const ReviewModal = ({ open, onClose, onReviewSubmitted, deliveredOrders, vendor
 
   const handleSubmit = async () => {
     if (!selectedOrderId || rating === 0 || reviewedIds.has(selectedOrderId)) return;
+    setCheckingCongruence(true);
+    try {
+      const result = await intelligenceApi.checkCongruence(rating, comment);
+      if (!result.congruent) {
+        toast.error(`Tu comentario no coincide con la calificación. Se detectó como "${result.text_sentiment}" pero ${rating} estrellas corresponde a "${result.rating_sentiment}".`);
+        return;
+      }
+    } catch {
+      toast.error("No se pudo validar la reseña. Intenta de nuevo.");
+      return;
+    } finally {
+      setCheckingCongruence(false);
+    }
     setSubmitting(true);
     try {
       await reviewApi.create({
@@ -154,9 +169,11 @@ const ReviewModal = ({ open, onClose, onReviewSubmitted, deliveredOrders, vendor
             <button
               className="rm-btn rm-btn--submit"
               onClick={handleSubmit}
-              disabled={rating === 0 || !selectedOrderId || reviewedIds.has(selectedOrderId) || !comment.trim() || submitting}
+              disabled={rating === 0 || !selectedOrderId || reviewedIds.has(selectedOrderId) || !comment.trim() || submitting || checkingCongruence}
             >
-              {submitting ? (
+              {checkingCongruence ? (
+                <><Loader2 size={16} className="rm-spinner" /> Validando...</>
+              ) : submitting ? (
                 <><Loader2 size={16} className="rm-spinner" /> Enviando...</>
               ) : (
                 <><Send size={16} /> Enviar reseña</>

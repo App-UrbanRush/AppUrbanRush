@@ -9,6 +9,7 @@ import { RegisterUseCase } from "../../application/use-cases/RegisterUseCase";
 import { LogoutUseCase } from "../../application/use-cases/LogoutUseCase";
 import { ForgotPasswordUseCase } from "../../application/use-cases/ForgotPasswordUseCase";
 import { ResetPasswordUseCase } from "../../application/use-cases/ResetPasswordUseCase";
+import { VerifyCodeUseCase } from "../../application/use-cases/VerifyCodeUseCase";
 import { AuthRepositoryImpl } from "../../infrastructure/repositories/AuthRepositoryImpl";
 import { authLocalStorage } from "../../infrastructure/persistence/authLocalStorage";
 import { RegisterDeliveryUseCase } from "../../application/use-cases/RegisterDeliveryUseCase";
@@ -52,6 +53,11 @@ const forgotPasswordUseCase = useMemo(
 
 const resetPasswordUseCase = useMemo(
   () => new ResetPasswordUseCase(authRepository),
+  [authRepository]
+);
+
+const verifyCodeUseCase = useMemo(
+  () => new VerifyCodeUseCase(authRepository),
   [authRepository]
 );
 
@@ -428,6 +434,37 @@ const [state, setState] = useState<AuthState>({
     [resetPasswordUseCase]
   );
 
+  // VERIFY CODE
+  const verifyCode = useCallback(
+    async (email: string, code: string) => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        const response = await verifyCodeUseCase.execute(email, code);
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: null,
+        }));
+
+        return response;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Error al verificar código";
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+
+        throw error;
+      }
+    },
+    [verifyCodeUseCase]
+  );
+
   // MY PROFILE
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
 
@@ -494,6 +531,7 @@ const value: AuthContextType = {
   registerVendor,
   forgotPassword,
   resetPassword,
+  verifyCode,
   verifyDocument,
   myProfile,
   fetchMyProfile,
