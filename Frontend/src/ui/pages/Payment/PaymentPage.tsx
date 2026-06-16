@@ -31,13 +31,16 @@ const PaymentPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [creatingPayment, setCreatingPayment] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
+  const [triggerPayment, setTriggerPayment] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const paymentStatus = payment?.status || null;
   const isPaid = paymentStatus === "APPROVED";
   const isDeclined = paymentStatus === "DECLINED" || paymentStatus === "ERROR" || paymentStatus === "VOIDED";
   const isPending = paymentStatus === "PENDING";
-  const noPaymentYet = !payment && !loading && !error;
+  const isCancelled = order?.status === 'CANCELLED';
+  const noPaymentYet = !payment && !loading && !error && order?.status !== 'CANCELLED';
 
   const startPolling = useCallback(() => {
     if (!orderId) return;
@@ -168,12 +171,17 @@ const PaymentPage = () => {
 
       const config = await paymentApi.getCheckoutConfig(reference, amountInCents);
 
+      const publicKey = config.publicKey || import.meta.env.VITE_WOMPI_PUBLIC_KEY;
+      if (!publicKey) {
+        throw new Error('La clave pública de Wompi no está configurada');
+      }
+
       const WidgetCheckout = (window as any).WidgetCheckout;
       const checkout = new WidgetCheckout({
         currency: "COP",
         amountInCents,
         reference,
-        publicKey: config.publicKey,
+        publicKey,
         signature: { integrity: config.signature },
       });
 
@@ -206,6 +214,32 @@ const PaymentPage = () => {
       setCreatingPayment(false);
     }
   }, [orderId, user, order, startPolling, loadWompiScript]);
+
+  // Trigger payment flow after order is updated (retry → PENDING)
+  useEffect(() => {
+    if (triggerPayment && !loading && order) {
+      setTriggerPayment(false);
+      handlePay();
+    }
+  }, [triggerPayment, loading, order, handlePay]);
+
+  const handlePayWithRetry = useCallback(async () => {
+    if (!orderId || !order) return;
+    setReactivating(true);
+    try {
+      await paymentApi.retry(orderId);
+      toast.success('Pedido reactivado');
+      const orderData = await ordersApi.getById(orderId);
+      setPayment(null);
+      setOrder(orderData);
+      setTriggerPayment(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al reactivar el pedido';
+      toast.error(msg);
+    } finally {
+      setReactivating(false);
+    }
+  }, [orderId, order]);
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -287,6 +321,19 @@ const PaymentPage = () => {
             <p>El pago no pudo ser procesado. Intenta de nuevo</p>
             <div className="payment-badge declined">
               <XCircle size={14} /> Rechazado
+            </div>
+          </>
+        ) : isCancelled ? (
+          <>
+            <div className="payment-icon-wrap pending">
+              <div className="payment-icon-circle pending">
+                <AlertTriangle size={36} style={{ color: "#e8500a" }} />
+              </div>
+            </div>
+            <h2 className="pending">Pedido cancelado</h2>
+            <p>Este pedido fue cancelado por falta de pago. Puedes reactivarlo y pagar.</p>
+            <div className="payment-badge pending">
+              <XCircle size={14} /> Cancelado
             </div>
           </>
         ) : (
@@ -383,6 +430,12 @@ const PaymentPage = () => {
         {isDeclined && (
           <button className="payment-btn payment-btn-primary" onClick={handlePay} disabled={creatingPayment}>
             <CreditCard size={18} /> {creatingPayment ? "Procesando..." : "Intentar de nuevo"}
+          </button>
+        )}
+
+        {isCancelled && (
+          <button className="payment-btn payment-btn-primary" onClick={handlePayWithRetry} disabled={reactivating}>
+            <CreditCard size={18} /> {reactivating ? "Reactivando..." : "Reactivar y pagar"}
           </button>
         )}
 

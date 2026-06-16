@@ -21,6 +21,9 @@ export class ConfirmPaymentUseCase {
   ) {}
 
   async execute(dto: WompiWebhookDto): Promise<{ status: string }> {
+    if (!dto.data?.transaction) {
+      throw new BadRequestException('Webhook inválido: falta data.transaction');
+    }
     const { transaction } = dto.data;
 
     const isValid = this.wompiService.validateSignature(
@@ -30,6 +33,10 @@ export class ConfirmPaymentUseCase {
       dto.signature.checksum,
     );
     if (!isValid) throw new BadRequestException('Firma del webhook inválida');
+
+    if (!transaction.reference || !transaction.status) {
+      throw new BadRequestException('Webhook inválido: transaction.reference o transaction.status faltante');
+    }
 
     const payment = await this.paymentRepository.findByReference(transaction.reference);
     if (!payment) throw new NotFoundException('Pago no encontrado para esta referencia');

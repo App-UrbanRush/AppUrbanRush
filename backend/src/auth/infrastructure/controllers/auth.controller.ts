@@ -21,6 +21,7 @@ import { GoogleLoginUseCase } from 'src/auth/application/use-cases/google-login.
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ISessionRepository } from 'src/redis/domain/repositories/session.repository.interface';
 import { Inject } from '@nestjs/common';
+import { SetPasswordUseCase } from 'src/auth/application/use-cases/set-password.use-case';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -33,6 +34,7 @@ export class AuthController {
     private readonly _forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly _resetPasswordUseCase: ResetPasswordUseCase,
     private readonly googleLoginUseCase: GoogleLoginUseCase,
+    private readonly setPasswordUseCase: SetPasswordUseCase,
     @Inject('ISessionRepository')
     private readonly sessionRepository: ISessionRepository,
     private readonly configService: ConfigService,
@@ -94,6 +96,16 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Código inválido o expirado.' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this._resetPasswordUseCase.execute(dto);
+  }
+
+  @Post('set-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Establecer contraseña (usuarios de Google sin password)' })
+  async setPassword(@Request() req, @Body('new_password') newPassword: string) {
+    if (!newPassword || newPassword.length < 6) {
+      throw new UnauthorizedException('La contraseña debe tener al menos 6 caracteres');
+    }
+    return this.setPasswordUseCase.execute(req.user.user_id, newPassword);
   }
 
   @Get('google')

@@ -412,6 +412,24 @@
   color: #d04500;
 }
 
+.myorders-card-action-btn--pay {
+  color: #059669;
+}
+
+.myorders-card-action-btn--pay:hover {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.dark-mode-wrapper.dark-mode .myorders-card-action-btn--pay {
+  color: #10b981;
+}
+
+.dark-mode-wrapper.dark-mode .myorders-card-action-btn--pay:hover {
+  background: #2d2d44;
+  color: #34d399;
+}
+
 /* ────────────── DARK MODE ────────────── */
 .dark-mode-wrapper.dark-mode .myorders-container {
   color: #f3f4f6;

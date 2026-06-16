@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
+import { getMyProfileApi } from "../../../infrastructure/api/authApi";
 import "./Login.css";
 
 const GoogleCallback = () => {
@@ -21,11 +22,27 @@ const GoogleCallback = () => {
     }
 
     googleLogin(token)
-      .then((response) => {
+      .then(async (response) => {
         const role = response.user?.role;
-        if (role === "Negocio") navigate("/vendor/dashboard", { replace: true });
-        else if (role === "Domiciliario") navigate("/courier/dashboard", { replace: true });
-        else navigate("/dashboard", { replace: true });
+        const rolesToSkipCompletion = ["Negocio", "Domiciliario"];
+        if (rolesToSkipCompletion.includes(role)) {
+          if (role === "Negocio") navigate("/vendor/dashboard", { replace: true });
+          else navigate("/courier/dashboard", { replace: true });
+          return;
+        }
+
+        try {
+          const profile = await getMyProfileApi();
+          const needsCompletion =
+            !profile.cellphone || !profile.address || !profile.gender;
+          if (needsCompletion) {
+            navigate("/complete-registration", { replace: true });
+          } else {
+            navigate("/dashboard", { replace: true });
+          }
+        } catch {
+          navigate("/dashboard", { replace: true });
+        }
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : "No se pudo iniciar sesión con Google.");

@@ -15,6 +15,7 @@ import { VendorModule } from 'src/vendor/vendor.module';
 import { EmailModule } from 'src/email/email.module';
 import { ForgotPasswordUseCase } from "./application/use-cases/forgot-password.use-case";
 import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use-case";
+import { SetPasswordUseCase } from "./application/use-cases/set-password.use-case";
 import { GoogleStrategy } from "./infrastructure/strategies/google.strategy";
 import { GoogleAuthGuard } from "./infrastructure/guards/google-auth.guard";
 import { GoogleLoginUseCase } from "./application/use-cases/google-login.use-case";
@@ -47,6 +48,7 @@ import { UserRolModule } from "src/user_rol/user_rol.module";
         RegisterVendorUseCase,
         ForgotPasswordUseCase,
         ResetPasswordUseCase,
+        SetPasswordUseCase,
         GoogleStrategy,      
         GoogleAuthGuard,   
         GoogleLoginUseCase,
