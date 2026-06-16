@@ -1,10 +1,11 @@
 import type { Store } from "../../../../domain/types/store.types";
 import { useFavorites } from "../../../context/useFavorites";
+import { Package, Store as StoreIcon } from "lucide-react";
 import "./StoreCard.css";
 
 interface StoreCardProps {
   store: Store;
-  variant?: "recommended" | "nearby";
+  variant?: "recommended" | "nearby" | "grid";
   onClick?: () => void;
 }
 
@@ -24,6 +25,62 @@ const StoreCard = ({ store, variant = "recommended", onClick }: StoreCardProps) 
     e.stopPropagation();
     toggle(store.id, store.name);
   };
+
+  if (variant === "grid") {
+    return (
+      <div
+        onClick={onClick}
+        className="store-card-rec"
+        style={{
+          width: '100%',
+          background: '#fff',
+          borderRadius: '16px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          overflow: 'hidden',
+          border: '1px solid #f0f0f0',
+          cursor: 'pointer',
+        }}
+      >
+        <div style={{ position: 'relative' }}>
+          <img src={store.image} alt={store.name} style={{ width: '100%', height: '150px', objectFit: 'cover', display: 'block' }} />
+          <span style={{
+            position: 'absolute', top: '10px', right: '10px',
+            background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: '14px',
+            padding: '3px 9px', fontSize: '12px', fontWeight: 700,
+            display: 'flex', alignItems: 'center', gap: '3px',
+          }}>
+            <svg width="11" height="11" viewBox="0 0 10 10" fill="#ffb300"><polygon points="5,1 6.5,4 10,4.5 7.5,7 8.1,10.5 5,8.8 1.9,10.5 2.5,7 0,4.5 3.5,4"/></svg>
+            {store.averageRating ?? store.rating ?? 0}
+          </span>
+        </div>
+        <div style={{ padding: '12px 14px 14px' }}>
+          <div style={{ fontWeight: 800, fontSize: '15px', color: '#1a1a1a', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {store.name}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '12.5px', color: '#777', fontWeight: 600 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <svg width="12" height="12" viewBox="0 0 10 10" fill="#f59e0b"><polygon points="5,1 6.5,4 10,4.5 7.5,7 8.1,10.5 5,8.8 1.9,10.5 2.5,7 0,4.5 3.5,4"/></svg>
+              {store.averageRating ?? store.rating ?? 0}
+            </span>
+            <span style={{ color: '#ccc' }}>{'\u2022'}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <Package size={14} strokeWidth={2} />
+              {store.productCount ?? 0} productos
+            </span>
+            {store.business_type && (
+              <>
+                <span style={{ color: '#ccc' }}>{'\u2022'}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <StoreIcon size={14} strokeWidth={2} />
+                  {store.business_type}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (variant === "nearby") {
     return (

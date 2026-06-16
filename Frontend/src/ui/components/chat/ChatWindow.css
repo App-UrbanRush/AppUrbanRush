@@ -134,6 +134,10 @@
   color: #fff;
   border-bottom-right-radius: 4px;
 }
+.chat-bubble-row.mine .chat-bubble-text,
+.chat-bubble-row.mine .chat-bubble-time {
+  color: #fff;
+}
 .chat-bubble-row.other .chat-bubble {
   background: #fff;
   color: #222;

@@ -23,6 +23,7 @@ import { PeopleEntity } from '../people/infrastructure/persistence/entities/peop
 import { CourierVendorRequestEntity } from '../courier-vendor-request/infrastructure/persistence/entities/courier-vendor-request.entity';
 import { ReportsModule } from '../reports/reports.module';
 import { TrackingModule } from '../tracking/tracking.module';
+import { ProductModule } from '../product/product.module';
 import { ReviewModule } from '../review/review.module';
 import { VendorStatsListener } from './infrastructure/listeners/vendor-stats.listener';
 
@@ -33,6 +34,7 @@ import { VendorStatsListener } from './infrastructure/listeners/vendor-stats.lis
       { name: Order.name, schema: OrderSchema },
       { name: VendorPhoto.name, schema: VendorPhotoSchema },
     ]),
+    ProductModule,
     ReportsModule,
     forwardRef(() => TrackingModule),
     ReviewModule,
