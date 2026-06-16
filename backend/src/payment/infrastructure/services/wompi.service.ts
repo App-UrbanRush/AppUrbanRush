@@ -97,9 +97,15 @@ export class WompiService {
         `${this.baseUrl}/transactions/${transactionId}`,
         { headers: { Authorization: `Bearer ${this.privateKey}` } },
       );
-      return response.data.data.status;
-    } catch {
-      this.logger.warn(`No se pudo consultar transacción ${transactionId} en Wompi`);
+      const status = response.data.data.status;
+      this.logger.log(`Transacción ${transactionId} en Wompi: ${status}`);
+      return status;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        this.logger.warn(`Error consultando transacción ${transactionId}: ${error.response?.status} ${error.response?.data?.message ?? error.message}`);
+      } else {
+        this.logger.warn(`Error inesperado consultando transacción ${transactionId}: ${(error as Error).message}`);
+      }
       return 'PENDING';
     }
   }

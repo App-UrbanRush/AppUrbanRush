@@ -55,7 +55,7 @@ const PaymentPage = () => {
       } catch {
         // ignore polling errors
       }
-    }, 10000);
+    }, 5000);
   }, [orderId]);
 
   useEffect(() => {
@@ -187,6 +187,14 @@ const PaymentPage = () => {
 
       checkout.open(async (result: any) => {
         if (result?.transaction) {
+          const txStatus = result.transaction.status;
+
+          if (txStatus === 'DECLINED' || txStatus === 'ERROR' || txStatus === 'VOIDED') {
+            const failPayment = { status: txStatus, transaction_id: result.transaction.id } as any;
+            setPayment(failPayment);
+            return;
+          }
+
           try {
             const newPayment = await paymentApi.create({
               order_id: orderId,
@@ -194,11 +202,16 @@ const PaymentPage = () => {
               customer_email: user.email,
               transaction_id: result.transaction.id,
               reference,
+              status: txStatus === 'APPROVED' ? 'APPROVED' : undefined,
             });
+
+            if (txStatus === 'APPROVED') {
+              setPayment(newPayment);
+              toast.success("Pago exitoso");
+              return;
+            }
+
             setPayment(newPayment);
-            paymentApi.confirm(reference).catch(() => {
-              // Si la confirmación manual falla, el webhook lo hará
-            });
             toast.success("Pago iniciado");
             startPolling();
           } catch (err: unknown) {
@@ -449,7 +462,7 @@ const PaymentPage = () => {
           <>
             <div className="payment-refresh">
               <div className="payment-refresh-dot" />
-              Actualizando cada 10 segundos
+              Actualizando cada 5 segundos
             </div>
             <button className="payment-btn payment-btn-primary" onClick={handlePay} disabled={creatingPayment}>
               <ExternalLink size={18} /> Pagar ahora

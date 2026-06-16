@@ -25,4 +25,5 @@ export interface CreatePaymentRequest {
   customer_email: string;
   transaction_id?: string;
   reference?: string;
+  status?: PaymentStatus;
 }
