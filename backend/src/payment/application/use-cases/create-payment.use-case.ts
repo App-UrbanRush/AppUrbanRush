@@ -3,6 +3,7 @@ import { IPaymentRepository } from '../../domain/repositories/payment.repository
 import { IOrderRepository } from 'src/order/domain/repositories/order.repository.interface';
 import { WompiService } from '../../infrastructure/services/wompi.service';
 import { FastApiService } from 'src/shared/services/fastapi.service';
+import { RegisterVendorSaleUseCase } from 'src/liquidation/application/use-cases/register-vendor-sale.use-case';
 import { CreatePaymentDto } from '../dtos/create-payment.dto';
 import { PaymentModel } from '../../domain/entities/payment.model';
 import { randomUUID } from 'crypto';
@@ -16,6 +17,7 @@ export class CreatePaymentUseCase {
     private readonly orderRepository: IOrderRepository,
     private readonly wompiService: WompiService,
     private readonly fastApiService: FastApiService,
+    private readonly registerVendorSale: RegisterVendorSaleUseCase,
   ) {}
 
   async execute(dto: CreatePaymentDto, userId: number): Promise<PaymentModel> {
@@ -35,6 +37,7 @@ export class CreatePaymentUseCase {
     // Si ya viene un transaction_id del WidgetCheckout, saltar Wompi API
     if (dto.transaction_id) {
       const reference = dto.reference || `urbanrush-${dto.order_id}-${randomUUID()}`;
+      const initialStatus = dto.status || 'PENDING';
       const payment = new PaymentModel(
         null,
         dto.order_id,
@@ -43,14 +46,21 @@ export class CreatePaymentUseCase {
         dto.transaction_id,
         amountInCents,
         'COP',
-        'PENDING',
+        initialStatus,
         dto.payment_method.type ?? 'CARD',
         reference,
         dto.customer_email,
         null,
         null,
       );
-      return this.paymentRepository.create(payment);
+      const created = await this.paymentRepository.create(payment);
+
+      if (initialStatus === 'APPROVED') {
+        await this.orderRepository.updateStatus(dto.order_id, 'ACCEPTED');
+        await this.registerVendorSale.execute(dto.order_id);
+      }
+
+      return created;
     }
 
     // Análisis de fraude — bloquea si es sospechoso

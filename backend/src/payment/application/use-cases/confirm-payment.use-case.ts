@@ -48,7 +48,11 @@ export class ConfirmPaymentUseCase {
     const payment = await this.paymentRepository.findByReference(reference);
     if (!payment) throw new NotFoundException('Pago no encontrado para esta referencia');
 
-    return this.processPayment(payment, 'APPROVED');
+    const realStatus = await this.wompiService.getTransactionStatus(
+      payment.wompi_transaction_id,
+    );
+
+    return this.processPayment(payment, realStatus);
   }
 
   private async processPayment(payment: any, newStatus: string): Promise<{ status: string }> {

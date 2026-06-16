@@ -26,4 +26,9 @@ export class CreatePaymentDto {
   @IsOptional()
   @IsString()
   reference?: string;
+
+  @ApiPropertyOptional({ description: 'Estado del pago (APPROVED, DECLINED, etc., si el widget ya lo conoce)' })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }
